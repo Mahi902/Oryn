@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sugarcane Editor</title>
-<meta name="sceditor-version" content="211">
+<meta name="sceditor-version" content="214">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -814,7 +814,7 @@ input:checked+.toggle-slider:before{transform:translateX(18px);}
 body.pl-on .editor-area-wrapper{justify-content:safe center;}
 
 /* A4 Page */
-.page{width:21cm;min-width:21cm;max-width:21cm;height:29.7cm;min-height:29.7cm;max-height:29.7cm;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);position:relative;padding:2cm;flex-shrink:0;overflow:hidden;}
+.page{width:var(--pg-w,21cm);min-width:var(--pg-w,21cm);max-width:var(--pg-w,21cm);height:var(--pg-h,29.7cm);min-height:var(--pg-h,29.7cm);max-height:var(--pg-h,29.7cm);background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);position:relative;padding:2cm;flex-shrink:0;overflow:hidden;}
 .page-header-area{position:absolute;top:0;left:0;right:0;height:1.2cm;background:transparent;display:flex;align-items:center;padding:0 2cm;z-index:10;min-height:28px;}
 .page-footer-area{position:absolute;bottom:0;left:0;right:0;height:1.2cm;background:transparent;display:flex;align-items:center;padding:0 2cm;z-index:10;min-height:28px;}
 .page-header-area[contenteditable="true"]:empty:before{content:attr(data-placeholder);color:#bbb;pointer-events:none;font-size:12px;}
@@ -1050,7 +1050,7 @@ body.dark .cert-mdl-note{color:hsl(var(--sc-th,0) var(--sc-ts,0%) calc(46.7% + v
 .scale-options.visible{display:block;}
 
 /* ── Lazy Pages (super optimizer) ───────────────────────────────── */
-body.lazy-pages #editorArea .page{content-visibility:auto;contain-intrinsic-size:auto 21cm auto 29.7cm;}
+body.lazy-pages #editorArea .page{content-visibility:auto;contain-intrinsic-size:auto var(--pg-w,21cm) auto var(--pg-h,29.7cm);}
 @media print{body.lazy-pages #editorArea .page{content-visibility:visible;}}
 .pgmgr-lazy-ph{height:64px;box-sizing:border-box;cursor:default;}
 .lazy-status{font-size:10.5px;color:hsl(var(--sc-th,0) var(--sc-ts,0%) calc(53.3% + var(--sc-tld,0%) * 0 + var(--sc-tll,0%) * 0.2));padding:0 10px 4px;line-height:1.35;}
@@ -4124,7 +4124,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v211…</p>
+    <p class="loading-text">Loading Sugarcane v214…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -5165,6 +5165,40 @@ function waitForSugarcaneAddons(){
           <div class="sb-row"><label class="sb-label">Second Color</label><button class="cc-swatch-btn cc-rect" id="bgColor2_btn" title="Second background color" onclick="openColorChooser('bgColor2',this)"><span class="cc-swatch-fill" style="background:hsl(calc(var(--sc-h,210) + -4.6) calc(86.7% * var(--sc-s,1)) calc(94.1% + var(--sc-l,0%) * 0))"></span></button><input type="color" id="bgColor2" value="#e3f2fd" style="display:none" onchange="updateBackground()"/></div>
           <div class="sb-row"><label class="sb-label">Angle (°)</label><input type="number" class="sb-input" id="gradientAngle" value="135" min="0" max="360" onchange="updateBackground()"/></div>
         </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <div class="aw-header" onclick="togglePageSizeExpand()" style="margin-bottom:6px">
+          <span class="aw-header-label" style="font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.6px">Page Size</span>
+          <span class="material-symbols-outlined aw-chevron" id="pgChevron">expand_more</span>
+        </div>
+        <div class="aw-dropdown" id="pgDropdown">
+          <div class="aw-inner">
+            <div style="font-size:10px;font-weight:700;color:hsl(var(--sc-th,0) var(--sc-ts,0%) calc(53.3% + var(--sc-tld,0%) * 0 + var(--sc-tll,0%) * 0.2));text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Page Size Library</div>
+            <input class="cmarg-search" id="pgSearch" placeholder="Search page sizes" oninput="pgFilter(this.value)"/>
+            <div class="cmarg-list" id="pgList"><div class="cmarg-empty">Loading</div></div>
+
+            <div id="pgSelectionRow" style="display:none;padding:4px 0 2px;">
+              <div style="font-size:10px;font-weight:700;color:hsl(var(--sc-th,0) var(--sc-ts,0%) calc(53.3% + var(--sc-tld,0%) * 0 + var(--sc-tll,0%) * 0.2));text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Apply Selected</div>
+              <div id="pgCustomForm" style="display:none;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+                <div><label class="sb-label" style="font-size:11px">Width (cm)</label><input type="number" class="sb-input" id="pgCustomW" value="21" min="5" max="100" step="0.1"/></div>
+                <div><label class="sb-label" style="font-size:11px">Height (cm)</label><input type="number" class="sb-input" id="pgCustomH" value="29.7" min="5" max="100" step="0.1"/></div>
+              </div>
+              <div class="cmarg-pages-row">
+                <label class="sb-label" style="font-size:11px;margin:0;white-space:nowrap;">Pages</label>
+                <input class="cmarg-pages-input" id="pgPages" placeholder="all  or  1-3,5" title="Which pages this size applies to"/>
+              </div>
+              <button class="cmarg-add-btn" onclick="pgApplyChosen()">
+                <span class="material-symbols-outlined" style="font-size:14px;">add_circle</span>Apply to Pages
+              </button>
+            </div>
+
+            <div id="pgActiveSection" style="display:none;">
+              <div style="font-size:10px;font-weight:700;color:hsl(var(--sc-th,0) var(--sc-ts,0%) calc(53.3% + var(--sc-tld,0%) * 0 + var(--sc-tll,0%) * 0.2));text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Page Sizes in Document</div>
+              <div class="cmarg-active-list" id="pgActiveList"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -8659,7 +8693,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 211; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 214; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -18341,6 +18375,7 @@ function addNewPage() {
     <div class="page-footer-area" id="pageFooter${n}" data-placeholder="Footer…"></div>`;
   outer.appendChild(page);
   area.insertBefore(outer, btn);
+  { const _all = pgAllPages(); pgInherit(page, _all[_all.length - 2] || _all[0]); }
   certMintForPage(page);
   bindPages(); updatePageIndicator(); updateWatermark(); updateBackground();
   updateMargins(document.getElementById('pageMargin').value);
@@ -18407,6 +18442,7 @@ function addPageAfter() {
   // Generate a unique suffix: timestamp + small random, avoids any ID clash
   const uid = Date.now() + '_' + Math.floor(Math.random() * 9999);
   const outer = _buildPageOuter(uid);
+  if (refPage) pgInherit(outer.querySelector('.page'), refPage);
 
   if (refPage) {
     // Insert right after the outer wrapper of the current page
@@ -18445,6 +18481,7 @@ function addPageBefore() {
   const refPage = getCurrentPageEl();
   const uid = Date.now() + '_' + Math.floor(Math.random() * 9999);
   const outer = _buildPageOuter(uid);
+  if (refPage) pgInherit(outer.querySelector('.page'), refPage);
 
   if (refPage) {
     const refOuter = refPage.closest('.page-outer') || refPage.parentElement;
@@ -19806,8 +19843,8 @@ async function exportPDFNative() {
     await delay(200);
     try { await document.fonts.ready; } catch(e) {}
 
-    const A4_W_MM = 210, A4_H_MM = 297;
-    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+    let A4_W_MM = pgOf(pageEls[0]).w * 10, A4_H_MM = pgOf(pageEls[0]).h * 10;
+    const pdf = new jsPDF({ unit: 'mm', format: pgPdfFormat(pgOf(pageEls[0])), orientation: pgOf(pageEls[0]).w > pgOf(pageEls[0]).h ? 'landscape' : 'portrait', compress: true });
 
     // Measure every fillable field's position BEFORE blanking its preview
     // text — blanking first would collapse each box to ~0 width, since
@@ -19816,7 +19853,7 @@ async function exportPDFNative() {
     // interactive AcroForm widget that will occupy that same spot.
     pageEls.forEach((pageEl, pi) => {
       const CRm = pageEl.getBoundingClientRect();
-      collectFillableFields(pi, pageEl, CRm, A4_W_MM / CRm.width, A4_H_MM / CRm.height);
+      collectFillableFields(pi, pageEl, CRm, pgOf(pageEl).w * 10 / CRm.width, pgOf(pageEl).h * 10 / CRm.height);
     });
     const _fieldRestore = prepFieldsForAcroFormCapture();
 
@@ -19868,7 +19905,7 @@ async function exportPDFNative() {
     if (pageEls.length > 40) SCALE = Math.min(SCALE, 2); else if (_big) SCALE = Math.min(SCALE, 3);
 
     for (let pi = 0; pi < pageEls.length; pi++) {
-      if (pi > 0) pdf.addPage();
+      { const _d = pgOf(pageEls[pi]); A4_W_MM = _d.w * 10; A4_H_MM = _d.h * 10; if (pi > 0) pdf.addPage(pgPdfFormat(_d), _d.w > _d.h ? 'landscape' : 'portrait'); }
       document.getElementById('pdfStatus').textContent =
         'Rendering page ' + (pi+1) + ' of ' + pageEls.length + '\u2026';
       document.getElementById('pdfFill').style.width = (8 + (pi / pageEls.length) * 80) + '%';
@@ -20226,8 +20263,8 @@ async function exportPDFStructured() {
     // fall back to a font with no glyphs for that script.
     try { await document.fonts.ready; } catch(e) {}
 
-    const A4_W_MM = 210, A4_H_MM = 297;
-    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+    let A4_W_MM = pgOf(pageEls[0]).w * 10, A4_H_MM = pgOf(pageEls[0]).h * 10;
+    const pdf = new jsPDF({ unit: 'mm', format: pgPdfFormat(pgOf(pageEls[0])), orientation: pgOf(pageEls[0]).w > pgOf(pageEls[0]).h ? 'landscape' : 'portrait', compress: true });
 
     // Measure every fillable field's position BEFORE blanking its preview
     // text — blanking first would collapse each box to ~0 width, since
@@ -20236,7 +20273,7 @@ async function exportPDFStructured() {
     // interactive AcroForm widget that will occupy that same spot.
     pageEls.forEach((pageEl, pi) => {
       const CRm = pageEl.getBoundingClientRect();
-      collectFillableFields(pi, pageEl, CRm, A4_W_MM / CRm.width, A4_H_MM / CRm.height);
+      collectFillableFields(pi, pageEl, CRm, pgOf(pageEl).w * 10 / CRm.width, pgOf(pageEl).h * 10 / CRm.height);
     });
     const _fieldRestore = prepFieldsForAcroFormCapture();
 
@@ -20279,7 +20316,7 @@ async function exportPDFStructured() {
     let imgOk = 0, imgSkip = 0;
 
     for (let pi = 0; pi < pageEls.length; pi++) {
-      if (pi > 0) pdf.addPage();
+      { const _d = pgOf(pageEls[pi]); A4_W_MM = _d.w * 10; A4_H_MM = _d.h * 10; if (pi > 0) pdf.addPage(pgPdfFormat(_d), _d.w > _d.h ? 'landscape' : 'portrait'); }
       document.getElementById('pdfStatus').textContent =
         'Building page ' + (pi+1) + ' of ' + pageEls.length + '\u2026';
       document.getElementById('pdfFill').style.width = (8 + (pi / pageEls.length) * 85) + '%';
@@ -21045,9 +21082,147 @@ const SCALE_STATE = {
   rulerSize: 28,    // ruler width/height in px
 };
 
-// A4 dimensions in each unit (at 96 DPI / standard CSS px)
-const A4_PX_W = 794; // 21cm at 96dpi
-const A4_PX_H = 1123; // 29.7cm at 96dpi
+// Page size, per page. A page keeps its own size in --pg-w / --pg-h (cm) on the .page element; no variables = A4 portrait.
+const PG_SIZES = {
+  a3: ['A3', 29.7, 42], a4: ['A4', 21, 29.7], a5: ['A5', 14.8, 21], a6: ['A6', 10.5, 14.8], b5: ['B5', 17.6, 25],
+  letter: ['Letter', 21.59, 27.94], legal: ['Legal', 21.59, 35.56], tabloid: ['Tabloid', 27.94, 43.18], executive: ['Executive', 18.41, 26.67],
+  custom: ['Custom', 0, 0]
+};
+const PG_PX = 37.7953;
+const PGUI = { sel: null, q: '' };
+function pgOf(el) {
+  var st = el && el.style, w = st ? parseFloat(st.getPropertyValue('--pg-w')) : 0, h = st ? parseFloat(st.getPropertyValue('--pg-h')) : 0;
+  if (!(w > 0) || !(h > 0)) return { key: 'a4', orient: 'portrait', w: 21, h: 29.7 };
+  var key = (el.dataset && el.dataset.pgKey) || 'custom';
+  if (!PG_SIZES[key]) key = 'custom';
+  return { key: key, orient: w > h ? 'landscape' : 'portrait', w: w, h: h };
+}
+const pgPdfFormat = d => [Math.min(d.w, d.h) * 10, Math.max(d.w, d.h) * 10];
+function pgCompute(key, orient, cw, ch) {
+  if (!PG_SIZES[key]) key = 'a4';
+  var w, h;
+  if (key === 'custom') {
+    w = Math.min(100, Math.max(5, parseFloat(cw) || 21)); h = Math.min(100, Math.max(5, parseFloat(ch) || 29.7));
+    orient = w > h ? 'landscape' : 'portrait';
+  } else {
+    orient = orient === 'landscape' ? 'landscape' : 'portrait';
+    w = PG_SIZES[key][1]; h = PG_SIZES[key][2];
+    if (orient === 'landscape') { var t = w; w = h; h = t; }
+  }
+  return { key: key, orient: orient, w: Math.round(w * 100) / 100, h: Math.round(h * 100) / 100 };
+}
+function pgApplyEl(el, d) {
+  if (!el) return;
+  if (!d || (d.key === 'a4' && d.orient === 'portrait')) { el.style.removeProperty('--pg-w'); el.style.removeProperty('--pg-h'); delete el.dataset.pgKey; if (!el.getAttribute('style')) el.removeAttribute('style'); return; }
+  el.style.setProperty('--pg-w', d.w + 'cm'); el.style.setProperty('--pg-h', d.h + 'cm'); el.dataset.pgKey = d.key;
+}
+function pgInherit(page, ref) { if (page && ref) pgApplyEl(page, pgOf(ref)); }
+const pgAllPages = () => [...document.querySelectorAll('#editorArea .page')];
+function pgTargets() {
+  var all = pgAllPages(), el = document.getElementById('pgPages');
+  return [...parseCmargPages(el ? el.value : 'all', all.length)].sort((a, b) => a - b).map(n => all[n - 1]).filter(Boolean);
+}
+function pgLabel(d) { return d.key === 'custom' ? d.w + ' \u00d7 ' + d.h + ' cm' : PG_SIZES[d.key][0] + (d.orient === 'landscape' ? ' Landscape' : ''); }
+function pgRuns(onlyCustomised) {
+  var runs = [];
+  pgAllPages().forEach(function (p, i) {
+    var d = pgOf(p), l = pgLabel(d), r = runs[runs.length - 1];
+    if (r && r.l === l) r.to = i + 1; else runs.push({ l: l, d: d, from: i + 1, to: i + 1 });
+  });
+  return onlyCustomised ? runs.filter(function (r) { return !(r.d.key === 'a4' && r.d.orient === 'portrait'); }) : runs;
+}
+function pgSummaryText() {
+  var runs = pgRuns(false);
+  if (runs.length <= 1) return runs.length ? runs[0].l : '';
+  return runs.map(function (r) { return (r.from === r.to ? 'p. ' + r.from : 'pp. ' + r.from + '\u2013' + r.to) + ': ' + r.l; }).join(' \u00b7 ');
+}
+function pgItems() {
+  var out = [];
+  ['a4', 'a3', 'a5', 'a6', 'b5', 'letter', 'legal', 'tabloid', 'executive'].forEach(function (k) {
+    ['portrait', 'landscape'].forEach(function (o) {
+      var d = pgCompute(k, o);
+      out.push({ id: k + '-' + o[0], key: k, orient: o, name: PG_SIZES[k][0] + (o === 'landscape' ? ' Landscape' : ''), sub: d.w + ' \u00d7 ' + d.h + ' cm', w: d.w, h: d.h });
+    });
+  });
+  return out;
+}
+function pgThumb(w, h) {
+  var s = Math.min(22 / w, 30 / h), rw = w * s, rh = h * s;
+  return '<svg viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg"><rect x="' + ((28 - rw) / 2).toFixed(1) + '" y="' + ((36 - rh) / 2).toFixed(1) + '" width="' + rw.toFixed(1) + '" height="' + rh.toFixed(1) + '" rx="1" fill="#e8f0f8" stroke="#8aa4bd" stroke-width="1"/></svg>';
+}
+function pgFilter(q) { PGUI.q = q || ''; pgRenderList(); }
+function pgRenderList() {
+  var list = document.getElementById('pgList'); if (!list) return;
+  var lq = PGUI.q.toLowerCase(), items = pgItems().filter(function (m) { return !lq || (m.name + ' ' + m.sub + ' ' + m.key).toLowerCase().indexOf(lq) > -1; });
+  var showCustom = !lq || 'custom size'.indexOf(lq) > -1;
+  list.innerHTML = '';
+  items.forEach(function (m) {
+    var div = document.createElement('div');
+    div.className = 'cmarg-item' + (PGUI.sel === m.id ? ' selected' : '');
+    div.innerHTML = '<div class="cmarg-item-thumb">' + pgThumb(m.w, m.h) + '</div><div class="cmarg-item-info"><div class="cmarg-item-name">' + esc(m.name) + '</div><div class="cmarg-item-id">' + esc(m.sub) + '</div></div><span class="material-symbols-outlined cmarg-item-check">check_circle</span>';
+    div.onclick = function () { pgSelect(m.id); };
+    list.appendChild(div);
+  });
+  if (showCustom) {
+    var c = document.createElement('div');
+    c.className = 'cmarg-item' + (PGUI.sel === 'custom' ? ' selected' : '');
+    c.innerHTML = '<div class="cmarg-item-thumb" style="display:flex;align-items:center;justify-content:center;"><span class="material-symbols-outlined" style="font-size:18px;color:#aaa">straighten</span></div><div class="cmarg-item-info"><div class="cmarg-item-name">Custom size</div><div class="cmarg-item-id">Enter your own width and height</div></div><span class="material-symbols-outlined cmarg-item-check">check_circle</span>';
+    c.onclick = function () { pgSelect('custom'); };
+    list.appendChild(c);
+  }
+  if (!items.length && !showCustom) list.innerHTML = '<div class="cmarg-empty">No page sizes found.</div>';
+}
+function pgSelect(id) {
+  PGUI.sel = id;
+  var g = function (x) { return document.getElementById(x); };
+  g('pgSelectionRow').style.display = 'block';
+  g('pgCustomForm').style.display = id === 'custom' ? 'grid' : 'none';
+  if (id === 'custom') { var t = pgTargets()[0], d = t ? pgOf(t) : { w: 21, h: 29.7 }; g('pgCustomW').value = d.w; g('pgCustomH').value = d.h; }
+  pgRenderList();
+}
+function pgRenderActive() {
+  var sec = document.getElementById('pgActiveSection'), list = document.getElementById('pgActiveList'); if (!sec || !list) return;
+  var runs = pgRuns(true);
+  if (!runs.length) { sec.style.display = 'none'; list.innerHTML = ''; return; }
+  sec.style.display = 'block'; list.innerHTML = '';
+  runs.forEach(function (r) {
+    var div = document.createElement('div'); div.className = 'cmarg-active-item';
+    div.innerHTML = '<div style="width:18px;height:24px;border:1px solid #ddd;border-radius:2px;overflow:hidden;flex-shrink:0;background:#fff;">' + pgThumb(r.d.w, r.d.h) + '</div><div class="cmarg-active-item-name">' + esc(r.l) + '</div><div class="cmarg-active-pages">pg: ' + (r.from === r.to ? r.from : r.from + '-' + r.to) + '</div><button class="cmarg-remove-btn" title="Back to A4" onclick="pgResetRange(' + r.from + ',' + r.to + ')"><span class="material-symbols-outlined" style="font-size:15px;">close</span></button>';
+    list.appendChild(div);
+  });
+}
+function pgRefreshUI() { pgRenderList(); pgRenderActive(); }
+function pgAfter() {
+  try { applyZoom(); } catch (e) {}
+  try { renderPageNumbers(); } catch (e) {}
+  try { if (window.mgAfterMargins) window.mgAfterMargins(); } catch (e) {}
+  try { if (typeof _isLoadingData === 'undefined' || !_isLoadingData) scheduleAutoSave(); } catch (e) {}
+  pgRefreshUI();
+}
+function setPageSize(key, orient, cw, ch) {
+  var T = pgTargets();
+  if (!T.length) { try { showToast('No pages match \u2014 check the page numbers', 'error'); } catch (e) {} return; }
+  var d = pgCompute(key, orient, cw, ch);
+  T.forEach(function (el) { pgApplyEl(el, d); });
+  pgAfter();
+  try { showToast(pgLabel(d) + ' applied to ' + (T.length === 1 ? 'page ' + (pgAllPages().indexOf(T[0]) + 1) : T.length + ' pages'), 'success'); } catch (e) {}
+}
+function pgApplyChosen() {
+  if (!PGUI.sel) { try { showToast('Select a page size from the list first', 'info'); } catch (e) {} return; }
+  if (PGUI.sel === 'custom') { setPageSize('custom', null, document.getElementById('pgCustomW').value, document.getElementById('pgCustomH').value); return; }
+  var m = pgItems().find(function (x) { return x.id === PGUI.sel; });
+  if (m) setPageSize(m.key, m.orient);
+}
+function pgResetRange(from, to) {
+  var all = pgAllPages();
+  for (var i = from; i <= to; i++) pgApplyEl(all[i - 1], null);
+  pgAfter();
+}
+function togglePageSizeExpand() {
+  var dd = document.getElementById('pgDropdown'), ch = document.getElementById('pgChevron'), open = dd.classList.contains('open');
+  dd.classList.toggle('open', !open); ch.classList.toggle('open', !open);
+  if (!open) pgRefreshUI();
+}
 
 const UNIT_TO_PX = { cm: 37.7953, mm: 3.77953, inch: 96, px: 1 };
 const UNIT_LABELS = { cm: 'cm', mm: 'mm', inch: '″', px: 'px' };
@@ -21344,6 +21519,9 @@ function _lazyBuildPages(data) {
   const first = area.querySelector('.page-outer .page');
   if (first) first.setAttribute('data-auth', 'ld1');
 
+  { const _pgs = [...area.querySelectorAll('.page-outer .page')], _sz = data.pageSizes || [];
+    _pgs.forEach((pg, i) => { const z = _sz[i]; pgApplyEl(pg, z ? { key: z[0], orient: z[1] > z[2] ? 'landscape' : 'portrait', w: z[1], h: z[2] } : null); });
+    pgRefreshUI(); }
   const pcs = area.querySelectorAll('.page-content');
   const hds = area.querySelectorAll('.page-header-area');
   const fts = area.querySelectorAll('.page-footer-area');
@@ -21451,8 +21629,8 @@ window.addEventListener('load', () => setTimeout(lazyAutoCheck, 300));
 ═══════════════════════════════════════════════════════ */
 const PGMGR = { selected: null, multiMode: false, multiSelected: new Set() };
 const PGMGR_THUMB_W = 32;      // px, matches .pgmgr-item-thumb width
-const PGMGR_PAGE_W  = 793.8;   // px, A4 @ 96dpi (21cm)
-const PGMGR_PAGE_H  = 1122.9;  // px, A4 @ 96dpi (29.7cm)
+let PGMGR_PAGE_W  = 793.8;   // px, A4 @ 96dpi (21cm)
+let PGMGR_PAGE_H  = 1122.9;  // px, A4 @ 96dpi (29.7cm)
 
 function _pgmgrVisible() {
   const dd = document.getElementById('vwDropdown');
@@ -21492,9 +21670,11 @@ function renderPageManagerList() {
     clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
     clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
     clone.classList.add('pgmgr-thumb-clone');
-    clone.style.width = PGMGR_PAGE_W + 'px';
-    clone.style.height = PGMGR_PAGE_H + 'px';
-    clone.style.transform = `scale(${scale})`;
+    const _pd = pgOf(pageEl), _pw = _pd.w * PG_PX, _ph = _pd.h * PG_PX, _sc = PGMGR_THUMB_W / _pw;
+    clone.style.width = _pw + 'px';
+    clone.style.height = _ph + 'px';
+    clone.style.transform = `scale(${_sc})`;
+    if (_pd.key !== 'a4' || _pd.orient !== 'portrait') thumbWrap.style.height = (_ph * _sc) + 'px';
     thumbWrap.appendChild(clone);
 
     const info = document.createElement('div');
@@ -22566,7 +22746,7 @@ async function exportPDF() {
       throw new Error('PDF library not loaded. Please check your internet connection and reload.');
     }
     const {jsPDF} = window.jspdf;
-    const pdf = new jsPDF('p','mm','a4');
+    const pdf = new jsPDF({ unit: 'mm', format: pgPdfFormat(pgOf(document.querySelector('#editorArea .page'))), orientation: pgOf(document.querySelector('#editorArea .page')).w > pgOf(document.querySelector('#editorArea .page')).h ? 'landscape' : 'portrait' });
     window._pdfFormFieldQueue = [];
     let pages = [...document.querySelectorAll('#editorArea .page')];
     if (Array.isArray(S.exportPageFilter)) pages = pages.filter((_, idx) => S.exportPageFilter.includes(idx + 1));
@@ -22622,9 +22802,11 @@ async function exportPDF() {
           height: clone.offsetHeight,
         });
 
-        if (i > 0) pdf.addPage();
+        const _d = pgOf(pages[i]), _o = _d.w > _d.h ? 'landscape' : 'portrait';
+        if (i > 0) pdf.addPage(pgPdfFormat(_d), _o);
+        else if (Math.abs(_d.w * 10 - pdf.internal.pageSize.getWidth()) > .5 || Math.abs(_d.h * 10 - pdf.internal.pageSize.getHeight()) > .5) { pdf.addPage(pgPdfFormat(_d), _o); pdf.deletePage(1); }
         const imgData = canvas.toDataURL('image/jpeg', quality);
-        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, '', 'FAST');
+        pdf.addImage(imgData, 'JPEG', 0, 0, _d.w * 10, _d.h * 10, '', 'FAST');
 
         // Link & button annotations (a[href] elements)
         clone.querySelectorAll('a[href]').forEach(a => {
@@ -23309,9 +23491,9 @@ function printDoc() {
     ${fontFaceCSS}
     *{margin:0;padding:0;box-sizing:border-box;}
     body{background:#fff;font-family:Arial,sans-serif;}
-    .page{width:21cm;min-width:21cm;max-width:21cm;min-height:29.7cm;background:#fff;padding:2cm;page-break-after:always;overflow:hidden;position:relative;margin:0 auto;}
+    .page{width:var(--pg-w,21cm);min-width:var(--pg-w,21cm);max-width:var(--pg-w,21cm);min-height:var(--pg-h,29.7cm);background:#fff;padding:2cm;page-break-after:always;overflow:hidden;position:relative;margin:0 auto;}
     .page:last-child{page-break-after:avoid;}
-    .page-content{font-size:16px;line-height:1.6;word-wrap:break-word;min-height:25cm;}
+    .page-content{font-size:16px;line-height:1.6;word-wrap:break-word;min-height:calc(var(--pg-h,29.7cm) - 4.7cm);}
     .page-header-area,.page-footer-area{position:absolute;left:0;right:0;padding:0 2cm;display:flex;align-items:center;font-size:12px;color:#555;}
     .page-header-area{top:8px;border-bottom:1px solid #eee;padding-bottom:4px;}
     .page-footer-area{bottom:8px;border-top:1px solid #eee;padding-top:4px;}
@@ -23656,6 +23838,7 @@ function collectData() {
     pages: [...document.querySelectorAll('#editorArea .page-content')].map(p => (p._lz != null ? p._lz : p.innerHTML)),
     headers: [...document.querySelectorAll('#editorArea .page-header-area')].map(h => h.innerHTML),
     footers: [...document.querySelectorAll('#editorArea .page-footer-area')].map(f => f.innerHTML),
+    pageSizes: pgAllPages().map(p => { const d = pgOf(p); return (d.w === 21 && d.h === 29.7) ? 0 : [d.key, d.w, d.h]; }),
     embeddedFonts: Object.keys(embeddedFonts).length > 0 ? embeddedFonts : undefined,
     importedFontLinks: getImportedFontLinks().length > 0 ? getImportedFontLinks() : undefined,
     meta: {
@@ -23978,6 +24161,7 @@ function resetPages() {
     if (pc) pc.innerHTML = '';
     if (ph) ph.innerHTML = '';
     if (pf) pf.innerHTML = '';
+    pgApplyEl(firstPage, null);
   }
 
   S.pageCount = 1;
@@ -29899,7 +30083,7 @@ async function _recDocMenuRenderDetails(c) {
   const marginBottom = settings.marginBottom || margin;
   const marginLeft = settings.marginLeft || margin;
   const marginRight = settings.marginRight || margin;
-  const pageSize = '210 × 297mm (A4)';
+  const pageSize = pgSummaryText();
   const pnEnabled = settings.pnEnabled ? 'Yes' : 'No';
   const font = settings.font || 'Default';
   
@@ -31329,7 +31513,7 @@ authInitFromCookie();
     if (tg && tg.checked !== QR.auto) tg.checked = QR.auto;
     if (QR.last) paintSidebar(QR.last);
   }
-  var sbOpen = function () { var sb = $('sidebar'); return !!sb && !sb.classList.contains('collapsed') && sb.getClientRects().length > 0; };
+  var sbOpen = function () { var sb = $('sidebar'); return !!sb && !sb.classList.contains('collapsed') && getComputedStyle(sb).display !== 'none'; };
   function schedule(ms) {
     if (!QR.auto) return;
     clearTimeout(QR.timer);
@@ -31343,7 +31527,7 @@ authInitFromCookie();
     QR.auto = !!on;
     try { localStorage.setItem(LS_AUTO, on ? '1' : '0'); } catch (e) {}
     syncUI();
-    if (on) schedule(0); else clearTimeout(QR.timer);
+    if (on) { setTimeout(function () { run(false); }, 0); schedule(0); } else clearTimeout(QR.timer);   /* first auto report runs right away */
   }
 
   window.SCQuality = {
@@ -37532,6 +37716,7 @@ async function checkApiHash() {
     const list = pagesNow();
     const uid = Date.now() + '_' + Math.floor(Math.random() * 9999);
     const outer = _buildPageOuter(uid);
+    pgInherit(outer.querySelector('.page'), list[Math.max(0, Math.min(index, list.length) - 1)]);
     if (index >= list.length) {
       const area = $('editorArea'), btn = area.querySelector('.add-page-btn');
       if (list.length) unit(list[list.length - 1]).after(outer);
@@ -37633,7 +37818,9 @@ async function checkApiHash() {
     oc.forEach((cv, i) => { try { if (cc[i]) cc[i].getContext('2d').drawImage(cv, 0, 0); } catch (e) {} });
     c.classList.add('pgx-clone');
     c.setAttribute('aria-hidden', 'true'); c.setAttribute('inert', '');
-    c.style.width = PGX.pw + 'px'; c.style.height = PGX.ph + 'px';
+    const _pd = pgOf(page), _pw = _pd.w * PG_PX, _ph = _pd.h * PG_PX, _tw = parseFloat(getComputedStyle($('pageNavMdl')).getPropertyValue('--pgx-w')) || 148;
+    c.style.width = _pw + 'px'; c.style.height = _ph + 'px';
+    thumb.style.setProperty('--pgx-s', (_tw / _pw).toFixed(5)); thumb.style.setProperty('--pgx-th', (_tw * _ph / _pw).toFixed(1) + 'px');
     thumb.appendChild(c);
     thumb.classList.remove('loading');
   }
