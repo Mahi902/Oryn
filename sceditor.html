@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sugarcane Editor</title>
-<meta name="sceditor-version" content="214">
+<meta name="sceditor-version" content="218">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -4124,7 +4124,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v214…</p>
+    <p class="loading-text">Loading Sugarcane v218…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -4881,6 +4881,7 @@ function waitForSugarcaneAddons(){
         <button class="insert-box has-nav" id="tbFormsBtn" onclick="openFormsMenu()" title="Insert Form Field (hold to browse existing)"><span class="material-symbols-outlined">dynamic_form</span><span class="insert-box-label">Forms</span><span class="hold-fill"></span></button>
         <div class="ew-sec-lbl">Editor &amp; Settings</div>
         <button class="insert-box ew-sec-box" onclick="openEditorWidgetsMenu()" title="Editor widgets: floating counters, tools and buttons"><span class="material-symbols-outlined">widgets</span><span class="insert-box-label">Editor Widgets</span><span class="material-symbols-outlined" style="font-size:18px">chevron_right</span></button>
+        <button class="insert-box ew-sec-box" id="scPageSrcBtn" style="display:none" onclick="closeInsertDropdown();openPageSource()" title="Page Source: edit the .scd, .uscd or the raw page HTML"><span class="material-symbols-outlined">code</span><span class="insert-box-label">Page Source</span><span class="material-symbols-outlined" style="font-size:18px">chevron_right</span></button>
       </div>
       <div class="insert-dd-list" id="formsDdList" style="display:none;">
         <div class="forms-dd-back" onclick="closeFormsMenu()"><span class="material-symbols-outlined">arrow_back</span>Forms</div>
@@ -7018,7 +7019,7 @@ body #ulBulletChips .olcust-chip.active,body.dark #ulBulletChips .olcust-chip.ac
           </div>
         </div>
         <button class="exp-do-btn" onclick="doExportWithOpts('scd')"><span class="material-symbols-outlined">fmt_scd</span>Export SCD</button>
-        <button class="exp-do-btn" style="background:hsl(calc(185.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(100.0% * var(--sc-rs,1)) calc(28.0% + var(--sc-rl,0%)))" onclick="exportUSCD()" title="Ultra Compressed Sugarcane Document — smallest possible file, slower to export/import"><span class="material-symbols-outlined">fmt_uscd</span>Export uSCD</button>
+        <button class="exp-do-btn" style="background:hsl(calc(185.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(100.0% * var(--sc-rs,1)) calc(28.0% + var(--sc-rl,0%)))" onclick="exportUSCD()" title="Ultra Compressed Sugarcane Document — smallest possible file (context-mixing), slower to export/import"><span class="material-symbols-outlined">fmt_uscd</span>Export uSCD</button>
         <!-- Template Sharing -->
         <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--exp-divider,#f0f0f0)">
           <div class="exp-opt-label" style="margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px;font-size:10px">Template Sharing</div>
@@ -7564,6 +7565,24 @@ body #ulBulletChips .olcust-chip.active,body.dark #ulBulletChips .olcust-chip.ac
 </div>
 
 <!-- PDF progress -->
+<div class="modal" id="pageSrcMdl">
+  <div class="mbox" style="width:min(940px,95vw);max-width:95vw">
+    <div class="mhdr"><h2 class="mtitle">Page Source</h2></div>
+    <div class="ew-seg" id="psTabs" style="display:flex;margin-bottom:8px">
+      <button type="button" data-m="pages" class="on" onclick="psMode('pages')"><span class="material-symbols-outlined">code</span>Page HTML</button>
+      <button type="button" data-m="scd" onclick="psMode('scd')"><span class="material-symbols-outlined">data_object</span>.scd</button>
+      <button type="button" data-m="uscd" onclick="psMode('uscd')"><span class="material-symbols-outlined">compress</span>.uscd</button>
+    </div>
+    <p id="psHint" style="font-size:12px;margin:0 0 6px;opacity:.75"></p>
+    <textarea id="psText" spellcheck="false" wrap="off" style="width:100%;box-sizing:border-box;height:52vh;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;padding:10px;border:1px solid var(--ui-line);border-radius:8px;background:transparent;color:inherit;resize:vertical;white-space:pre;overflow:auto;user-select:text;-webkit-user-select:text"></textarea>
+    <p id="psStatus" style="font-size:12px;margin:6px 0 0;min-height:16px"></p>
+    <div class="mfooter">
+      <button class="mbtn sec" type="button" onclick="psMode(psCur,true)"><span class="material-symbols-outlined" style="font-size:16px">refresh</span>Reload</button>
+      <button class="mbtn sec" type="button" onclick="closeMdl('pageSrcMdl')">Cancel</button>
+      <button class="mbtn primary" type="button" id="psApplyBtn" onclick="psApply()"><span class="material-symbols-outlined" style="font-size:16px">check</span>Apply</button>
+    </div>
+  </div>
+</div>
 <div class="modal" id="pdfMdl">
   <div class="mbox narrow">
     <div class="mhdr"><h2 class="mtitle" id="pdfTitle">Generating PDF…</h2></div>
@@ -8693,7 +8712,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 214; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 218; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -20671,6 +20690,255 @@ async function exportSCDWithOpts() {
    repeated HTML/text snippets replaced by one private-use Unicode char.
    SK / META / TOP lists are APPEND-ONLY (short keys depend on order).
 ═══════════════════════════════════════════════════════ */
+/* ── CM: tiny integer-only context-mixing compressor (orders 1-4,6 + word + match, mixer, 2 APMs). Deterministic across browsers. ── */
+const CM = (() => {
+  const SQ = [1,2,3,6,10,16,27,45,73,120,194,310,488,747,1101,1546,2047,2549,2994,3348,3607,3785,3901,3975,4022,4050,4068,4079,4085,4089,4092,4093,4094];
+  const squash = d => { if (d > 2047) return 4095; if (d < -2047) return 0; const w = d & 127, i = (d >> 7) + 16; return (SQ[i] * (128 - w) + SQ[i + 1] * w + 64) >> 7; };
+  const ST = new Int16Array(4096);
+  for (let x = -2047, pi = 0; x <= 2047; x++) { const v = squash(x); for (let i = pi; i <= v; i++) ST[i] = x; pi = v + 1; }
+  const RT = new Int32Array(256); for (let i = 0; i < 256; i++) RT[i] = Math.floor(32768 / (i + 1.6));
+  const NC = 10, NI = NC * 2 + 3;
+  function Model(len) {
+    let bits = 16; while (bits < 22 && (1 << bits) < len * 6) bits++;
+    const SH = 32 - bits, T = [], N = [];
+    for (let i = 0; i < NC; i++) { T.push(new Uint16Array(1 << bits).fill(32768)); N.push(new Uint8Array(1 << bits)); }
+    const o0p = new Uint16Array(256).fill(32768), o0n = new Uint8Array(256);
+    const buf = new Uint8Array(len + 8), MB = Math.min(22, bits + 1), MT = new Int32Array(1 << MB);
+    const W = new Int32Array(3 * 256 * NI).fill(7000), W2 = new Int32Array(40 * NI).fill(7000), X = new Int32Array(NI), idx = new Int32Array(NC), H = new Int32Array(NC);
+    const mp = new Uint16Array(64).fill(49152), mn = new Uint8Array(64);
+    const a1 = new Uint16Array(256 * 33), a2 = new Uint16Array(65536 * 33);
+    for (let i = 0; i < 33; i++) { const v = squash((i - 16) * 128) * 16; for (let j = 0; j < 256; j++) a1[j * 33 + i] = v; for (let j = 0; j < 65536; j++) a2[j * 33 + i] = v; }
+    let tok = 0, ptok = 0, c0 = 1, pos = 0, wsel2 = 0, pm1 = 2048, pm2 = 2048, c4 = 0, c8 = 0, word = 0, mptr = 0, mlen = 0, mbit = -1, mctx = 0, wsel = 0, pr = 2048, pm = 2048, pa = 0, pb = 0, ia = 0, ib = 0, lim = 255;
+    function bytectx() {
+      const c = buf[pos - 1];
+      if ((c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || c >= 128) word = Math.imul(word + c + 1, 0x2F0B4A27) | 0; else word = 0;
+      H[0] = Math.imul(c4 & 0xff, 0x9E3779B1) + 1;
+      H[1] = Math.imul(c4 & 0xffff, 0x85EBCA6B) + 2;
+      H[2] = Math.imul(c4 & 0xffffff, 0xC2B2AE35) + 3;
+      H[3] = Math.imul(c4, 0x27D4EB2F) + 4;
+      H[4] = Math.imul(Math.imul(c4, 0x165667B1) ^ Math.imul(c8 & 0xffff, 0x9E3779B1), 0x85EBCA6B) + 5;
+      H[5] = Math.imul(word, 0xD2511F53) + 6;
+      H[6] = Math.imul(Math.imul(word, 0x2545F491) ^ Math.imul(c4 >>> 24 | 0, 0x9E3779B1), 0xC2B2AE35) + 7;
+      H[7] = Math.imul(Math.imul(c4, 0x1B873593) ^ Math.imul(buf[pos - 5] || 0, 0x9E3779B1), 0x85EBCA6B) + 8;
+      if (c === 60 || c === 62 || c === 32 || c === 34 || c === 59 || c === 58 || c === 61 || c === 10) { if (tok) ptok = tok; tok = Math.imul(c + 1, 0x3C6EF372) | 0; } else tok = Math.imul(tok + c + 1, 0x2F0B4A27) | 0;
+      H[8] = Math.imul(tok, 0xA54FF53A) + 9;
+      H[9] = Math.imul(Math.imul(tok, 0x510E527F) ^ Math.imul(ptok, 0x9B05688C), 0x1F83D9AB) + 10;
+      // match model
+      if (mlen > 0 && buf[mptr] === c) { mlen++; mptr++; } else mlen = 0;
+      if (pos >= 5) {
+        const h = (Math.imul(c4, 0x9E3779B1) ^ Math.imul(buf[pos - 5], 0x85EBCA6B)) >>> (32 - MB);
+        if (mlen === 0) { const p = MT[h]; if (p > 0) { let l = 0; while (l < 32 && p - 1 - l >= 0 && buf[p - 1 - l] === buf[pos - 1 - l]) l++; if (l >= 5) { mlen = l; mptr = p; } } }
+        MT[h] = pos;
+      }
+    }
+    function predict() {
+      let n = 0;
+      for (let i = 0; i < NC; i++) {
+        const j = (Math.imul(H[i] ^ Math.imul(c0, 0x2F0B4A27), 0x9E3779B1) >>> SH); idx[i] = j;
+        const pp = T[i][j]; X[n++] = ST[pp >> 4]; X[n++] = N[i][j] === 0 ? 0 : (pp - 32768) >> 5;
+      }
+      X[n++] = ST[o0p[c0] >> 4];
+      mbit = -1; mctx = 0;
+      if (mlen > 0 && mptr < pos) {
+        const pb8 = buf[mptr] | 256, bc = 32 - Math.clz32(c0) - 1; // bits seen
+        if ((pb8 >> (8 - bc)) === c0) { mbit = (pb8 >> (7 - bc)) & 1; mctx = Math.min(mlen, 31) * 2 + (bc === 0 ? 0 : 1); const s = ST[mp[mctx] >> 4]; X[n++] = mbit ? s : -s; } else X[n++] = 0;
+      } else X[n++] = 0;
+      X[n++] = 256;
+      wsel = ((mbit < 0 ? 0 : mlen < 16 ? 1 : 2) * 256 + c0) * NI;
+      wsel2 = (mbit < 0 ? 0 : Math.min(mlen, 31) + 1) * NI;
+      let dot = 0, dot2 = 0; for (let i = 0; i < NI; i++) { dot += X[i] * W[wsel + i]; dot2 += X[i] * W2[wsel2 + i]; }
+      pm1 = squash(Math.floor(dot / 65536)); pm2 = squash(Math.floor(dot2 / 65536));
+      pm = pm1;
+      ia = c0 * 33; ib = (((c4 & 0xff) << 8 | c0) & 0xffff) * 33;
+      const s = ST[pm] + 2048, lo = s >> 7, w = s & 127;
+      ia += lo; ib += lo; pa = (a1[ia] * (128 - w) + a1[ia + 1] * w) >> 11; pb = (a2[ib] * (128 - w) + a2[ib + 1] * w) >> 11; 
+      
+      let p = (pm * 2 + pa + pb + 2) >> 2; if (p < 1) p = 1; else if (p > 4095) p = 4095;
+      return (pr = p);
+    }
+    
+    function update(y) {
+      const e1 = ((y << 12) - pm1) * 9, e2 = ((y << 12) - pm2) * 9;
+      for (let i = 0; i < NI; i++) { W[wsel + i] += ((X[i] * e1 + 32768) >> 16); W2[wsel2 + i] += ((X[i] * e2 + 32768) >> 16); }
+      const g = (y << 16) + (y << 6) - y - y;
+      a1[ia] += (g - a1[ia]) >> 6; a1[ia + 1] += (g - a1[ia + 1]) >> 6; a2[ib] += (g - a2[ib]) >> 6; a2[ib + 1] += (g - a2[ib + 1]) >> 6;
+      const tgt = y << 16;
+      for (let i = 0; i < NC; i++) { const t = T[i], nn = N[i], j = idx[i], k = nn[j]; t[j] += (((tgt - t[j]) * RT[k]) >> 15); if (k < 30) nn[j] = k + 1; }
+      { const k = o0n[c0]; o0p[c0] += (((tgt - o0p[c0]) * RT[k]) >> 15); if (k < 60) o0n[c0] = k + 1; }
+      if (mbit >= 0) { const hit = mbit === y ? 1 : 0, k = mn[mctx]; mp[mctx] += ((((hit << 16) - mp[mctx]) * RT[k]) >> 15); if (k < 250) mn[mctx] = k + 1; if (!hit) mlen = 0; }
+      c0 = (c0 << 1) | y;
+      if (c0 >= 256) { const c = c0 & 255; buf[pos++] = c; c8 = (c8 << 8) | (c4 >>> 24); c4 = ((c4 << 8) | c) | 0; c0 = 1; bytectx(); }
+    }
+    bytectx();
+    return { predict, update };
+  }
+
+  async function compress(src, onP) {
+    const n = src.length, m = Model(n), out = []; let x1 = 0, x2 = 0xFFFFFFFF;
+    for (let i = 0; i < n; i++) {
+      const c = src[i];
+      for (let b = 7; b >= 0; b--) {
+        const y = (c >> b) & 1, p = m.predict(), xm = (x1 + Math.floor((x2 - x1) / 4096) * p) >>> 0;
+        if (y) x2 = xm; else x1 = (xm + 1) >>> 0;
+        m.update(y);
+        while (((x1 ^ x2) & 0xff000000) === 0) { out.push(x2 >>> 24); x1 = (x1 << 8) >>> 0; x2 = ((x2 << 8) | 255) >>> 0; }
+      }
+      if ((i & 0xFFFF) === 0xFFFF && onP) { onP(i / n); await new Promise(r => setTimeout(r, 0)); }
+    }
+    out.push(x1 >>> 24, (x1 >>> 16) & 255, (x1 >>> 8) & 255, x1 & 255);
+    return Uint8Array.from(out);
+  }
+  async function decompress(src, n, onP) {
+    const m = Model(n), out = new Uint8Array(n); let x1 = 0, x2 = 0xFFFFFFFF, x = 0, ip = 0;
+    for (let i = 0; i < 4; i++) x = ((x << 8) | (src[ip++] || 0)) >>> 0;
+    for (let i = 0; i < n; i++) {
+      let c = 0;
+      for (let b = 0; b < 8; b++) {
+        const p = m.predict(), xm = (x1 + Math.floor((x2 - x1) / 4096) * p) >>> 0, y = x <= xm ? 1 : 0;
+        if (y) x2 = xm; else x1 = (xm + 1) >>> 0;
+        m.update(y); c = (c << 1) | y;
+        while (((x1 ^ x2) & 0xff000000) === 0) { x1 = (x1 << 8) >>> 0; x2 = ((x2 << 8) | 255) >>> 0; x = ((x << 8) | (src[ip++] || 0)) >>> 0; }
+      }
+      out[i] = c;
+      if ((i & 0xFFFF) === 0xFFFF && onP) { onP(i / n); await new Promise(r => setTimeout(r, 0)); }
+    }
+    return out;
+  }
+  return { compress, decompress };
+})();
+
+const CM2 = (() => {
+  const SQ = [1,2,3,6,10,16,27,45,73,120,194,310,488,747,1101,1546,2047,2549,2994,3348,3607,3785,3901,3975,4022,4050,4068,4079,4085,4089,4092,4093,4094];
+  const squash = d => { if (d > 2047) return 4095; if (d < -2047) return 0; const w = d & 127, i = (d >> 7) + 16; return (SQ[i] * (128 - w) + SQ[i + 1] * w + 64) >> 7; };
+  const ST = new Int16Array(4096);
+  for (let x = -2047, pi = 0; x <= 2047; x++) { const v = squash(x); for (let i = pi; i <= v; i++) ST[i] = x; pi = v + 1; }
+  const RT = new Int32Array(256); for (let i = 0; i < 256; i++) RT[i] = Math.floor(32768 / (i + 1.6));
+  const NC = 14, NI = NC * 2 + 3;
+  function Model(len) {
+    let bits = 16; while (bits < 24 && (1 << bits) < len * 8) bits++;
+    const SH = 32 - bits, T = [], N = [];
+    for (let i = 0; i < NC; i++) { T.push(new Uint16Array(1 << bits).fill(32768)); N.push(new Uint8Array(1 << bits)); }
+    const o0p = new Uint16Array(256).fill(32768), o0n = new Uint8Array(256);
+    const buf = new Uint8Array(len + 8), MB = Math.min(22, bits + 1), MT = new Int32Array(1 << MB);
+    const W = new Int32Array(3 * 256 * NI).fill(7000), W2 = new Int32Array(40 * NI).fill(7000), X = new Int32Array(NI), idx = new Int32Array(NC), H = new Int32Array(NC);
+    const W3 = new Int32Array(256 * NI).fill(7000), FW = new Int32Array(256 * 4).fill(21845); let pm3 = 2048, wsel3 = 0, fsel = 0, pf = 2048, f1 = 0, f2 = 0, f3 = 0;
+    const mp = new Uint16Array(64).fill(49152), mn = new Uint8Array(64);
+    const a1 = new Uint16Array(256 * 33), a2 = new Uint16Array(65536 * 33);
+    for (let i = 0; i < 33; i++) { const v = squash((i - 16) * 128) * 16; for (let j = 0; j < 256; j++) a1[j * 33 + i] = v; for (let j = 0; j < 65536; j++) a2[j * 33 + i] = v; }
+    let tagH = 0, attH = 0, inTag = 0, inQ = 0, stg = 0, pword = 0, tok = 0, ptok = 0, c0 = 1, pos = 0, wsel2 = 0, pm1 = 2048, pm2 = 2048, c4 = 0, c8 = 0, word = 0, mptr = 0, mlen = 0, mbit = -1, mctx = 0, wsel = 0, pr = 2048, pm = 2048, pa = 0, pb = 0, ia = 0, ib = 0, lim = 255;
+    function bytectx() {
+      const c = buf[pos - 1];
+      if ((c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || c >= 128) word = Math.imul(word + c + 1, 0x2F0B4A27) | 0; else { if (word) pword = word; word = 0; }
+      H[0] = Math.imul(c4 & 0xff, 0x9E3779B1) + 1;
+      H[1] = Math.imul(c4 & 0xffff, 0x85EBCA6B) + 2;
+      H[2] = Math.imul(c4 & 0xffffff, 0xC2B2AE35) + 3;
+      H[3] = Math.imul(c4, 0x27D4EB2F) + 4;
+      H[4] = Math.imul(Math.imul(c4, 0x165667B1) ^ Math.imul(c8 & 0xffff, 0x9E3779B1), 0x85EBCA6B) + 5;
+      H[5] = Math.imul(word, 0xD2511F53) + 6;
+      H[6] = Math.imul(Math.imul(word, 0x2545F491) ^ Math.imul(c4 >>> 24 | 0, 0x9E3779B1), 0xC2B2AE35) + 7;
+      H[7] = Math.imul(Math.imul(c4, 0x1B873593) ^ Math.imul(buf[pos - 5] || 0, 0x9E3779B1), 0x85EBCA6B) + 8;
+      if (c === 60 || c === 62 || c === 32 || c === 34 || c === 59 || c === 58 || c === 61 || c === 10) { if (tok) ptok = tok; tok = Math.imul(c + 1, 0x3C6EF372) | 0; } else tok = Math.imul(tok + c + 1, 0x2F0B4A27) | 0;
+      H[8] = Math.imul(tok, 0xA54FF53A) + 9;
+      H[9] = Math.imul(Math.imul(tok, 0x510E527F) ^ Math.imul(ptok, 0x9B05688C), 0x1F83D9AB) + 10;
+      if (c === 60) { inTag = 1; tagH = 0; attH = 0; inQ = 0; stg = 0; }
+      else if (inTag) {
+        if (inQ) { if (c === inQ) inQ = 0; }
+        else if (c === 34 || c === 39) inQ = c;
+        else if (c === 62) inTag = 0;
+        else if (c === 32) { stg = 1; attH = 0; }
+        else if (c !== 61) { if (stg === 0) tagH = Math.imul(tagH + c + 1, 0x2F0B4A27) | 0; else attH = Math.imul(attH + c + 1, 0x2F0B4A27) | 0; }
+      }
+      H[10] = Math.imul(Math.imul(c4, 0x3D4D51CB) ^ Math.imul(c8, 0x9E3779B1), 0xB5297A4D) + 11;
+      H[11] = Math.imul((c4 >>> 8) & 0xffff, 0xCC9E2D51) + 12;
+      H[12] = Math.imul(Math.imul(tagH, 0x7FEB352D) ^ Math.imul(attH + (inQ << 8) + (inTag << 16), 0x846CA68B) ^ Math.imul(c4 & 0xff, 0x9E3779B1), 0x85EBCA6B) + 13;
+      H[13] = Math.imul(Math.imul(word, 0x1B873593) ^ Math.imul(pword, 0xE6546B64), 0xC2B2AE35) + 14;
+      // match model
+      if (mlen > 0 && buf[mptr] === c) { mlen++; mptr++; } else mlen = 0;
+      if (pos >= 5) {
+        const h = (Math.imul(c4, 0x9E3779B1) ^ Math.imul(buf[pos - 5], 0x85EBCA6B)) >>> (32 - MB);
+        if (mlen === 0) { const p = MT[h]; if (p > 0) { let l = 0; while (l < 32 && p - 1 - l >= 0 && buf[p - 1 - l] === buf[pos - 1 - l]) l++; if (l >= 5) { mlen = l; mptr = p; } } }
+        MT[h] = pos;
+      }
+    }
+    function predict() {
+      let n = 0;
+      for (let i = 0; i < NC; i++) {
+        const j = (Math.imul(H[i] ^ Math.imul(c0, 0x2F0B4A27), 0x9E3779B1) >>> SH); idx[i] = j;
+        const pp = T[i][j]; X[n++] = ST[pp >> 4]; X[n++] = N[i][j] === 0 ? 0 : (pp - 32768) >> 5;
+      }
+      X[n++] = ST[o0p[c0] >> 4];
+      mbit = -1; mctx = 0;
+      if (mlen > 0 && mptr < pos) {
+        const pb8 = buf[mptr] | 256, bc = 32 - Math.clz32(c0) - 1; // bits seen
+        if ((pb8 >> (8 - bc)) === c0) { mbit = (pb8 >> (7 - bc)) & 1; mctx = Math.min(mlen, 31) * 2 + (bc === 0 ? 0 : 1); const s = ST[mp[mctx] >> 4]; X[n++] = mbit ? s : -s; } else X[n++] = 0;
+      } else X[n++] = 0;
+      X[n++] = 256;
+      wsel = ((mbit < 0 ? 0 : mlen < 16 ? 1 : 2) * 256 + c0) * NI;
+      wsel2 = (mbit < 0 ? 0 : Math.min(mlen, 31) + 1) * NI;
+      wsel3 = (c4 & 0xff) * NI; let dot = 0, dot2 = 0, dot3 = 0; for (let i = 0; i < NI; i++) { const xi = X[i]; dot += xi * W[wsel + i]; dot2 += xi * W2[wsel2 + i]; dot3 += xi * W3[wsel3 + i]; }
+      f1 = Math.max(-2047, Math.min(2047, Math.floor(dot / 65536))); f2 = Math.max(-2047, Math.min(2047, Math.floor(dot2 / 65536))); f3 = Math.max(-2047, Math.min(2047, Math.floor(dot3 / 65536)));
+      pm1 = squash(f1); pm2 = squash(f2); pm3 = squash(f3);
+      fsel = (mbit < 0 ? 0 : 1) * 4 * 128 + (c0 & 127) * 4;
+      pm = squash(Math.floor((f1 * FW[fsel] + f2 * FW[fsel + 1] + f3 * FW[fsel + 2]) / 65536)); pf = pm;
+      ia = c0 * 33; ib = (((c4 & 0xff) << 8 | c0) & 0xffff) * 33;
+      const s = ST[pm] + 2048, lo = s >> 7, w = s & 127;
+      ia += lo; ib += lo; pa = (a1[ia] * (128 - w) + a1[ia + 1] * w) >> 11; pb = (a2[ib] * (128 - w) + a2[ib + 1] * w) >> 11; 
+      
+      let p = (pm * 3 + pa + 2) >> 2; if (p < 1) p = 1; else if (p > 4095) p = 4095;
+      return (pr = p);
+    }
+    
+    function update(y) {
+      const e1 = ((y << 12) - pm1) * 24, e2 = ((y << 12) - pm2) * 24, e3 = ((y << 12) - pm3) * 24, ef = ((y << 12) - pf) * 2;
+      FW[fsel] += (f1 * ef + 32768) >> 16; FW[fsel + 1] += (f2 * ef + 32768) >> 16; FW[fsel + 2] += (f3 * ef + 32768) >> 16;
+      for (let i = 0; i < NI; i++) { W[wsel + i] += ((X[i] * e1 + 32768) >> 16); W2[wsel2 + i] += ((X[i] * e2 + 32768) >> 16); W3[wsel3 + i] += ((X[i] * e3 + 32768) >> 16); }
+      const g = (y << 16) + (y << 6) - y - y;
+      a1[ia] += (g - a1[ia]) >> 6; a1[ia + 1] += (g - a1[ia + 1]) >> 6; a2[ib] += (g - a2[ib]) >> 6; a2[ib + 1] += (g - a2[ib + 1]) >> 6;
+      const tgt = y << 16;
+      for (let i = 0; i < NC; i++) { const t = T[i], nn = N[i], j = idx[i], k = nn[j]; t[j] += (((tgt - t[j]) * RT[k]) >> 15); if (k < 30) nn[j] = k + 1; }
+      { const k = o0n[c0]; o0p[c0] += (((tgt - o0p[c0]) * RT[k]) >> 15); if (k < 60) o0n[c0] = k + 1; }
+      if (mbit >= 0) { const hit = mbit === y ? 1 : 0, k = mn[mctx]; mp[mctx] += ((((hit << 16) - mp[mctx]) * RT[k]) >> 15); if (k < 250) mn[mctx] = k + 1; if (!hit) mlen = 0; }
+      c0 = (c0 << 1) | y;
+      if (c0 >= 256) { const c = c0 & 255; buf[pos++] = c; c8 = (c8 << 8) | (c4 >>> 24); c4 = ((c4 << 8) | c) | 0; c0 = 1; bytectx(); }
+    }
+    bytectx();
+    return { predict, update };
+  }
+
+  async function compress(src, onP) {
+    const n = src.length, m = Model(n), out = []; let x1 = 0, x2 = 0xFFFFFFFF;
+    for (let i = 0; i < n; i++) {
+      const c = src[i];
+      for (let b = 7; b >= 0; b--) {
+        const y = (c >> b) & 1, p = m.predict(), xm = (x1 + Math.floor((x2 - x1) / 4096) * p) >>> 0;
+        if (y) x2 = xm; else x1 = (xm + 1) >>> 0;
+        m.update(y);
+        while (((x1 ^ x2) & 0xff000000) === 0) { out.push(x2 >>> 24); x1 = (x1 << 8) >>> 0; x2 = ((x2 << 8) | 255) >>> 0; }
+      }
+      if ((i & 0xFFFF) === 0xFFFF && onP) { onP(i / n); await new Promise(r => setTimeout(r, 0)); }
+    }
+    out.push(x1 >>> 24, (x1 >>> 16) & 255, (x1 >>> 8) & 255, x1 & 255);
+    return Uint8Array.from(out);
+  }
+  async function decompress(src, n, onP) {
+    const m = Model(n), out = new Uint8Array(n); let x1 = 0, x2 = 0xFFFFFFFF, x = 0, ip = 0;
+    for (let i = 0; i < 4; i++) x = ((x << 8) | (src[ip++] || 0)) >>> 0;
+    for (let i = 0; i < n; i++) {
+      let c = 0;
+      for (let b = 0; b < 8; b++) {
+        const p = m.predict(), xm = (x1 + Math.floor((x2 - x1) / 4096) * p) >>> 0, y = x <= xm ? 1 : 0;
+        if (y) x2 = xm; else x1 = (xm + 1) >>> 0;
+        m.update(y); c = (c << 1) | y;
+        while (((x1 ^ x2) & 0xff000000) === 0) { x1 = (x1 << 8) >>> 0; x2 = ((x2 << 8) | 255) >>> 0; x = ((x << 8) | (src[ip++] || 0)) >>> 0; }
+      }
+      out[i] = c;
+      if ((i & 0xFFFF) === 0xFFFF && onP) { onP(i / n); await new Promise(r => setTimeout(r, 0)); }
+    }
+    return out;
+  }
+  return { compress, decompress };
+})();
+
 const USCD = (() => {
   const SK = [['margin','2'],['marginTop','2'],['marginBottom','2'],['marginLeft','2'],['marginRight','2'],['allowMarginOverride',true],
     ['bgType','solid'],['bgColor','#ffffff'],['bgColor2','#e3f0ff'],['angle','135'],['spacing','1.5'],['font','Default'],['zoom',100],['wordSpacing','0'],
@@ -20767,7 +21035,7 @@ const USCD = (() => {
     const cands = [];
     cnt.forEach((c, t) => { if (c > 1) { const sv = (t.length - 1) * c - (t.length + 1); if (sv > 0) cands.push([t, sv]); } });
     cands.sort((a, b) => b[1] - a[1]);
-    const list = cands.slice(0, HI - LO).map(c => c[0]);
+    const list = []; // CM models repeats itself; a dictionary only hurts it (~3.5% bigger)
     const map = new Map(list.map((t, i) => [t, String.fromCharCode(LO + 1 + i)]));
     const enc = toks.map(a => a.map(t => map.get(t) || t).join(''));
     const np = data.pages.length, nh = heads.length;
@@ -20849,25 +21117,59 @@ const USCD = (() => {
     if (!same) throw new Error('uSCD verification failed — nothing exported');
     P(0.7, 'Deflating…'); await yieldUI();
     const raw = serialize(o, blobs);
-    let body = raw, flags = 0;
+    let body = raw, flags = 0, ver = 2;
     if (typeof CompressionStream !== 'undefined') {
       try { const z = await streamBytes(raw, CompressionStream, 'deflate-raw'); if (z.length < raw.length) { body = z; flags = 1; } } catch (_) {}
     }
+    // v3: context-mixing on text part (~25% smaller than deflate), deflate on binary tail
+    try {
+      const hl = headLen(raw), isP = m => /png|jpe?g|webp|gif|avif|heic|woff|video|audio|zip|mp4|webm/i.test(m);
+      if (hl < 48e6) {
+        const cmP = [raw.subarray(0, hl)], stP = []; let off = hl;
+        blobs.forEach(bl => { const seg = raw.subarray(off, off + bl.u.length); off += bl.u.length; (isP(bl.mime) ? stP : cmP).push(seg); });
+        const cat = ps => { const r = new Uint8Array(ps.reduce((x, q) => x + q.length, 0)); let o2 = 0; ps.forEach(q => { r.set(q, o2); o2 += q.length; }); return r; };
+        const cmRaw = cat(cmP); let tail = cat(stP), tf = 0;
+        const cmb = await CM2.compress(cmRaw, f => P(0.72 + f * 0.25, 'Squeezing…'));
+        if (tail.length && typeof CompressionStream !== 'undefined') { try { const z = await streamBytes(tail, CompressionStream, 'deflate-raw'); if (z.length < tail.length) { tail = z; tf = 1; } } catch (_) {} }
+        const v3 = new Uint8Array(9 + cmb.length + tail.length), d3 = new DataView(v3.buffer);
+        d3.setUint32(0, cmRaw.length); v3[4] = tf; d3.setUint32(5, cmb.length); v3.set(cmb, 9); v3.set(tail, 9 + cmb.length);
+        if (v3.length < body.length) {
+          let ok = true;
+          if (cmRaw.length < 6e6) { const back = await CM2.decompress(cmb, cmRaw.length); ok = crc32(back) === crc32(cmRaw); }
+          if (ok) { body = v3; flags = 6; ver = 4; }
+        }
+      }
+    } catch (_) {}
     const out = new Uint8Array(14 + body.length), dv = new DataView(out.buffer);
-    out.set([0x55, 0x53, 0x43, 0x44, 2, flags], 0);
+    out.set([0x55, 0x53, 0x43, 0x44, ver, flags], 0);
     dv.setUint32(6, crc32(raw)); dv.setUint32(10, raw.length);
     out.set(body, 14);
     P(1, 'Done');
     return out;
   }
+  function headLen(raw) { const dv = new DataView(raw.buffer, raw.byteOffset, raw.length), ml = dv.getUint32(0); return 8 + ml + dv.getUint32(4 + ml); }
 
   async function decode(buf, onStage) {
     const b = new Uint8Array(buf);
     if (b.length < 14 || b[0] !== 0x55 || b[1] !== 0x53 || b[2] !== 0x43 || b[3] !== 0x44) throw new Error('Not a valid uSCD file');
-    if (b[4] > 2) throw new Error('uSCD format v' + b[4] + ' is newer than this editor supports');
+    if (b[4] > 4) throw new Error('uSCD format v' + b[4] + ' is newer than this editor supports');
     const flags = b[5], dv = new DataView(b.buffer, b.byteOffset), crc = dv.getUint32(6), rawLen = dv.getUint32(10);
     let body = b.subarray(14);
-    if (flags & 1) {
+    if (flags & 2) {
+      const d3 = new DataView(body.buffer, body.byteOffset), hl0 = d3.getUint32(0), tf = body[4], cl = d3.getUint32(5);
+      onStage && onStage('Unsqueezing…');
+      const head = await (b[4] >= 4 ? CM2 : CM).decompress(body.subarray(9, 9 + cl), hl0, f => onStage && onStage('Unsqueezing… ' + Math.round(f * 100) + '%'));
+      let tail = body.subarray(9 + cl);
+      if (tf) tail = await streamBytes(tail, DecompressionStream, 'deflate-raw');
+      if (flags & 4) {
+        const isP = m => /png|jpe?g|webp|gif|avif|heic|woff|video|audio|zip|mp4|webm/i.test(m);
+        const hl = headLen(head), dh = new DataView(head.buffer, head.byteOffset, head.length), ml = dh.getUint32(0);
+        const meta = JSON.parse(new TextDecoder().decode(head.subarray(4, 4 + ml)));
+        const parts = [head.subarray(0, hl)]; let cp = hl, sp = 0;
+        meta.b.forEach(([mime, len]) => { if (isP(mime)) { parts.push(tail.subarray(sp, sp + len)); sp += len; } else { parts.push(head.subarray(cp, cp + len)); cp += len; } });
+        body = new Uint8Array(parts.reduce((x, q) => x + q.length, 0)); let o2 = 0; parts.forEach(q => { body.set(q, o2); o2 += q.length; });
+      } else { body = new Uint8Array(hl0 + tail.length); body.set(head, 0); body.set(tail, hl0); }
+    } else if (flags & 1) {
       if (typeof DecompressionStream === 'undefined') throw new Error('This browser cannot decompress uSCD files');
       onStage && onStage('Inflating…'); body = await streamBytes(body, DecompressionStream, 'deflate-raw');
     }
@@ -20934,7 +21236,7 @@ async function handleUSCDImport(file) {
     fill.style.width = '30%';
     const nPages = (o.p || []).length;
     row('Title', o.t || '(untitled)'); row('File size', kb(packedLen));
-    row('Compression', (flags & 1) ? 'Deflate + snippets' : 'Snippets only'); row('Packed payload', kb(rawLen));
+    row('Compression', (flags & 2) ? 'Context mixing (lossless)' : (flags & 1) ? 'Deflate + snippets' : 'Snippets only'); row('Packed payload', kb(rawLen));
     row('Pages', nPages); row('Snippet dictionary', (o.d || []).length + ' entries');
     row('Embedded fonts', o.ef ? Object.keys(o.ef).length : 0); row('Extracted images/fonts', blobs.length);
     if (o.m && o.m.ea) { try { row('Exported', new Date(parseInt(o.m.ea, 36)).toLocaleString()); } catch (_) {} }
@@ -39207,7 +39509,8 @@ window.SCAdmin=(function(){
       <div class="sc-acx-row"><span class="sc-acx-name">Allow add-ons</span>${tg(st.addons,'addons')}</div>
       <div class="sc-acx-row"><span class="sc-acx-name">Chat cooldown (sec)</span><input type="text" value="${E(st.cd||0)}" onchange="SCAdmin.cx('cd',{v:this.value})"/></div>`;
   }
-  function render(){
+  function syncPageSrcBtn(){ const b=document.getElementById('scPageSrcBtn'); const ok=state.status==='admin'||(state.status==='checking'&&wasAdmin); if(b) b.style.display=ok?'':'none'; }
+  function render(){ try{ syncPageSrcBtn(); }catch(e){}
     renderCollab();
     const sec=document.getElementById('adminAbilitySbSection');
     const keep=state.status==='admin'||(state.status==='checking'&&wasAdmin);
@@ -39238,7 +39541,7 @@ window.SCAdmin=(function(){
     el.innerHTML=rows.length?rows.map(p=>`<div class="fc-font-item ${p.id===sel?'selected':''}" onclick="SCAdmin.choose('${E(p.id)}')"><span class="fc-font-name">${E(p.name||'Guest')}${p.id===me?' (you)':''}</span>${p.admin?'<span class="sc-admin-badge">ADMIN</span>':''}</div>`).join(''):'<div class="sc-hint">No one matches that name.</div>';
   }
   return{
-    verify, require:require_, render, renderCollab, checkEmail, email:()=>lastEmail,
+    isAdmin:()=>state.status==='admin', syncPageSrcBtn, verify, require:require_, render, renderCollab, checkEmail, email:()=>lastEmail,
     colToggle(){ colOpen=!colOpen; document.getElementById('scAdminColDropdown').classList.toggle('open',colOpen); document.getElementById('scAdminColChev').classList.toggle('open',colOpen); if(colOpen){ const c=C(); if(c&&c._inSession&&c._inSession()&&!c._isHost()) c._admCollab('state'); renderCollab(); } },
     async cx(k,v){
       if(!(await require_())) return;
@@ -43995,6 +44298,81 @@ function pedDrawOv() {
   else if (PED.tool === 'draw' && PED.hover) { c.strokeStyle = '#fff'; c.lineWidth = 1.5 * u; c.beginPath(); c.arc(PED.hover.x, PED.hover.y, PED.o.size * pedScale() / 2, 0, 7); c.stroke(); c.strokeStyle = 'rgba(0,0,0,.6)'; c.lineWidth = u; c.stroke(); }
 }
 
+</script>
+<script>
+/* ── Page Source (v218): edit pages / .scd / .uscd as text and apply in place ── */
+var psCur = 'pages';
+(function () {
+  const $ = id => document.getElementById(id);
+  const HINTS = {
+    pages: 'Raw HTML of every page. Pages are separated by the “PAGE n” comment lines — keep them to add/remove pages. Headers, footers and settings are kept.',
+    scd: 'The full .scd JSON (title, settings, pages, headers, footers, meta). Paste a whole generated document here.',
+    uscd: 'The .uscd file as Base64 text. Paste Base64 of a .uscd to load it; it is generated from the current document when opened.'
+  };
+  const PG = n => '<!-- ===== PAGE ' + n + ' ===== -->';
+  const st = (t, bad) => { const e = $('psStatus'); e.textContent = t || ''; e.style.color = bad ? '#d64545' : ''; };
+  const b64 = u => { let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+  const unb64 = t => { t = t.replace(/^\s*data:[^,]*,/, '').replace(/\s+/g, ''); const bin = atob(t), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; };
+
+  window.openPageSource = async function () { if(!(window.SCAdmin && await SCAdmin.require())) return; openMdl('pageSrcMdl'); psMode('pages', true); };
+
+  window.psMode = async function (m, force) {
+    psCur = m;
+    document.querySelectorAll('#psTabs button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+    $('psHint').textContent = HINTS[m];
+    const ta = $('psText'); ta.value = ''; st('Loading…');
+    try {
+      try { lazyHydrateAll(false); } catch (_) {}
+      const data = collectData();
+      if (m === 'pages') ta.value = data.pages.map((p, i) => PG(i + 1) + '\n' + p).join('\n\n');
+      else if (m === 'scd') ta.value = JSON.stringify(data, null, 2);
+      else {
+        st('Compressing…'); await new Promise(r => setTimeout(r, 30));
+        const u = await USCD.encode(data, (p, t) => st('uSCD: ' + t + ' ' + Math.round(p * 100) + '%'));
+        ta.value = b64(u);
+      }
+      st(m === 'uscd' ? 'Current document: ' + Math.round(ta.value.length * 0.75 / 1024) + ' KB' : '');
+    } catch (e) { st('Could not read the document: ' + e.message, true); }
+  };
+
+  function parsePages(t) {
+    const re = /^[ \t]*<!--\s*={3,}\s*PAGE\s+\d+\s*={3,}\s*-->[ \t]*\r?\n?/gm;
+    const idx = []; let m;
+    while ((m = re.exec(t))) idx.push([m.index, re.lastIndex]);
+    if (!idx.length) return [t.trim()];
+    return idx.map((a, i) => t.slice(a[1], i + 1 < idx.length ? idx[i + 1][0] : t.length).replace(/\s+$/, ''));
+  }
+
+  window.psApply = async function () {
+    const btn = $('psApplyBtn'); btn.disabled = true;
+    try {
+      const t = $('psText').value;
+      if (!t.trim()) throw new Error('Nothing to apply');
+      let data;
+      if (psCur === 'scd') {
+        data = JSON.parse(t);
+      } else if (psCur === 'uscd') {
+        st('Decoding…');
+        const u = unb64(t), d = await USCD.decode(u.buffer.slice(u.byteOffset, u.byteOffset + u.length), x => st(x));
+        data = await USCD.unpack(d.o, null, d.blobs);
+      } else {
+        try { lazyHydrateAll(false); } catch (_) {}
+        data = collectData();
+        const pages = parsePages(t), n = pages.length, fit = a => { a = (a || []).slice(0, n); while (a.length < n) a.push(''); return a; };
+        data.pages = pages; data.headers = fit(data.headers); data.footers = fit(data.footers);
+        if (data.meta) data.meta.pageCount = n;
+      }
+      if (!data || !Array.isArray(data.pages) || !data.pages.length) throw new Error('No pages found');
+      st('Applying…'); await new Promise(r => setTimeout(r, 20));
+      loadData(data);
+      const ti = document.getElementById('docTitle'); if (ti && data.title) ti.value = data.title;
+      try { DOC.schedule(); } catch (_) {}
+      closeMdl('pageSrcMdl');
+      showToast('Page source applied', 'success');
+    } catch (e) { st('Error: ' + e.message, true); }
+    btn.disabled = false;
+  };
+})();
 </script>
 </body>
 </html>
