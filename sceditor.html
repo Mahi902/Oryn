@@ -4858,6 +4858,7 @@ function waitForSugarcaneAddons(){
     <button class="tbtn" id="tbOlBtn" onclick="document.execCommand('insertOrderedList')" title="Numbered List (hold to customise)"><span class="material-symbols-outlined">format_list_numbered</span></button>
     <button class="tbtn" id="tbHrBtn" onclick="insertHR()" title="Insert Horizontal Line (hold to navigate)"><span class="material-symbols-outlined">horizontal_rule</span></button>
     <button class="tbtn" id="tbDictateBtn" type="button" onmousedown="event.preventDefault()" onclick="SCDictate.toggle()" title="Voice dictation (Ctrl+Alt+D)" aria-label="Voice dictation" aria-pressed="false"><span class="material-symbols-outlined" data-dwi="mic">mic</span></button>
+    <button class="tbtn" id="tbTranscribeBtn" type="button" style="display:none" onmousedown="event.preventDefault()" onclick="SCTranscribe.toggle()" title="Read aloud (transcription)" aria-label="Read aloud" aria-pressed="false"><span class="material-symbols-outlined">volume_up</span></button>
     <button class="tbtn" id="tbMagicBtn" type="button" style="display:none" onmousedown="event.preventDefault()" title="Magic Typing: write by hand (Ctrl+Alt+M)" aria-label="Magic Typing" aria-pressed="false"><span class="material-symbols-outlined" data-dwi="draw">draw</span></button>
     <div class="toolbar-sep"></div>
     <button class="font-chooser-btn" id="insertDdBtn" onclick="toggleInsertDropdown()" title="Insert">
@@ -5390,6 +5391,45 @@ function waitForSugarcaneAddons(){
               <div class="wc-freq-title">Top letters</div>
               <div class="wc-freq" id="wcs-letterfreq"></div>
             </div>
+            <div class="wc-freq-section">
+              <div class="sb-toggle-row" style="padding:4px 6px 2px;margin-bottom:0;">
+                <span class="sb-toggle-label" style="font-weight:600;font-size:12px;">Extended analysis</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="wcExtToggle"/>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+            <div id="wcExtended" style="display:none">
+            <div class="wc-freq-section">
+              <div class="wc-freq-title">Echo finder · repeats within</div>
+              <div class="wc-freq" id="echoRange" style="margin-bottom:6px">
+                <button class="wc-pill" data-n="15"><b>15 words</b></button>
+                <button class="wc-pill" data-n="40"><b>40 words</b></button>
+                <button class="wc-pill" data-n="100"><b>100 words</b></button>
+              </div>
+              <div class="wc-rows">
+                <div class="wc-row"><span class="wc-row-lbl">Echoed words</span><span class="wc-row-val" id="echo-words">0</span></div>
+                <div class="wc-row"><span class="wc-row-lbl">Total repeats</span><span class="wc-row-val" id="echo-total">0</span></div>
+                <div class="wc-row"><span class="wc-row-lbl">Repeated openers</span><span class="wc-row-val" id="echo-openers">0</span></div>
+              </div>
+              <div class="wc-freq" id="echo-list"></div>
+            </div>
+            <div class="wc-freq-section">
+              <div class="wc-freq-title">Openers used 3+ times</div>
+              <div class="wc-freq" id="echo-open-list"></div>
+              <button class="exp-options-link" onclick="echoClear()" style="margin-top:6px">Clear highlights</button>
+            </div>
+            <div class="wc-freq-section">
+              <div class="wc-freq-title">Sentence rhythm · click a bar</div>
+              <div id="rhy-bars" style="display:flex;align-items:flex-end;gap:1px;height:40px;margin-bottom:6px"></div>
+              <div class="wc-rows">
+                <div class="wc-row"><span class="wc-row-lbl">Average length</span><span class="wc-row-val" id="rhy-avg">0</span></div>
+                <div class="wc-row"><span class="wc-row-lbl">Longest</span><span class="wc-row-val" id="rhy-max">0</span></div>
+                <div class="wc-row"><span class="wc-row-lbl">Long (30+ words)</span><span class="wc-row-val" id="rhy-long">0</span></div>
+              </div>
+            </div>
+            </div>
           </div>
         </div>
       </div>
@@ -5483,6 +5523,24 @@ function waitForSugarcaneAddons(){
               <button onclick="SCDictate.openHistory()" class="aw-correct-btn" style="margin-top:5px;background:hsl(calc(var(--sc-h,210) + -11.1) calc(18.4% * var(--sc-s,1)) calc(40.4% + var(--sc-l,0%) * 1));">
                 <span class="material-symbols-outlined" style="font-size:13px">history</span>Dictation History
               </button>
+            </div>
+
+            <!-- TRANSCRIPTION (text → speech, the reverse of Dictation) -->
+            <div class="aw-row">
+              <div>
+                <div class="aw-row-label">Transcription</div>
+                <div class="aw-row-sub">Hear your text read aloud</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="awTranscription"/>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div id="awTranscriptionPanel" style="display:none;padding:0 10px 6px">
+              <button id="stStartBtn" onmousedown="event.preventDefault()" onclick="SCTranscribe.toggle()" class="aw-correct-btn">
+                <span class="material-symbols-outlined" style="font-size:13px">volume_up</span><span id="stStartLbl">Start Transcription</span>
+              </button>
+              <div class="aw-row-sub" style="margin-top:6px">Reads the selection, or from the cursor onward. Also in the toolbar and the text selection menu.</div>
             </div>
 
             <!-- MAGIC TYPING -->
@@ -5904,6 +5962,13 @@ function waitForSugarcaneAddons(){
     </div>
   </div>
   <div class="cpp-section">
+    <div class="cpp-section-label">Sort by this column</div>
+    <div class="cpp-tiles c2">
+      <div class="ctx-item" data-cm data-cm-gap data-cm-title="Sort A to Z" onclick="tableAction('sortAsc')" title="Sort rows A to Z, or low to high"><span class="material-symbols-outlined">arrow_upward</span>A → Z</div>
+      <div class="ctx-item" data-cm data-cm-title="Sort Z to A" onclick="tableAction('sortDesc')" title="Sort rows Z to A, or high to low"><span class="material-symbols-outlined">arrow_downward</span>Z → A</div>
+    </div>
+  </div>
+  <div class="cpp-section">
     <div class="ctx-item wide danger" data-cm data-cm-gap data-cm-title="Delete table" onclick="tableAction('deleteTable')"><span class="material-symbols-outlined">delete</span>Delete table</div>
   </div>
   <div class="popup-collapsed-row" id="tblCollapsedRow"></div>
@@ -5985,6 +6050,7 @@ function waitForSugarcaneAddons(){
     <button class="wcm-inline-back" onclick="closeInlinePanel()"><span class="material-symbols-outlined">chevron_left</span>Warp</button>
     <div class="wcm-sub-item" onclick="closeWinMenu();openWarpTitleModal()"><span class="material-symbols-outlined">title</span>Warp to title</div>
     <div class="wcm-sub-item" onclick="closeWinMenu();openWarpPageModal()"><span class="material-symbols-outlined">article</span>Warp to page</div>
+    <div class="wcm-sub-item" onclick="closeWinMenu();warpToLastEdit()"><span class="material-symbols-outlined">history</span>Warp to last edit</div>
   </div>
   <div class="wcm-inline-panel" id="panelDelete">
     <button class="wcm-inline-back" onclick="closeInlinePanel()"><span class="material-symbols-outlined">chevron_left</span>Delete</button>
@@ -6028,6 +6094,7 @@ function waitForSugarcaneAddons(){
 <div class="wcm-submenu" id="submenuWarp" onmouseenter="keepSubmenu('submenuWarp')" onmouseleave="hideSubmenu('submenuWarp')">
   <div class="wcm-sub-item" onclick="closeWinMenu();openWarpTitleModal()"><span class="material-symbols-outlined">title</span>Warp to title</div>
   <div class="wcm-sub-item" onclick="closeWinMenu();openWarpPageModal()"><span class="material-symbols-outlined">article</span>Warp to page</div>
+  <div class="wcm-sub-item" onclick="closeWinMenu();warpToLastEdit()"><span class="material-symbols-outlined">history</span>Warp to last edit</div>
 </div>
 <div class="wcm-submenu" id="submenuDelete" onmouseenter="keepSubmenu('submenuDelete')" onmouseleave="hideSubmenu('submenuDelete')">
   <div class="wcm-sub-item" onclick="closeWinMenu();confirmDeletePage()" style="color:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(65.1% * var(--sc-rs,1)) calc(50.6% + var(--sc-rl,0%)))"><span class="material-symbols-outlined" style="color:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(65.1% * var(--sc-rs,1)) calc(50.6% + var(--sc-rl,0%)))">delete_forever</span>Delete current page</div>
@@ -6220,6 +6287,14 @@ body #ulBulletChips .olcust-chip.active,body.dark #ulBulletChips .olcust-chip.ac
             <div class="scf-sec">
               <div class="scf-sec-h"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>Alt text</div>
               <input type="text" class="scf-input" id="imgAltText" maxlength="250" placeholder="Describe the image for screen readers" autocomplete="off" style="width:100%;box-sizing:border-box"/>
+            </div>
+
+            <div class="scf-sec">
+              <div class="scf-sec-h"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v11H4zM8 19h8"/></svg></span>Caption</div>
+              <input type="text" class="scf-input" id="imgCapText" maxlength="200" placeholder="Visible caption (leave empty for none)" autocomplete="off" style="width:100%;box-sizing:border-box"/>
+              <div class="sm-btn-row" id="imgCapStyle" style="margin-top:8px"><button class="sm-chip active" data-v="plain" onclick="imgChipSel(this,'imgCapStyle')">Plain</button><button class="sm-chip" data-v="italic" onclick="imgChipSel(this,'imgCapStyle')">Italic</button><button class="sm-chip" data-v="boxed" onclick="imgChipSel(this,'imgCapStyle')">Boxed</button><button class="sm-chip" data-v="label" onclick="imgChipSel(this,'imgCapStyle')">Label</button></div>
+              <div class="sm-btn-row" id="imgCapPos" style="margin-top:8px"><button class="sm-chip active" data-v="below" onclick="imgChipSel(this,'imgCapPos')">Below image</button><button class="sm-chip" data-v="above" onclick="imgChipSel(this,'imgCapPos')">Above image</button></div>
+              <div class="sm-btn-row" id="imgCapNum" style="margin-top:8px"><button class="sm-chip" data-v="off" onclick="imgChipSel(this,'imgCapNum')">No number</button><button class="sm-chip active" data-v="fig" onclick="imgChipSel(this,'imgCapNum')">Figure N.</button></div>
             </div>
 
             <div class="scf-sec">
@@ -8218,6 +8293,9 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
       <label>Pages (e.g. 1-3 or 1,2,4 — leave blank for all)</label>
       <input type="text" class="finput" id="frPages" placeholder="All pages"/>
     </div>
+    <div class="sb-toggle-row" style="margin-bottom:7px"><span class="sb-toggle-label">Match case</span><label class="toggle-switch"><input type="checkbox" id="frCase"/><span class="toggle-slider"></span></label></div>
+    <div class="sb-toggle-row" style="margin-bottom:7px"><span class="sb-toggle-label">Whole word</span><label class="toggle-switch"><input type="checkbox" id="frWord"/><span class="toggle-slider"></span></label></div>
+    <div class="sb-toggle-row" style="margin-bottom:7px"><span class="sb-toggle-label">Regular expression</span><label class="toggle-switch"><input type="checkbox" id="frRegex"/><span class="toggle-slider"></span></label></div>
     <p class="fr-count" id="frCount"></p>
     <div class="mfooter">
       <button class="mbtn sec" onclick="closeMdl('findReplaceMdl')">Close</button>
@@ -8395,6 +8473,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
       <button class="cpp-btn" id="tpEditLinkBtn" onclick="openEditLinkAttrs()" style="display:none;color:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1));"><span class="material-symbols-outlined">link</span>Edit Link</button>
       <button class="cpp-btn" id="tpAutofillBtn" onclick="openAedFromPopup()" style="display:none;color:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1));"><span class="material-symbols-outlined">auto_fix_high</span>Autofill</button>
       <button class="cpp-btn" id="tpExpandContextBtn" onclick="runExpandContext()" style="display:none;color:hsl(calc(259.8 * var(--sc-hk,1) + var(--sc-rb,0)) calc(53.9% * var(--sc-rs,1)) calc(45.1% + var(--sc-rl,0%)));"><span class="material-symbols-outlined">auto_awesome</span>Expand Context</button>
+      <button class="cpp-btn" id="tpReadBtn" onmousedown="event.preventDefault()" onclick="SCTranscribe.toggle(true)" style="display:none;color:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1));"><span class="material-symbols-outlined">volume_up</span>Read</button>
       <button class="cpp-btn" id="tpSummarizeBtn" onclick="openSummarize('selection')" style="display:none;color:hsl(calc(259.8 * var(--sc-hk,1) + var(--sc-rb,0)) calc(53.9% * var(--sc-rs,1)) calc(45.1% + var(--sc-rl,0%)));"><span class="material-symbols-outlined">summarize</span>Summarize</button>
     </div>
     <div class="ctx-popup-sep"></div>
@@ -44374,5 +44453,480 @@ var psCur = 'pages';
   };
 })();
 </script>
+
+<style>
+::highlight(echo-all){background-color:rgba(250,204,21,.35);}
+::highlight(echo-pick){background-color:rgba(249,115,22,.55);}
+#echoRange .wc-pill{border:none;cursor:pointer;font-family:inherit;}
+#echoRange .wc-pill.on{outline:1.5px solid hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1));}
+#echo-list .wc-pill,#echo-open-list .wc-pill{cursor:pointer;}
+</style>
+<script>
+(function(){
+  var STOP=new Set('that this with from have they been were will would there their what when which about your into than then them these those some such only also more most very just over under while where because could should being each other after before again once here does doing done both many much like even still same make made'.split(' '));
+  var N=40,cur=null,idx=0,groups={},timer=null;
+  function open(){var d=document.getElementById('wcDropdown'),x=document.getElementById('wcExtToggle');return d&&d.classList.contains('open')&&x&&x.checked;}
+  function tokens(){
+    var out=[],re=/[A-Za-z\u00C0-\u024F']+/g;
+    document.querySelectorAll('#editorArea .page-content').forEach(function(pg){
+      var w=document.createTreeWalker(pg,NodeFilter.SHOW_TEXT);var n;
+      while(n=w.nextNode()){var m;re.lastIndex=0;while(m=re.exec(n.nodeValue)){out.push({w:m[0].toLowerCase().replace(/^'+|'+$/g,''),n:n,s:m.index,e:m.index+m[0].length});}}
+    });return out;
+  }
+  function rng(t){var r=new Range();r.setStart(t.n,t.s);r.setEnd(t.n,t.e);return r;}
+  function scan(){
+    var T=tokens(),last={},flag={};groups={};
+    T.forEach(function(t,i){
+      if(t.w.length<4||STOP.has(t.w))return;
+      var p=last[t.w];
+      if(p!==undefined&&i-p<=N){flag[p]=1;flag[i]=1;}
+      last[t.w]=i;
+    });
+    Object.keys(flag).forEach(function(i){var t=T[i];(groups[t.w]=groups[t.w]||[]).push(t);});
+    // sentence openers
+    var full=T.map(function(t){return t;}),op={};
+    document.querySelectorAll('#editorArea .page-content').forEach(function(pg){
+      var tx=pg.innerText||'';(tx.match(/(?:^|[.!?]\s+|\n)([A-Za-z']+)/g)||[]).forEach(function(m){
+        var w=m.replace(/^[.!?\s]+/,'').toLowerCase();if(w.length>1)op[w]=(op[w]||0)+1;});
+    });
+    var ops=Object.entries(op).filter(function(e){return e[1]>=3;}).sort(function(a,b){return b[1]-a[1];}).slice(0,8);
+    var ks=Object.keys(groups).sort(function(a,b){return groups[b].length-groups[a].length;});
+    var total=ks.reduce(function(a,k){return a+groups[k].length;},0);
+    set('echo-words',ks.length);set('echo-total',total);set('echo-openers',ops.length);
+    document.getElementById('echo-list').innerHTML=ks.length?ks.slice(0,24).map(function(k){return '<span class="wc-pill" data-w="'+k+'"><b>'+k+'</b><em>'+groups[k].length+'</em></span>';}).join(''):'<span class="wc-empty">Nothing repeated nearby</span>';
+    document.getElementById('echo-open-list').innerHTML=ops.length?ops.map(function(e){return '<span class="wc-pill"><b>'+e[0]+'</b><em>'+e[1]+'</em></span>';}).join(''):'<span class="wc-empty">None</span>';
+    paint();
+  }
+  function set(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  function paint(){
+    if(!window.CSS||!CSS.highlights)return;
+    var all=[];Object.keys(groups).forEach(function(k){groups[k].forEach(function(t){all.push(rng(t));});});
+    CSS.highlights.set('echo-all',new Highlight(...all));
+    if(cur&&groups[cur]){var t=groups[cur][idx%groups[cur].length];CSS.highlights.set('echo-pick',new Highlight(rng(t)));}
+    else CSS.highlights.delete('echo-pick');
+  }
+  window.__echoScan=scan;
+  window.echoClear=function(){cur=null;if(window.CSS&&CSS.highlights){CSS.highlights.delete('echo-all');CSS.highlights.delete('echo-pick');}};
+  var _t=window.toggleWordCountExpand;
+  window.toggleWordCountExpand=function(){_t.apply(this,arguments);if(open())scan();else window.echoClear();};
+  document.addEventListener('click',function(e){
+    var r=e.target.closest&&e.target.closest('#echoRange .wc-pill');
+    if(r){N=+r.dataset.n;mark();scan();return;}
+    var p=e.target.closest&&e.target.closest('#echo-list .wc-pill');
+    if(p){var w=p.dataset.w;idx=(w===cur)?idx+1:0;cur=w;paint();var t=groups[w][idx%groups[w].length];
+      if(t.n.parentElement)t.n.parentElement.scrollIntoView({block:'center',behavior:'smooth'});}
+  });
+  function mark(){document.querySelectorAll('#echoRange .wc-pill').forEach(function(b){b.classList.toggle('on',+b.dataset.n===N);});}
+  document.addEventListener('input',function(e){
+    if(!open()||!(e.target.closest&&e.target.closest('#editorArea')))return;
+    clearTimeout(timer);timer=setTimeout(scan,900);
+  });
+  mark();
+})();
+</script>
+
+<style>
+::highlight(rhy-pick){background-color:rgba(249,115,22,.4);}
+#rhy-bars i{flex:1 1 0;min-width:1px;max-width:8px;border-radius:1px 1px 0 0;cursor:pointer;background:hsl(calc(var(--sc-h,210) + 1.9) calc(80.3% * var(--sc-s,1)) calc(41.8% + var(--sc-l,0%) * 1));opacity:.75;}
+#rhy-bars i.long{background:#f97316;opacity:1;}
+#rhy-bars i:hover{opacity:1;}
+</style>
+<script>
+(function(){
+  var S=[],timer=null;
+  function open(){var d=document.getElementById('wcDropdown'),x=document.getElementById('wcExtToggle');return d&&d.classList.contains('open')&&x&&x.checked;}
+  function set(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  function scan(){
+    S=[];
+    document.querySelectorAll('#editorArea .page-content').forEach(function(pg){
+      var nodes=[],txt='',w=document.createTreeWalker(pg,NodeFilter.SHOW_TEXT),n;
+      while(n=w.nextNode()){nodes.push({n:n,o:txt.length});txt+=n.nodeValue+(/\s$/.test(n.nodeValue)?'':' ');}
+      function at(off){for(var i=nodes.length-1;i>=0;i--)if(off>=nodes[i].o)return[nodes[i].n,Math.min(off-nodes[i].o,nodes[i].n.nodeValue.length)];return null;}
+      var re=/[^.!?\n]+[.!?]*/g,m;
+      while(m=re.exec(txt)){
+        var c=(m[0].match(/[A-Za-z\u00C0-\u024F0-9']+/g)||[]).length;if(c<1)continue;
+        var a=at(m.index+(m[0].length-m[0].trimStart().length)),b=at(m.index+m[0].trimEnd().length);
+        if(a&&b)S.push({c:c,a:a,b:b});
+      }
+    });
+    var box=document.getElementById('rhy-bars');if(!box)return;
+    var mx=0,sum=0,lg=0;S.forEach(function(x){sum+=x.c;if(x.c>mx)mx=x.c;if(x.c>=30)lg++;});
+    set('rhy-avg',S.length?(sum/S.length).toFixed(1)+' words':'0');set('rhy-max',mx+' words');set('rhy-long',lg);
+    box.innerHTML=S.length?S.slice(0,240).map(function(x,i){return '<i data-i="'+i+'" class="'+(x.c>=30?'long':'')+'" title="'+x.c+' words" style="height:'+Math.max(8,Math.min(100,x.c/40*100))+'%"></i>';}).join(''):'<span class="wc-empty">No data</span>';
+  }
+  function clear(){if(window.CSS&&CSS.highlights)CSS.highlights.delete('rhy-pick');}
+  window.__rhyScan=scan;window.__rhyClear=clear;
+  var _t=window.toggleWordCountExpand;
+  window.toggleWordCountExpand=function(){_t.apply(this,arguments);if(open())scan();else clear();};
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('#rhy-bars i');if(!b)return;
+    var x=S[+b.dataset.i];if(!x)return;
+    try{var r=new Range();r.setStart(x.a[0],x.a[1]);r.setEnd(x.b[0],x.b[1]);
+      if(window.CSS&&CSS.highlights)CSS.highlights.set('rhy-pick',new Highlight(r));
+      var el=x.a[0].parentElement;if(el)el.scrollIntoView({block:'center',behavior:'smooth'});}catch(_){}
+  });
+  document.addEventListener('input',function(e){
+    if(!open()||!(e.target.closest&&e.target.closest('#editorArea')))return;
+    clearTimeout(timer);timer=setTimeout(scan,1000);
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var K='sc-ext-analysis',x=document.getElementById('wcExtToggle'),box=document.getElementById('wcExtended');
+  if(!x||!box)return;
+  try{x.checked=localStorage.getItem(K)==='1';}catch(_){}
+  function apply(){
+    box.style.display=x.checked?'':'none';
+    try{localStorage.setItem(K,x.checked?'1':'0');}catch(_){}
+    var d=document.getElementById('wcDropdown'),o=d&&d.classList.contains('open');
+    if(x.checked&&o){window.__echoScan&&window.__echoScan();window.__rhyScan&&window.__rhyScan();}
+    if(!x.checked){window.echoClear&&window.echoClear();window.__rhyClear&&window.__rhyClear();}
+  }
+  x.addEventListener('change',apply);apply();
+})();
+</script>
+
+
+<script>
+(function(){
+  function build(find){
+    var rx=document.getElementById('frRegex').checked,cs=document.getElementById('frCase').checked,ww=document.getElementById('frWord').checked;
+    var src=rx?find:find.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    if(ww)src='\\b(?:'+src+')\\b';
+    return {re:new RegExp(src,'g'+(cs?'':'i')),rx:rx};
+  }
+  window.doFindReplace=function(doReplace){
+    lazyHydrateAll(false);
+    var find=document.getElementById('frFindInput').value,rep=document.getElementById('frReplaceInput').value;
+    if(!find)return showToast('Enter a search term','error');
+    var b;try{b=build(find);}catch(e){return showToast('Invalid regular expression','error');}
+    var pageNums=getPagesForSearch(document.getElementById('frPages').value),total=0;
+    pageNums.forEach(function(n){
+      var pc=getPageContentByIndex(n);if(!pc)return;
+      var w=document.createTreeWalker(pc,NodeFilter.SHOW_TEXT),nodes=[],t;
+      while(t=w.nextNode()){var p=t.parentElement;if(p&&p.closest('script,style'))continue;nodes.push(t);}
+      var changed=false;
+      nodes.forEach(function(nd){
+        var v=nd.nodeValue,c=0;
+        var out=v.replace(b.re,function(m){
+          if(!m.length)return m;c++;
+          if(!b.rx)return rep;
+          var a=[].slice.call(arguments);
+          return rep.replace(/\$(\d+|&)/g,function(_,k){return k==='&'?m:(typeof a[+k]==='string'?a[+k]:'');});
+        });
+        total+=c;
+        if(doReplace&&c){nd.nodeValue=out;changed=true;}
+      });
+      if(changed)pc.dispatchEvent(new Event('input',{bubbles:true}));
+    });
+    var el=document.getElementById('frCount');
+    if(doReplace){el.textContent='Replaced '+total+' occurrence'+(total!==1?'s':'')+'.';showToast('Replaced '+total+' occurrence(s)','success');}
+    else el.textContent=total?'Found '+total+' occurrence'+(total!==1?'s':'')+' across pages '+pageNums.join(', '):'Not found.';
+  };
+})();
+</script>
+
+<script>
+(function(){
+  var orig=window.tableAction;
+  function val(c){return (c.textContent||'').replace(/\u00a0/g,' ').trim();}
+  function num(v){var t=v.replace(/[,$%\s]/g,'');return t!==''&&isFinite(t)?parseFloat(t):null;}
+  window.tableAction=function(a){
+    if(a!=='sortAsc'&&a!=='sortDesc')return orig.apply(this,arguments);
+    hideCtxMenu();
+    var table=S.ctxTable,cell=S.ctxCell;if(!table||!cell)return;
+    var tbody=table.tBodies[0]||table,rows=[].slice.call(tbody.querySelectorAll(':scope > tr'));
+    var col=[].indexOf.call(cell.closest('tr').children,cell);
+    if(rows.some(function(r){return [].some.call(r.children,function(c){return c.rowSpan>1||c.colSpan>1;});}))
+      return showToast('Sorting isn\u2019t available for tables with merged cells','error');
+    var head=null;
+    if(rows.length&&!table.tHead&&[].every.call(rows[0].children,function(c){return c.tagName==='TH';}))head=rows.shift();
+    if(rows.length<2)return showToast('Nothing to sort','error');
+    var dir=a==='sortAsc'?1:-1;
+    var keyed=rows.map(function(r,i){var c=r.children[col],v=c?val(c):'';return{r:r,i:i,v:v,n:num(v)};});
+    keyed.sort(function(x,y){
+      if(x.v===''||y.v==='')return x.v===y.v?x.i-y.i:(x.v===''?1:-1);
+      var d=(x.n!==null&&y.n!==null)?x.n-y.n:x.v.localeCompare(y.v,undefined,{numeric:true,sensitivity:'base'});
+      return d?d*dir:x.i-y.i;
+    });
+    keyed.forEach(function(k){tbody.appendChild(k.r);});
+    if(typeof checkContent==='function')checkContent();
+    showToast('Sorted '+rows.length+' rows','success');
+  };
+})();
+</script>
+
+<script>
+/* Shift+F3 — cycle selected text through Title Case → UPPERCASE → lowercase (Word-style) */
+(function(){
+  function offsetOf(pc,node,off){var w=document.createTreeWalker(pc,NodeFilter.SHOW_TEXT),n,t=0;while(n=w.nextNode()){if(n===node)return t+off;t+=n.nodeValue.length;}return -1;}
+  function pointAt(pc,pos){var w=document.createTreeWalker(pc,NodeFilter.SHOW_TEXT),n,t=0,last=null;while(n=w.nextNode()){last=n;if(pos<=t+n.nodeValue.length)return[n,pos-t];t+=n.nodeValue.length;}return last?[last,last.nodeValue.length]:null;}
+  function conv(str,mode,prev){
+    var out='';
+    for(var i=0;i<str.length;i++){var ch=str[i],r=ch;
+      if(mode==='upper')r=ch.toUpperCase();else if(mode==='lower')r=ch.toLowerCase();
+      else r=/[\s\-\u2013\u2014("\u201c\u2018\/]/.test(prev)||prev===''?ch.toUpperCase():ch.toLowerCase();
+      out+=r.length===ch.length?r:ch;prev=ch;}
+    return out;
+  }
+  document.addEventListener('keydown',function(e){
+    if(!(e.shiftKey&&e.key==='F3'))return;
+    var sel=getSelection();
+    if(!sel.rangeCount||sel.isCollapsed)return;
+    var r=sel.getRangeAt(0),pc=r.commonAncestorContainer;pc=(pc.nodeType===3?pc.parentElement:pc).closest('.page-content');
+    if(!pc||!pc.isContentEditable)return;
+    e.preventDefault();
+    var txt=sel.toString();
+    var mode=txt===txt.toUpperCase()&&txt!==txt.toLowerCase()?'lower':(txt===txt.toLowerCase()?'title':'upper');
+    var a=offsetOf(pc,r.startContainer,r.startOffset),b=offsetOf(pc,r.endContainer,r.endOffset);
+    if(a<0||b<0)return;
+    var pieces=[],w=document.createTreeWalker(pc,NodeFilter.SHOW_TEXT),n,t=0;
+    while(n=w.nextNode()){var L=n.nodeValue.length,s0=Math.max(a,t),e0=Math.min(b,t+L);
+      if(e0>s0)pieces.push({n:n,s:s0-t,e:e0-t,abs:s0});t+=L;}
+    var prev='';pieces.forEach(function(p){var seg=p.n.nodeValue.slice(p.s,p.e);p.out=conv(seg,mode,prev||(p.s>0?p.n.nodeValue[p.s-1]:''));prev=seg.slice(-1);});
+    for(var i=pieces.length-1;i>=0;i--){
+      var p=pieces[i];if(p.out===p.n.nodeValue.slice(p.s,p.e))continue;
+      var rg=document.createRange();rg.setStart(p.n,p.s);rg.setEnd(p.n,p.e);sel.removeAllRanges();sel.addRange(rg);
+      document.execCommand('insertText',false,p.out);
+    }
+    var A=pointAt(pc,a),B=pointAt(pc,b);
+    if(A&&B){var nr=document.createRange();nr.setStart(A[0],A[1]);nr.setEnd(B[0],B[1]);sel.removeAllRanges();sel.addRange(nr);}
+    if(typeof showToast==='function')showToast({title:'Title Case',upper:'UPPERCASE',lower:'lowercase'}[mode==='title'?'title':mode],'success');
+  },true);
+})();
+</script>
+
+
+<style>
+[data-dwi="volume_up"]{--dwi:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 9.5h3.5L12 5.5v13l-4.5-4H4z' transform='translate(1.4 1.4)' fill-opacity='.28'/%3E%3Cpath d='M4 9.5h3.5L12 5.5v13l-4.5-4H4z' fill='none' stroke='%2523000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M15.5 9a4.5 4.5 0 010 6M18 6.5a8 8 0 010 11' fill='none' stroke='%2523000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+[data-dwi="stop_circle"]{--dwi:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' transform='translate(1.4 1.4)' fill-opacity='.28'/%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%2523000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Crect x='9' y='9' width='6' height='6' rx='1' fill='none' stroke='%2523000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+#tbTranscribeBtn.active{background:transparent!important;box-shadow:none!important;}
+#tbTranscribeBtn.active .material-symbols-outlined{color:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1));}
+</style>
+<script>
+/* Transcription — text → speech; the reverse of Dictation. Enabled from Assistive Writing → Transcription.
+   While reading: floating panel on wide screens, banner under the toolbar on small screens (Snippets styles, like Dictation). */
+(function(){
+  var LS='sc_transcription_v1',on=false,speaking=false,paused=false,ss=window.speechSynthesis,panel,bar,total=0,idx=0,live='';
+  function $(id){return document.getElementById(id);}
+  try{on=JSON.parse(localStorage.getItem(LS)||'{}').enabled===true;}catch(_){}
+  function toast(m,t){if(typeof showToast==='function')showToast(m,t||'info');}
+  function ic(n,z){return '<span class="material-symbols-outlined" data-dwi="'+n+'"'+(z?' style="font-size:'+z+'px"':'')+'>'+n+'</span>';}
+  function setIcon(el,n){if(!el)return;el.textContent=n;el.setAttribute('data-dwi',n);}
+  function reg(){try{['volume_up','stop_circle','play_arrow','pause'].forEach(function(n){window.DWI&&window.DWI.register(n);});}catch(_){}}
+  function chunks(t){
+    var out=[],parts=t.replace(/\s+/g,' ').match(/[^.!?]+[.!?]*\s*/g)||[],cur='';
+    parts.forEach(function(p){if((cur+p).length>200&&cur){out.push(cur);cur='';}cur+=p;});
+    if(cur.trim())out.push(cur);return out;
+  }
+  function gather(preferSel){
+    var sel=getSelection();
+    if(sel.rangeCount&&!sel.isCollapsed&&sel.toString().trim())return sel.toString();
+    var pcs=[].slice.call(document.querySelectorAll('#editorArea .page-content'));
+    if(!preferSel&&sel.rangeCount){
+      var r=sel.getRangeAt(0),n=r.startContainer,pc=(n.nodeType===3?n.parentElement:n).closest('.page-content'),i=pcs.indexOf(pc);
+      if(i>=0){var rest=document.createRange();rest.setStart(r.startContainer,r.startOffset);rest.setEndAfter(pc.lastChild||pc);
+        return [rest.toString()].concat(pcs.slice(i+1).map(function(p){return p.innerText;})).join(' ');}
+    }
+    return pcs.map(function(p){return p.innerText;}).join(' ');
+  }
+  /* ── panel (wide screens) + banner (small screens) ── */
+  function build(){
+    if(panel)return;reg();
+    panel=document.createElement('div');panel.id='scTransPanel';panel.className='snippet-panel';panel.setAttribute('role','status');panel.setAttribute('aria-live','polite');
+    panel.innerHTML=
+      '<div class="snippet-panel-head"><span class="snippet-panel-title">Transcription <span id="stStatus"></span></span><button type="button" class="snippet-panel-close" id="stClose" title="Stop reading">'+ic('close')+'</button></div>'+
+      '<div class="snippet-panel-list"><div class="snippet-row" id="stRow" title="Pause / resume"><span class="snippet-row-num">'+ic('volume_up',11)+'</span><span class="snippet-row-text" id="stLive" style="unicode-bidi:plaintext"></span></div></div>'+
+      '<div class="snippet-panel-hint">Tap the line to pause or resume.</div>'+
+      '<div class="snippet-panel-foot"><button type="button" class="snippet-panel-btn" id="stPause">'+ic('pause',15)+'<span>Pause</span></button><button type="button" class="snippet-panel-btn primary" id="stStop">'+ic('close',15)+'Stop</button></div>';
+    document.body.appendChild(panel);
+    bar=document.createElement('div');bar.id='scTransBar';bar.className='snippet-toolbar';bar.setAttribute('role','status');bar.setAttribute('aria-live','polite');
+    bar.innerHTML=
+      '<span class="snippet-toolbar-label">Transcription</span>'+
+      '<div class="snippet-toolbar-chips"><span class="snippet-chip" id="stChip" title="Pause / resume" style="max-width:none;flex:1;min-width:0"><span class="snippet-chip-num">'+ic('volume_up',10)+'</span><span class="snippet-chip-text" id="stChipTxt" style="unicode-bidi:plaintext"></span></span></div>'+
+      '<button type="button" class="snippet-toolbar-add" id="stBarPause" title="Pause / resume">'+ic('pause',16)+'</button>'+
+      '<button type="button" class="snippet-toolbar-done" id="stBarStop" title="Stop reading">'+ic('close',16)+'Stop</button>';
+    var sn=$('snippetToolbar'),tb=document.querySelector('.toolbar'),after=$('scDictBar')||sn;
+    if(after&&after.parentNode)after.parentNode.insertBefore(bar,after.nextSibling);
+    else if(tb&&tb.parentNode)tb.parentNode.insertBefore(bar,tb.nextSibling);else document.body.appendChild(bar);
+    [panel,bar].forEach(function(el){el.addEventListener('mousedown',function(e){e.preventDefault();});});
+    ['stClose','stStop','stBarStop'].forEach(function(id){$(id).addEventListener('click',function(){stop();});});
+    ['stPause','stBarPause','stRow','stChip'].forEach(function(id){$(id).addEventListener('click',togglePause);});
+    window.addEventListener('resize',layout);
+  }
+  function layout(){
+    if(!panel)return;
+    var dp=$('scDictPanel'),sp=$('snippetPanel'),push=0;
+    if(dp&&dp.classList.contains('open')&&dp.offsetHeight)push=dp.offsetHeight+12;
+    if(sp&&sp.classList.contains('open')&&sp.offsetHeight)push=Math.max(push,sp.offsetHeight+12);
+    panel.style.bottom=push?(22+push)+'px':'';
+    var h=0,anyOn=false;
+    ['snippetToolbar','scDictBar','scTransBar'].forEach(function(id){var e=$(id);if(e&&e.classList.contains('open')&&e.offsetHeight){h+=e.offsetHeight;anyOn=true;}});
+    if(anyOn){document.body.classList.add('sc-snippet-bar-on');document.documentElement.style.setProperty('--sc-snippet-h',h+'px');}
+    else if(!(sp&&sp.classList.contains('open')))document.body.classList.remove('sc-snippet-bar-on');
+  }
+  function render(){
+    if(!panel)return;
+    var label=paused?'Paused':'Reading…',pos=total>1?' '+Math.min(idx+1,total)+'/'+total:'';
+    var t=live.length>90?live.slice(0,90)+'…':live;
+    $('stStatus').textContent=label+pos;
+    $('stLive').textContent=paused?'Paused — tap to resume':(t||label);
+    $('stChipTxt').textContent=paused?'Paused — tap to resume':(t||label);
+    setIcon(panel.querySelector('#stPause .material-symbols-outlined'),paused?'play_arrow':'pause');
+    panel.querySelector('#stPause span:last-child').textContent=paused?'Resume':'Pause';
+    setIcon(panel.querySelector('#stRow .material-symbols-outlined'),paused?'pause':'volume_up');
+    setIcon(bar.querySelector('#stBarPause .material-symbols-outlined'),paused?'play_arrow':'pause');
+    setIcon(bar.querySelector('#stChip .material-symbols-outlined'),paused?'pause':'volume_up');
+    layout();
+  }
+  function showUi(v){
+    if(v){build();panel.classList.add('open');bar.classList.add('open');render();}
+    else if(panel){panel.classList.remove('open');bar.classList.remove('open');layout();}
+  }
+  /* ── state sync ── */
+  function sync(){
+    speaking=!!(ss&&(ss.speaking||ss.pending));
+    if(!speaking){paused=false;showUi(false);}
+    var b=$('tbTranscribeBtn');
+    if(b){b.style.display=on?'':'none';b.classList.toggle('active',speaking);b.setAttribute('aria-pressed',speaking?'true':'false');
+      setIcon(b.querySelector('.material-symbols-outlined'),speaking?'stop_circle':'volume_up');
+      try{window.dispatchEvent(new Event('resize'));}catch(_){}}
+    var t=$('awTranscription');if(t)t.checked=on;
+    var p=$('awTranscriptionPanel');if(p)p.style.display=on?'':'none';
+    var l=$('stStartLbl');if(l)l.textContent=speaking?'Stop Transcription':'Start Transcription';
+    var sb=$('stStartBtn');if(sb)setIcon(sb.querySelector('.material-symbols-outlined'),speaking?'stop_circle':'volume_up');
+    var r=$('tpReadBtn');if(r)r.style.display=on?'':'none';
+  }
+  function stop(quiet){if(!ss)return;ss.cancel();speaking=false;paused=false;live='';sync();if(!quiet)toast('Stopped reading','success');}
+  function togglePause(){
+    if(!speaking)return;
+    if(paused){ss.resume();paused=false;}else{ss.pause();paused=true;}
+    render();
+  }
+  function start(sel){
+    if(!ss||!window.SpeechSynthesisUtterance)return toast('Read aloud isn’t supported on this device.','error');
+    var q=chunks(gather(sel).trim());
+    if(!q.length)return toast('Nothing to read.','error');
+    ss.cancel();total=q.length;idx=0;paused=false;live=q[0];
+    q.forEach(function(c,i){
+      var u=new SpeechSynthesisUtterance(c);u.lang=document.documentElement.lang||navigator.language||'en-US';
+      u.onstart=function(){idx=i;live=c.trim();render();};
+      if(i===q.length-1){u.onend=u.onerror=function(){setTimeout(sync,50);};}
+      ss.speak(u);
+    });
+    speaking=true;sync();showUi(true);
+  }
+  function toggle(sel){
+    if(!on)return toast('Transcription is off. Turn it on in the sidebar under Assistive Writing first.','error');
+    if(speaking||(ss&&(ss.speaking||ss.pending)))stop();else start(!!sel);
+  }
+  function setEnabled(v){on=!!v;if(!on)stop(true);try{localStorage.setItem(LS,JSON.stringify({enabled:on}));}catch(_){}sync();}
+  var t=$('awTranscription');if(t)t.addEventListener('change',function(){setEnabled(this.checked);});
+  var _t=window.toggleAssistiveWriting;
+  if(typeof _t==='function')window.toggleAssistiveWriting=function(){var r=_t.apply(this,arguments);sync();return r;};
+  window.addEventListener('pagehide',function(){try{ss.cancel();}catch(_){}});
+  document.addEventListener('visibilitychange',function(){if(document.hidden)stop(true);});
+  window.SCTranscribe={toggle:toggle,start:start,stop:stop,pause:togglePause,setEnabled:setEnabled,isActive:function(){return speaking;}};
+  sync();
+})();
+</script>
+
+
+<script>
+/* Image caption — lives in the Edit Image screen under Alt text. Style, position and optional "Figure N." numbering. */
+(function(){
+  var STY={
+    plain:'text-align:center;font-size:.85em;color:#555;',
+    italic:'text-align:center;font-size:.85em;color:#555;font-style:italic;',
+    boxed:'text-align:center;font-size:.85em;color:#444;border:1px solid #dcdfe4;background:#f6f7f9;padding:6px 12px;border-radius:8px;width:fit-content;max-width:92%;box-sizing:border-box;',
+    label:'text-align:center;font-size:.72em;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#1976d2;'
+  };
+  function $(id){return document.getElementById(id);}
+  function val(g){var a=$(g).querySelector('.sm-chip.active');return a?a.dataset.v:'';}
+  function hostOf(img){
+    var b=img.closest('p,div,li,td,th,figure');
+    return (!b||b.classList.contains('page-content')||/^(TD|TH|LI)$/.test(b.tagName))?img:b;
+  }
+  function capOf(img){
+    var h=hostOf(img),n=h.nextElementSibling,p=h.previousElementSibling;
+    if(n&&n.hasAttribute('data-sc-cap'))return n;
+    if(p&&p.hasAttribute('data-sc-cap'))return p;
+    return null;
+  }
+  function renumber(){
+    document.querySelectorAll('#editorArea .page-content [data-sc-cap][data-cap-num="fig"]').forEach(function(p,i){
+      var b=p.querySelector('b');if(b)b.textContent='Figure '+(i+1)+'.';
+    });
+  }
+  function apply(img){
+    if(!img)return;
+    var text=$('imgCapText').value.trim(),old=capOf(img);
+    if(old)old.remove();
+    if(text){
+      var st=val('imgCapStyle')||'plain',pos=val('imgCapPos')||'below',num=val('imgCapNum')||'off';
+      var p=document.createElement('p');
+      p.setAttribute('data-sc-cap','1');p.setAttribute('data-cap-text',text);p.setAttribute('data-cap-style',st);p.setAttribute('data-cap-pos',pos);p.setAttribute('data-cap-num',num);
+      p.className='sc-caption';
+      p.style.cssText=STY[st]+(st==='boxed'?'margin:'+(pos==='above'?'12px auto 4px':'4px auto 12px')+';':'margin:'+(pos==='above'?'12px 0 4px':'4px 0 12px')+';');
+      if(num==='fig'){var b=document.createElement('b');b.style.fontStyle='normal';b.textContent='Figure.';p.appendChild(b);p.appendChild(document.createTextNode(' '));}
+      p.appendChild(document.createTextNode(text));
+      hostOf(img).insertAdjacentElement(pos==='above'?'beforebegin':'afterend',p);
+    }
+    renumber();
+    if(typeof checkContent==='function')checkContent();
+  }
+  function fill(img){
+    var c=img&&capOf(img);
+    $('imgCapText').value=c?(c.getAttribute('data-cap-text')||''):'';
+    imgChipSelById('imgCapStyle',c?(c.getAttribute('data-cap-style')||'plain'):'plain');
+    imgChipSelById('imgCapPos',c?(c.getAttribute('data-cap-pos')||'below'):'below');
+    imgChipSelById('imgCapNum',c?(c.getAttribute('data-cap-num')||'off'):'fig');
+  }
+  var _reset=window.imgResetControls;
+  window.imgResetControls=function(){_reset.apply(this,arguments);fill(null);};
+  var _open=window.openEditImgAttrs;
+  window.openEditImgAttrs=function(){var r=_open.apply(this,arguments);try{fill(_editingImg);}catch(_){}return r;};
+  var _ins=window.insertImage;
+  window.insertImage=function(){
+    var before=new Set(document.querySelectorAll('#editorArea .page-content img'));
+    var r=_ins.apply(this,arguments);
+    var made=[].filter.call(document.querySelectorAll('#editorArea .page-content img'),function(i){return !before.has(i);})[0];
+    if(made)apply(made);
+    return r;
+  };
+  var _edit=window.applyEditImgAttrs;
+  window.applyEditImgAttrs=function(){
+    var img=null;try{img=_editingImg;}catch(_){}
+    var r=_edit.apply(this,arguments);
+    if(img)apply(img);
+    return r;
+  };
+})();
+</script>
+
+<script>
+/* Warp to last edit — remembers where you last typed so you can jump back after scrolling away. */
+(function(){
+  var last=null;
+  function inEditor(n){var el=n&&(n.nodeType===3?n.parentElement:n);return el&&el.closest&&el.closest('#editorArea .page-content');}
+  function remember(){
+    var s=getSelection();if(!s.rangeCount)return;
+    var r=s.getRangeAt(0);if(!inEditor(r.startContainer))return;
+    last=r.cloneRange();last.collapse(false);
+  }
+  document.addEventListener('input',function(e){if(e.target.closest&&e.target.closest('#editorArea'))remember();},true);
+  window.warpToLastEdit=function(){
+    if(!last||!last.startContainer.isConnected||!inEditor(last.startContainer))
+      return showToast('No recent edit to jump to','error');
+    var n=last.startContainer,el=n.nodeType===3?n.parentElement:n,pc=el.closest('.page-content');
+    if(pc&&pc.focus)pc.focus({preventScroll:true});
+    var s=getSelection();s.removeAllRanges();s.addRange(last.cloneRange());
+    el.scrollIntoView({block:'center',behavior:'smooth'});
+  };
+})();
+</script>
+
 </body>
 </html>
