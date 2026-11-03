@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sugarcane Editor</title>
-<meta name="sceditor-version" content="218">
+<meta name="sceditor-version" content="219">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -60,6 +60,8 @@ body.dark .qr-row.pass .qr-pt{color:#58c585;}body.dark .qr-row.fail .qr-pt{color
 .qr-empty{padding:24px;text-align:center;font-size:13px;color:var(--ui-muted);}
 @media(max-width:600px){.qr-head{gap:12px;}.qr-ring{width:64px;height:64px;}.qr-ring span{font-size:16px;}.qr-body{max-height:58vh;}}
 </style><script>(function(){var R=new Set(["map", "location_on", "open_with", "close", "expand_more", "chevron_left", "chevron_right", "add", "remove", "check", "delete", "delete_forever", "delete_sweep", "search", "zoom_in", "push_pin", "edit", "draw", "auto_fix_high", "auto_awesome", "download", "upload", "upload_file", "note_add", "description", "text_snippet", "picture_as_pdf", "check_circle", "add_circle", "cancel", "block", "info", "warning", "play_circle", "image", "link", "refresh", "tune", "cloud", "cloud_upload", "cloud_off", "view_carousel", "article", "format_bold", "format_italic", "format_underlined", "strikethrough_s", "format_align_left", "format_align_center", "format_align_right", "format_align_justify", "format_list_bulleted", "format_list_numbered", "text_fields", "title", "table", "translate", "my_location", "lock", "lock_open", "category", "visibility", "spellcheck", "content_paste", "content_copy", "content_cut", "groups", "person", "undo", "redo", "format_clear", "functions", "more_horiz", "more_vert", "print", "save", "palette", "menu", "arrow_back", "play_arrow", "pause", "schedule", "history", "open_in_new", "dark_mode", "code", "select_all", "find_replace", "highlight", "close_fullscreen", "progress_activity", "slideshow", "add_box", "logout", "chat", "south", "vertical_align_top", "vertical_align_bottom", "grid_view", "smartphone", "align_flex_start", "align_flex_end", "bar_chart", "border_top", "border_bottom", "cancel_presentation", "crop", "drive_file_move", "dynamic_form", "eco", "electric_bolt", "extension", "format_color_text", "format_indent_increase", "format_indent_decrease", "format_size", "ink_eraser", "interests", "layers_clear", "library_add", "playlist_add", "verified", "view_agenda", "widgets", "arrow_drop_down_circle", "calendar_month", "check_box", "checklist", "notes", "paid", "percent", "radio_button_checked", "short_text", "smart_button", "tag", "unfold_more", "password", "error", "light_mode", "link_off", "keep", "horizontal_rule", "arrow_back_ios", "rotate_right", "edit_document", "edit_note", "post_add", "pageview", "add_photo_alternate", "photo_library", "unfold_less", "fit_screen", "center_focus_strong", "adjust", "ink_highlighter", "emoji_symbols", "flare", "preview", "cloud_sync", "list","brush"]);var S='.dwi,.material-symbols-outlined,.rec-search-icon';function ic(e){var t=(e.textContent||'').trim();if(R.has(t)){if(e.getAttribute('data-dwi')!==t)e.setAttribute('data-dwi',t)}else if(e.hasAttribute('data-dwi'))e.removeAttribute('data-dwi')}function scan(n){if(n.nodeType===3){var p=n.parentElement;if(p&&p.matches(S))ic(p);return}if(n.nodeType!==1)return;if(n.matches(S))ic(n);n.querySelectorAll(S).forEach(ic)}new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];if(m.type==='characterData'){var p=m.target.parentElement;if(p&&p.matches(S))ic(p)}else{m.addedNodes.forEach(scan);if(m.target.matches&&m.target.matches(S))ic(m.target)}}}).observe(document.documentElement,{childList:true,subtree:true,characterData:true});window.DWI={register:function(n,d){R.add(n)},has:function(n){return R.has(n)}}})();</script>
+<style id="dwi-mindmap">[data-dwi="mindmap"]{--dwi:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0 -5 0z' transform='translate(1.4 1.4)' fill-opacity='.28'/%3E%3Cpath d='M9.5 12a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0 -5 0z M3.2 5.5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0z M3.2 18.5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0z M16.8 5.5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0z M16.8 18.5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0z M9.9 10.4L6.6 7 M9.9 13.6L6.6 17 M14.1 10.4L17.4 7 M14.1 13.6L17.4 17' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}</style><script>try{window.DWI&&DWI.register('mindmap')}catch(e){}</script>
+
 <link rel="stylesheet" href="vendor/fonts/material.css"/>
 <link rel="stylesheet" href="vendor/fonts/fonts.css">
 <link rel="stylesheet" href="vendor/bootstrap-icons/font/bootstrap-icons.min.css"/>
@@ -638,6 +640,32 @@ body.dark #acPopup{background:#09090b;box-shadow:0 8px 40px rgba(0,0,0,.6);}
 }
 
 /* ── Draw / Chart popups (shell = shared .modal/.mbox, see "Modals" rules) ── */
+.mbox.mm-box{padding:0;display:flex;flex-direction:column;overflow:hidden;width:min(980px,96vw);height:min(720px,92dvh)}
+.mbox.mm-box::before{display:none!important}
+.mm-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 12px}
+.mm-bar{display:flex;gap:6px;padding:0 20px 12px;overflow-x:auto;align-items:center}
+.mm-chip{border:none;background:var(--ui-chip);color:var(--ui-muted);width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;padding:0;transition:filter .15s}
+.mm-chip:hover{filter:brightness(.94)}.mm-chip:disabled{opacity:.4;cursor:default}
+.mm-chip .material-symbols-outlined{font-size:20px}
+.mm-zoom{font-size:12px;font-weight:600;color:var(--ui-muted);min-width:42px;text-align:center;flex:none}
+.mm-sep{width:1px;height:20px;background:var(--ui-line);margin:0 4px;flex:none}
+.mm-stage{position:relative;flex:1;min-height:0;margin:0 20px;border:1px solid var(--ui-line);border-radius:16px;overflow:hidden;background-color:var(--ui-card);background-image:radial-gradient(var(--ui-line) 1px,transparent 1.2px);background-size:22px 22px;touch-action:none}
+.mm-svg{width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.mm-svg text{font-size:14px;font-weight:500;pointer-events:none}
+.mm-tools{position:absolute;display:none;gap:2px;padding:4px;background:var(--ui-shell);border:1px solid var(--ui-line);border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.18);z-index:3;flex-wrap:nowrap}
+.mm-tools.on{display:flex}
+.mm-tb{border:none;background:transparent;color:var(--ui-muted);width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.mm-tb:hover{background:var(--ui-chip)}.mm-tb .material-symbols-outlined{font-size:19px}
+.mm-tb.del{color:var(--ui-danger)}
+.mm-pal{position:absolute;display:none;gap:7px;padding:8px 10px;background:var(--ui-shell);border:1px solid var(--ui-line);border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.18);z-index:4}
+.mm-pal.on{display:flex}
+.mm-sw{width:22px;height:22px;border-radius:50%;border:2px solid var(--ui-line);cursor:pointer;padding:0}
+.mm-input{position:absolute;z-index:5;transform:translate(-50%,-50%);font:inherit;font-size:14px;font-weight:500;text-align:center;padding:8px 10px;border:2px solid var(--ui-accent);border-radius:12px;background:var(--ui-shell);color:var(--ui-text);outline:none;box-sizing:border-box}
+.mm-hint{position:absolute;left:12px;bottom:8px;font-size:11.5px;color:var(--ui-muted);pointer-events:none;opacity:.8}
+.mm-box>.sc-body{display:flex;flex-direction:column;padding:12px 20px!important;overflow:hidden!important}
+.mm-box>.sc-body .mm-bar{padding:0 0 12px}.mm-box>.sc-body .mm-stage{margin:0}
+.mm-tb.on{background:var(--ui-chip);color:var(--ui-link)}
+@media(max-width:600px){.mbox.mm-box{height:94dvh;padding:0!important}.mm-box>.sc-body{padding:10px 12px!important}.mm-hint{display:none}}
 .mbox.draw-box,.mbox.chart-box{
   padding:0;display:flex;flex-direction:column;overflow:hidden;
   height:min(680px, calc(100dvh - 32px));
@@ -4124,7 +4152,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v218…</p>
+    <p class="loading-text">Loading Sugarcane v219…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -4489,6 +4517,45 @@ function waitForSugarcaneAddons(){
 <div class="modal" id="chartOverlay">
   <div class="mbox chart-box">
     <iframe id="chartFrame" src="" allow="same-origin"></iframe>
+  </div>
+</div>
+
+<!-- Mind Map Modal -->
+<div class="modal" id="mindmapOverlay">
+  <div class="mbox mm-box">
+    <div class="mm-head split-modal-header">
+      <div class="mtitle">Insert Mind map</div>
+      <button class="mclose" onclick="closeMindmapOverlay()" title="Close"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="mm-bar">
+      <button class="mm-chip" id="mmUndo" title="Undo"><span class="material-symbols-outlined">undo</span></button>
+      <button class="mm-chip" id="mmRedo" title="Redo"><span class="material-symbols-outlined">redo</span></button>
+      <span class="mm-sep"></span>
+      <button class="mm-chip" id="mmLayout" title="Auto layout"><span class="material-symbols-outlined">auto_fix_high</span></button>
+      <button class="mm-chip" id="mmFit" title="Fit to view"><span class="material-symbols-outlined">fit_screen</span></button>
+      <span class="mm-sep"></span>
+      <button class="mm-chip" id="mmZo" title="Zoom out"><span class="material-symbols-outlined">remove</span></button>
+      <span class="mm-zoom" id="mmZv">100%</span>
+      <button class="mm-chip" id="mmZi" title="Zoom in"><span class="material-symbols-outlined">add</span></button>
+      <span class="mm-sep"></span>
+      <button class="mm-chip" id="mmClear" title="Start over"><span class="material-symbols-outlined">delete_sweep</span></button>
+    </div>
+    <div class="mm-stage" id="mmStage">
+      <svg class="mm-svg" id="mmSvg"></svg>
+      <div class="mm-tools" id="mmTools">
+        <button class="mm-tb" data-a="child" title="Add child"><span class="material-symbols-outlined">add_circle</span></button>
+        <button class="mm-tb" data-a="sib" title="Add sibling"><span class="material-symbols-outlined">library_add</span></button>
+        <button class="mm-tb" data-a="edit" title="Edit text"><span class="material-symbols-outlined">edit</span></button>
+        <button class="mm-tb" data-a="link" id="mmLinkBtn" title="Link to another node (tap a linked node to unlink)"><span class="material-symbols-outlined">link</span></button>
+        <button class="mm-tb" data-a="color" title="Color"><span class="material-symbols-outlined">palette</span></button>
+        <button class="mm-tb del" data-a="del" title="Delete"><span class="material-symbols-outlined">delete</span></button>
+      </div>
+      <div class="mm-hint" id="mmHint">Tap a node · drag to move · pinch or scroll to zoom</div>
+    </div>
+    <div class="mfooter mm-foot">
+      <button class="mbtn sec" onclick="closeMindmapOverlay()">Cancel</button>
+      <button class="mbtn primary" id="mmInsert">Insert</button>
+    </div>
   </div>
 </div>
 
@@ -4874,6 +4941,7 @@ function waitForSugarcaneAddons(){
         <button class="insert-box has-nav" id="tbLinkBtn" onclick="closeInsertDropdown();openLinkModal()" title="Insert Link (hold to browse existing)"><span class="material-symbols-outlined">link</span><span class="insert-box-label">Link</span><span class="hold-fill"></span></button>
         <button class="insert-box has-nav" id="tbLatexBtn" onclick="closeInsertDropdown();openLatexModal()" title="Insert LaTeX Formula (hold to browse existing)"><span class="material-symbols-outlined">functions</span><span class="insert-box-label">LaTeX</span><span class="hold-fill"></span></button>
         <button class="insert-box" onclick="closeInsertDropdown();openChartOverlay()" title="Insert Chart"><span class="material-symbols-outlined">bar_chart</span><span class="insert-box-label">Chart</span></button>
+        <button class="insert-box" onclick="closeInsertDropdown();openMindmapOverlay()" title="Insert Mind map"><span class="material-symbols-outlined">mindmap</span><span class="insert-box-label">Mind map</span></button>
         <button class="insert-box" onclick="closeInsertDropdown();openIconModal()" title="Insert Icon"><span class="material-symbols-outlined">interests</span><span class="insert-box-label">Icon</span></button>
         <button class="insert-box" onclick="closeInsertDropdown();openShapeModal()" title="Insert Shape"><span class="material-symbols-outlined">category</span><span class="insert-box-label">Shape</span></button>
         <button class="insert-box" onclick="closeInsertDropdown();openDrawOverlay()" title="Insert Draw"><span class="material-symbols-outlined">draw</span><span class="insert-box-label">Draw</span></button>
@@ -8791,7 +8859,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 218; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 219; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -10882,6 +10950,118 @@ const POPUP_COLLAPSE_KEYS = {
 })();
 /* ════════════════════════════════════════════════════════════════ */
 
+/* ════ INSERT MIND MAP ════ */
+(function(){
+  const $=id=>document.getElementById(id), ROOT='n1';
+  let S, hist=[], fut=[], pan={x:0,y:0}, z=1, sel=null, editing=false, inited=false, linking=null, AC='#2563eb';
+  const stage=$('mmStage'), svg=$('mmSvg'), tools=$('mmTools'), hint=$('mmHint'), HINT0=hint.textContent;
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  /* solid accent colour (--ui-accent is a gradient, so resolve a real colour for SVG / canvas) */
+  function accent(){try{const p=document.createElement('i');p.style.cssText='position:fixed;left:-99px;color:var(--ui-link)';document.body.appendChild(p);const c=getComputedStyle(p).color;p.remove();if(c&&!/^rgba\(0, 0, 0, 0\)$/.test(c))AC=c}catch(e){}return AC}
+  function ink(c){const m=/^#?([0-9a-f]{6})$/i.exec((c||'').trim());if(!m)return '#1e293b';const v=parseInt(m[1],16),r=v>>16,g=(v>>8)&255,b=v&255;return (0.299*r+0.587*g+0.114*b)>150?'#1e293b':'#ffffff'}
+  const hasL=(a,b)=>S.l.findIndex(p=>(p[0]===a&&p[1]===b)||(p[0]===b&&p[1]===a));
+  function lpath(a,b){let sx,sy,ex,ey,c1x,c1y,c2x,c2y;
+    if(Math.abs(b.x-a.x)>=(a.w+b.w)/2){const d=b.x>=a.x?1:-1;sx=a.x+d*a.w/2;sy=a.y;ex=b.x-d*b.w/2;ey=b.y;const mx=(sx+ex)/2;c1x=mx;c1y=sy;c2x=mx;c2y=ey}
+    else{const d=b.y>=a.y?1:-1;sx=a.x;sy=a.y+d*a.h/2;ex=b.x;ey=b.y-d*b.h/2;const my=(sy+ey)/2;c1x=sx;c1y=my;c2x=ex;c2y=my}
+    return {sx,sy,ex,ey,c1x,c1y,c2x,c2y}}
+  const wrap=t=>{const w=(t||' ').split(/\s+/),L=[];let c='';w.forEach(x=>{if((c+' '+x).trim().length>20&&c){L.push(c);c=x}else c=(c+' '+x).trim()});L.push(c);return L};
+  function meas(n){n.l=wrap(n.t);const m=Math.max(...n.l.map(s=>s.length));n.w=Math.max(96,m*8.2+34);n.h=n.l.length*19+22}
+  function reset(){S={n:{n1:{id:'n1',t:'Central idea',x:0,y:0,p:null,c:''}},id:1,l:[]};meas(S.n.n1);hist=[];fut=[];sel=ROOT;stopLink()}
+  const snap=()=>{hist.push(JSON.stringify(S));if(hist.length>60)hist.shift();fut=[];btns()};
+  function restore(j){S=JSON.parse(j);S.l=S.l||[];Object.values(S.n).forEach(meas);if(!S.n[sel])sel=ROOT;stopLink()}
+  function btns(){$('mmUndo').disabled=!hist.length;$('mmRedo').disabled=!fut.length}
+  const kids=(id,side)=>Object.values(S.n).filter(k=>k.p===id).filter((k,i)=>side==null||((i%2===0)===(side>0)));
+  const H=id=>{const k=kids(id);return Math.max(S.n[id].h+16,k.reduce((a,c)=>a+H(c.id),0))};
+  function place(id,list,dir){const n=S.n[id];let y=n.y-list.reduce((a,c)=>a+H(c.id),0)/2;list.forEach(k=>{const h=H(k.id);k.x=n.x+dir*(n.w/2+56+k.w/2);k.y=y+h/2;y+=h;place(k.id,kids(k.id),dir)})}
+  function layout(){const r=S.n[ROOT];r.x=0;r.y=0;place(ROOT,kids(ROOT,1),1);place(ROOT,kids(ROOT,-1),-1)}
+  function fit(){const a=Object.values(S.n);let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;a.forEach(n=>{x0=Math.min(x0,n.x-n.w/2);x1=Math.max(x1,n.x+n.w/2);y0=Math.min(y0,n.y-n.h/2);y1=Math.max(y1,n.y+n.h/2)});
+    const W=stage.clientWidth,Hh=stage.clientHeight;z=Math.max(.2,Math.min(1.2,(W-60)/(x1-x0),(Hh-60)/(y1-y0)));pan.x=W/2-(x0+x1)/2*z;pan.y=Hh/2-(y0+y1)/2*z;draw()}
+  function draw(){
+    let s='<g transform="translate('+pan.x+' '+pan.y+') scale('+z+')">';
+    const A=Object.values(S.n);
+    A.forEach(n=>{if(!n.p)return;const p=S.n[n.p],d=n.x>=p.x?1:-1,sx=p.x+d*p.w/2,ex=n.x-d*n.w/2,mx=(sx+ex)/2;
+      s+='<path d="M'+sx+' '+p.y+'C'+mx+' '+p.y+' '+mx+' '+n.y+' '+ex+' '+n.y+'" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>'});
+    const ac=accent();
+    S.l.forEach(p=>{const a=S.n[p[0]],b=S.n[p[1]];if(!a||!b)return;const q=lpath(a,b);
+      s+='<path d="M'+q.sx+' '+q.sy+'C'+q.c1x+' '+q.c1y+' '+q.c2x+' '+q.c2y+' '+q.ex+' '+q.ey+'" fill="none" stroke="'+ac+'" stroke-width="2" stroke-dasharray="7 5" stroke-linecap="round" opacity=".85"/>'});
+    A.forEach(n=>{const root=!n.p,f=n.c||(root?ac:'var(--ui-shell)'),tc=n.c?ink(n.c):(root?'#fff':'var(--ui-text)'),on=n.id===sel||n.id===linking;
+      s+='<g data-id="'+n.id+'"><rect x="'+(n.x-n.w/2)+'" y="'+(n.y-n.h/2)+'" width="'+n.w+'" height="'+n.h+'" rx="14" style="fill:'+f+';stroke:'+(on?ac:'#cbd5e1')+'" stroke-width="'+(on?3:1.5)+'" filter="drop-shadow(0 2px 4px rgba(0,0,0,.1))"/>';
+      n.l.forEach((l,i)=>{s+='<text x="'+n.x+'" y="'+(n.y-(n.l.length-1)*9.5+i*19+5)+'" text-anchor="middle" style="fill:'+tc+'">'+esc(l)+'</text>'});s+='</g>'});
+    svg.innerHTML=s+'</g>';
+    stage.style.backgroundSize=(22*z)+'px '+(22*z)+'px';stage.style.backgroundPosition=pan.x+'px '+pan.y+'px';
+    $('mmZv').textContent=Math.round(z*100)+'%';place_tools()}
+  function place_tools(){const n=sel&&S.n[sel];if(!n||editing||linking){tools.classList.remove('on');return}
+    tools.classList.add('on');const W=stage.clientWidth,tw=tools.offsetWidth||190,sx=n.x*z+pan.x,top=(n.y-n.h/2)*z+pan.y-48;
+    tools.style.left=Math.max(6,Math.min(W-tw-6,sx-tw/2))+'px';tools.style.top=(top<6?(n.y+n.h/2)*z+pan.y+10:top)+'px';
+    tools.querySelector('[data-a=del]').style.display=sel===ROOT?'none':''}
+  function add(parent,startEdit){snap();const id='n'+(++S.id),n={id,t:'New idea',x:0,y:0,p:parent,c:''};meas(n);S.n[id]=n;layout();sel=id;draw();if(startEdit)edit()}
+  function del(){if(!sel||sel===ROOT)return;snap();const go=i=>Object.values(S.n).filter(k=>k.p===i).forEach(k=>go(k.id));const rm=i=>{Object.values(S.n).filter(k=>k.p===i).forEach(k=>rm(k.id));delete S.n[i]};const p=S.n[sel].p;rm(sel);S.l=S.l.filter(q=>S.n[q[0]]&&S.n[q[1]]);sel=p;layout();draw()}
+  function edit(){const n=S.n[sel];if(!n)return;stopLink();editing=true;tools.classList.remove('on');
+    const i=document.createElement('input');i.className='mm-input';i.value=n.t;i.style.left=(n.x*z+pan.x)+'px';i.style.top=(n.y*z+pan.y)+'px';i.style.width=Math.max(150,n.w*z)+'px';stage.appendChild(i);i.focus();i.select();
+    let done=false;const fin=ok=>{if(done)return;done=true;const v=i.value.trim();if(ok&&v&&v!==n.t){snap();n.t=v;meas(n);layout()}i.remove();editing=false;draw()};
+    i.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')fin(true);else if(e.key==='Escape')fin(false)};i.onblur=()=>fin(true)}
+  function startLink(){if(!sel||!S.n[sel])return;linking=sel;tools.classList.remove('on');hint.textContent='Tap another node to link it · tap a linked node to unlink · tap empty space to cancel';draw()}
+  function stopLink(){if(linking===null)return;linking=null;hint.textContent=HINT0}
+  function toggleLink(to){const a=linking,i=hasL(a,to);snap();if(i>=0)S.l.splice(i,1);else S.l.push([a,to]);stopLink();sel=to;draw()}
+  function pickColor(){const n=S.n[sel];if(!n)return;const id=sel,cur=n.c||'#fde68a';
+    window.__mmColor=(i,hex)=>{if(!S.n[id])return;snap();S.n[id].c=hex;draw()};
+    const fake={querySelector:()=>({style:{background:cur}})};
+    if(typeof window.openColorChooserDynamic==='function')window.openColorChooserDynamic(fake,'__mmColor',0)}
+  /* pointers: mouse + touch + pen */
+  const P=new Map();let drag=null,pinch=null,moved=false,lastTap={id:null,t:0};
+  svg.addEventListener('pointerdown',e=>{if(editing)return;svg.setPointerCapture(e.pointerId);P.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=false;
+    if(P.size===2){const[a,b]=[...P.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),z};drag=null;return}
+    const g=e.target.closest('[data-id]'),r=stage.getBoundingClientRect();
+    if(linking){const to=g&&g.dataset.id;P.clear();drag=null;if(to&&to!==linking)toggleLink(to);else{stopLink();draw()}return}
+    if(g){sel=g.dataset.id;const n=S.n[sel];drag={k:'node',ox:(e.clientX-r.left-pan.x)/z-n.x,oy:(e.clientY-r.top-pan.y)/z-n.y,snapped:false}}
+    else drag={k:'pan',sx:e.clientX-pan.x,sy:e.clientY-pan.y};draw()});
+  svg.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;const r=stage.getBoundingClientRect();P.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pinch&&P.size===2){const[a,b]=[...P.values()],nz=Math.max(.2,Math.min(3,pinch.z*Math.hypot(a.x-b.x,a.y-b.y)/pinch.d)),mx=(a.x+b.x)/2-r.left,my=(a.y+b.y)/2-r.top,wx=(mx-pan.x)/z,wy=(my-pan.y)/z;z=nz;pan.x=mx-wx*z;pan.y=my-wy*z;moved=true;draw();return}
+    if(!drag)return;
+    if(drag.k==='node'){const n=S.n[sel],nx=(e.clientX-r.left-pan.x)/z-drag.ox,ny=(e.clientY-r.top-pan.y)/z-drag.oy;
+      if(!moved&&Math.hypot(nx-n.x,ny-n.y)*z<5)return;if(!drag.snapped){snap();drag.snapped=true}moved=true;n.x=nx;n.y=ny}
+    else{const nx=e.clientX-drag.sx,ny=e.clientY-drag.sy;if(!moved&&Math.hypot(nx-pan.x,ny-pan.y)<4)return;moved=true;pan.x=nx;pan.y=ny}
+    draw()});
+  const up=e=>{if(!P.has(e.pointerId))return;P.delete(e.pointerId);if(P.size<2)pinch=null;
+    if(!moved&&drag&&P.size===0){if(drag.k==='node'){const t=Date.now();if(lastTap.id===sel&&t-lastTap.t<350){lastTap.id=null;edit();return}lastTap={id:sel,t}}else{sel=null;draw()}}
+    if(!P.size)drag=null};
+  svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);
+  svg.addEventListener('wheel',e=>{e.preventDefault();const r=stage.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top,nz=Math.max(.2,Math.min(3,z*(e.deltaY<0?1.1:.91))),wx=(mx-pan.x)/z,wy=(my-pan.y)/z;z=nz;pan.x=mx-wx*z;pan.y=my-wy*z;draw()},{passive:false});
+  /* toolbars */
+  tools.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
+    if(a==='child')add(sel,true);else if(a==='sib')add(S.n[sel].p||sel,true);else if(a==='edit')edit();else if(a==='del')del();
+    else if(a==='link')startLink();
+    else if(a==='color')pickColor()});
+  $('mmUndo').onclick=()=>{if(!hist.length)return;fut.push(JSON.stringify(S));restore(hist.pop());btns();draw()};
+  $('mmRedo').onclick=()=>{if(!fut.length)return;hist.push(JSON.stringify(S));restore(fut.pop());btns();draw()};
+  $('mmLayout').onclick=()=>{snap();layout();fit()};$('mmFit').onclick=fit;
+  const zoomC=f=>{const W=stage.clientWidth/2,Hh=stage.clientHeight/2,wx=(W-pan.x)/z,wy=(Hh-pan.y)/z;z=Math.max(.2,Math.min(3,z*f));pan.x=W-wx*z;pan.y=Hh-wy*z;draw()};
+  $('mmZi').onclick=()=>zoomC(1.2);$('mmZo').onclick=()=>zoomC(1/1.2);
+  $('mmClear').onclick=()=>{if(Object.keys(S.n).length>1&&!confirm('Start over with an empty mind map?'))return;reset();layout();fit();btns()};
+  document.addEventListener('keydown',e=>{if(!$('mindmapOverlay').classList.contains('open')||editing||!sel)return;if(linking){if(e.key==='Escape'){e.stopImmediatePropagation();stopLink();draw()}return}
+    if(e.key==='Tab'){e.preventDefault();add(sel,true)}else if(e.key==='Enter'){e.preventDefault();add(S.n[sel].p||sel,true)}
+    else if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();del()}else if(e.key==='F2'){edit()}
+    else if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();$('mmUndo').click()}else if((e.ctrlKey||e.metaKey)&&e.key==='y'){e.preventDefault();$('mmRedo').click()}});
+  new ResizeObserver(()=>{if($('mindmapOverlay').classList.contains('open'))draw()}).observe(stage);
+  /* export to PNG (transparent) */
+  function png(){const A=Object.values(S.n);let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;A.forEach(n=>{x0=Math.min(x0,n.x-n.w/2);x1=Math.max(x1,n.x+n.w/2);y0=Math.min(y0,n.y-n.h/2);y1=Math.max(y1,n.y+n.h/2)});
+    const pd=30,sc=2,c=document.createElement('canvas');c.width=(x1-x0+pd*2)*sc;c.height=(y1-y0+pd*2)*sc;const g=c.getContext('2d');g.scale(sc,sc);g.translate(pd-x0,pd-y0);
+    const ac=accent();
+    g.lineWidth=2;g.lineCap='round';g.strokeStyle='#94a3b8';
+    A.forEach(n=>{if(!n.p)return;const p=S.n[n.p],d=n.x>=p.x?1:-1,sx=p.x+d*p.w/2,ex=n.x-d*n.w/2,mx=(sx+ex)/2;g.beginPath();g.moveTo(sx,p.y);g.bezierCurveTo(mx,p.y,mx,n.y,ex,n.y);g.stroke()});
+    g.setLineDash([7,5]);g.strokeStyle=ac;
+    S.l.forEach(p=>{const a=S.n[p[0]],b=S.n[p[1]];if(!a||!b)return;const q=lpath(a,b);g.beginPath();g.moveTo(q.sx,q.sy);g.bezierCurveTo(q.c1x,q.c1y,q.c2x,q.c2y,q.ex,q.ey);g.stroke()});
+    g.setLineDash([]);g.strokeStyle='#94a3b8';
+    g.font='500 14px '+getComputedStyle(document.body).fontFamily;g.textAlign='center';g.textBaseline='middle';
+    A.forEach(n=>{g.save();g.shadowColor='rgba(0,0,0,.12)';g.shadowBlur=6;g.shadowOffsetY=2;g.fillStyle=n.c||(n.p?'#fff':ac);g.beginPath();g.roundRect(n.x-n.w/2,n.y-n.h/2,n.w,n.h,14);g.fill();g.restore();
+      g.strokeStyle='#cbd5e1';g.lineWidth=1.5;g.stroke();g.fillStyle=n.c?ink(n.c):(n.p?'#1e293b':'#fff');n.l.forEach((l,i)=>g.fillText(l,n.x,n.y-(n.l.length-1)*9.5+i*19))});
+    return c.toDataURL('image/png')}
+  $('mmInsert').onclick=()=>{sel=null;const url=png();restoreRange();const img=makeImg(url);img.style.maxWidth='100%';img.style.height='auto';insertAtCursor(img);window.closeMindmapOverlay();reset();scheduleAutoSave()};
+  window.openMindmapOverlay=function(){saveRange();if(!S)reset();accent();openMdl('mindmapOverlay');if(!inited){inited=true;layout()}setTimeout(()=>{fit();btns()},60)};
+  window.closeMindmapOverlay=function(){editing=false;stopLink();closeMdl('mindmapOverlay')};
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!editing&&!linking&&$('mindmapOverlay').classList.contains('open'))window.closeMindmapOverlay()});
+  reset();
+})();
 /* ════════════════════════════════════════════════════════════════
    INSERT CHART  — ColorLabs chartmaker1.html integration
    ════════════════════════════════════════════════════════════════ */
@@ -19187,6 +19367,7 @@ function _closeAllOverlays(exceptId) {
   if (exceptId !== 'linkNavMenu') closeLinkNavigator();
   if (exceptId !== 'drawOverlay') closeDrawOverlay();
   if (exceptId !== 'chartOverlay') closeChartOverlay();
+  if (exceptId !== 'mindmapOverlay') closeMindmapOverlay();
 }
 
 function setupDZ(zoneId, inputId, onFile) {
@@ -40935,6 +41116,7 @@ const CFG=[
    del:el=>{el.remove();try{checkContent()}catch(e){}}}],
  ['shapeMdl',{name:'Shape',icon:'category',primary:'#shapeInsertBtn',close:()=>closeShapeModal(),target:()=>null}],
  ['iconMdl',{name:'Icon',icon:'interests',primary:'#iconInsertBtn',target:()=>null}],
+ ['mindmapOverlay',{name:'Mind map',icon:'mindmap',primary:'#mmInsert',close:()=>closeMindmapOverlay(),target:()=>null}],
  ['dateTimeMdl',{name:'Time / Date',icon:'schedule',primary:'#dtInsertBtn',target:()=>null}],
  ['fieldPropsMdl',{name:'Form Field',icon:'dynamic_form',primary:'.mbtn.primary',keepTitle:true,
    target:()=>typeof fpEditTarget!=='undefined'&&fpEditTarget&&fpEditTarget.isConnected?fpEditTarget:null,
