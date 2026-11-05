@@ -1677,6 +1677,10 @@
                     <span class="setting-label">What&#8217;s New</span>
                     <span class="material-symbols-rounded setting-chevron">chevron_right</span>
                 </div>
+                <div class="setting-row" onclick="openWikiExplorer()">
+                    <span class="setting-label">Wiki</span>
+                    <span class="material-symbols-rounded setting-chevron">chevron_right</span>
+                </div>
             </div>
 
             <div class="settings-section-title">Legal &amp; Resources</div>
@@ -1708,6 +1712,14 @@
     </div>
 
     <!-- ── Support Oryn page ── -->
+    <div id="wiki-explorer-page" class="slide-page">
+        <div class="iframe-header" style="width:100%; flex-shrink:0;">
+            <div class="iframe-title">Wiki</div>
+            <div class="close-tool-btn" onclick="closeWikiExplorer()">Close</div>
+        </div>
+        <iframe id="wiki-frame" title="Oryn Wiki" style="flex:1; width:100%; border:0; background:var(--bg-body);"></iframe>
+    </div>
+
     <div id="support-page-container" class="slide-page">
         <div class="iframe-header" style="width:100%; flex-shrink:0;">
             <div class="iframe-title">Support Us</div>
@@ -4219,6 +4231,19 @@
             const c = document.getElementById('about-iframe-container');
             if (c) c.classList.remove('slide-open');
             closeAboutSheet();
+            closeWikiExplorer();
+        }
+        // ── Wiki explorer (wiki.html inside a slide page; follows the app theme) ──
+        function openWikiExplorer() {
+            const f = document.getElementById('wiki-frame'), p = document.getElementById('wiki-explorer-page');
+            if (!f || !p) return;
+            const t = isDarkTheme() ? 'd' : 'l';
+            if (f.dataset.t !== t) { f.dataset.t = t; f.src = BASE_URL + 'wiki.html?t=' + t; }
+            requestAnimationFrame(() => requestAnimationFrame(() => p.classList.add('slide-open')));
+        }
+        function closeWikiExplorer() {
+            const p = document.getElementById('wiki-explorer-page');
+            if (p) p.classList.remove('slide-open');
         }
         function abShowSheet(title, showHelp) {
             document.getElementById('ab-sheet-title').textContent = title;
