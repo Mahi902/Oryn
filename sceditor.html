@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sugarcane Editor</title>
-<meta name="sceditor-version" content="230">
+<meta name="sceditor-version" content="231">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -882,6 +882,20 @@ body.pl-on .editor-area-wrapper{touch-action:pan-x pan-y;}
 .pgmgr-item.swiping{transition:none;z-index:2;}
 .pgmgr-item.swipe-l{box-shadow:inset 3px 0 0 hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1));}
 .pgmgr-item.swipe-r{box-shadow:inset -3px 0 0 hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1));}
+.page-content img[data-solid="1"]{cursor:pointer;}
+.insert-dd-list .sc-ov-row{grid-column:1/-1!important;}
+.sc-imgdef-wrap{grid-column:1/-1!important;display:flex;align-items:stretch;gap:6px;width:100%;box-sizing:border-box;}
+.sc-imgdef-wrap{flex-direction:row!important;direction:ltr;}
+.sc-imgdef-wrap .sc-ov-row{order:1;flex:1 1 0!important;width:auto!important;max-width:none!important;min-width:0;}
+
+.imgcfg-hold{position:relative;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+.imgcfg-hold-fill{position:absolute;left:0;top:0;bottom:0;width:0%;transition:none!important;animation:none!important;background:var(--ui-danger,#e53935);opacity:.3;pointer-events:none;}
+.sc-ov-cfg{display:flex;align-items:center;gap:4px;flex-shrink:0;border:0;border-radius:10px;padding:3px 8px;font:inherit;font-size:11px;font-weight:700;cursor:pointer;background:var(--ui-chip,#f2f2f7);color:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1));}
+.sc-ov-cfg:hover{filter:brightness(.95);}
+body.dark .sc-ov-cfg{background:#2a2a2e;color:hsl(calc(var(--sc-h,210) + -3.1) calc(89.7% * var(--sc-s,1)) calc(77.1% + var(--sc-l,0%) * 0));}
+body.dark .sc-ov-cfg:hover{background:#34343a;filter:none;}
+.sc-ov-row .sc-ov-t.fit{-webkit-mask-image:none;mask-image:none;}
+.sc-ov-row .sc-ov-t.fit>span{position:static;animation:none;}
 /* Add-page button on the side: icon only, hold menu stacked */
 .editor-area.pl-cols.pl-h>.add-page-btn{font-size:0;padding:18px 14px;min-width:0;gap:0;}
 .editor-area.pl-cols.pl-h>.add-page-btn .material-symbols-outlined{font-size:28px;}
@@ -4254,7 +4268,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v230…</p>
+    <p class="loading-text">Loading Sugarcane v231…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -5154,6 +5168,8 @@ function waitForSugarcaneAddons(){
         <button class="insert-box" id="tbESignBtn" onclick="closeInsertDropdown();openESignModal()" title="Insert E-Signature"><span class="material-symbols-outlined">esign</span><span class="insert-box-label">E-Sign</span></button>
         <button class="insert-box has-nav" id="tbFormsBtn" onclick="openFormsMenu()" title="Insert Form Field (hold to browse existing)"><span class="material-symbols-outlined">dynamic_form</span><span class="insert-box-label">Forms</span><span class="hold-fill"></span></button>
         <div class="ew-sec-lbl">Editor &amp; Settings</div>
+        <label class="sc-ov-row" title="Insert images as Solid (default for new images)" onmousedown="event.stopPropagation()"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M6 17l4.2-5 3 3.4 2.3-2.6L18 17z" fill="currentColor"/><circle cx="9" cy="8.8" r="1.4" fill="currentColor"/></svg></span><span class="sc-ov-t"><span>Insert images as Solid (default for new images)&emsp;&emsp;Insert images as Solid (default for new images)&emsp;&emsp;</span></span><input type="checkbox" id="insSolidImg" onchange="setSolidImgDefault(this.checked)"><span class="sc-ov-sw"></span></label>
+        <div class="sc-imgdef-wrap"><label class="sc-ov-row" title="Give every new image your own default properties" onmousedown="event.stopPropagation()"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="15" cy="7" r="2.3" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="17" r="2.3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg></span><span class="sc-ov-t"><span>Auto apply custom image properties (default for new images)&emsp;&emsp;Auto apply custom image properties (default for new images)&emsp;&emsp;</span></span><input type="checkbox" id="insImgDef" onchange="setImgDefOn(this.checked)"><button type="button" class="sc-ov-cfg" id="imgDefCfgBtn" style="display:none" onclick="event.preventDefault();event.stopPropagation();closeInsertDropdown();configureNewImages()" title="Edit the properties every new image starts with"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l1.7 2.1 2.7-.4.9 2.6 2.5 1.1-.6 2.7 1.7 2.1-1.9 2-.1 2.7-2.7.6-1.5 2.3-2.5-1.2-2.5 1.2-1.5-2.3-2.7-.6-.1-2.7-1.9-2 1.7-2.1-.6-2.7 2.5-1.1.9-2.6 2.7.4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.8" fill="currentColor"/></svg>Configure</button><span class="sc-ov-sw"></span></label></div>
         <button class="insert-box ew-sec-box" onclick="openEditorWidgetsMenu()" title="Editor widgets: floating counters, tools and buttons"><span class="material-symbols-outlined">widgets</span><span class="insert-box-label">Editor Widgets</span><span class="material-symbols-outlined" style="font-size:18px">chevron_right</span></button>
         <button class="insert-box ew-sec-box" id="scPageSrcBtn" style="display:none" onclick="closeInsertDropdown();openPageSource()" title="Page Source: edit the .scd, .uscd or the raw page HTML"><span class="material-symbols-outlined">code</span><span class="insert-box-label">Page Source</span><span class="material-symbols-outlined" style="font-size:18px">chevron_right</span></button>
       </div>
@@ -5464,6 +5480,11 @@ function waitForSugarcaneAddons(){
         </div>
         <div class="aw-dropdown" id="pgDropdown">
           <div class="aw-inner">
+            <div style="font-size:10px;font-weight:700;color:hsl(var(--sc-th,0) var(--sc-ts,0%) calc(53.3% + var(--sc-tld,0%) * 0 + var(--sc-tll,0%) * 0.2));text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Pagination</div>
+            <div class="vw-mode-row" id="pgnRow" style="margin-bottom:10px;">
+              <button class="vw-mode-btn active" data-pgn="manual" onclick="setPagination('manual')" title="Manual: you add pages yourself (default)"><svg class="vw-lay-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="5" y="2.5" width="14" height="9" rx="1.6" fill="currentColor"/><rect x="5" y="14" width="14" height="7.5" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.4 2"/><path d="M12 15.9v3.6M10.2 17.7h3.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Manual</button>
+              <button class="vw-mode-btn" data-pgn="auto" onclick="setPagination('auto')" title="Auto: text past the page limit flows onto the next page"><svg class="vw-lay-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="5" y="2.5" width="14" height="8" rx="1.6" fill="currentColor"/><rect x="5" y="13.5" width="14" height="8" rx="1.6" fill="currentColor" opacity=".5"/><path d="M9.6 11.3 12 13.1l2.4-1.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 5.5h7M8.5 7.8h4.5" fill="none" stroke="var(--ui-shell,#fff)" stroke-width="1.3" stroke-linecap="round"/></svg>Auto</button>
+            </div>
             <div style="font-size:10px;font-weight:700;color:hsl(var(--sc-th,0) var(--sc-ts,0%) calc(53.3% + var(--sc-tld,0%) * 0 + var(--sc-tll,0%) * 0.2));text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Page Size Library</div>
             <input class="cmarg-search" id="pgSearch" placeholder="Search page sizes" oninput="pgFilter(this.value)"/>
             <div class="cmarg-list" id="pgList"><div class="cmarg-empty">Loading</div></div>
@@ -6624,6 +6645,15 @@ body #ulBulletChips .olcust-chip.active,body.dark #ulBulletChips .olcust-chip.ac
                 <span>Crop applied — it is baked in when you insert.</span>
                 <button type="button" class="scf-link" onclick="resetImgCrop()">Reset</button>
               </div>
+            </div>
+
+            <div class="scf-sec">
+              <div class="scf-sec-h"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="8" height="8" rx="1.5"/><path d="M14 7h7M14 11h7M3 17h18M3 21h12"/></svg></span>Property</div>
+              <div class="sm-btn-row" id="imgProperty">
+                <button class="sm-chip active" data-v="image" onclick="imgChipSel(this,'imgProperty')" title="Free image: drag it anywhere on the page">Image</button>
+                <button class="sm-chip" data-v="solid" onclick="imgChipSel(this,'imgProperty')" title="Solid: sits in the text and moves with it">Solid</button>
+              </div>
+              <div class="scf-note"><span>Solid images behave like text: they flow with the words and can't be dragged freely.</span></div>
             </div>
 
             <div class="scf-sec">
@@ -9111,7 +9141,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 230; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 231; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -11733,6 +11763,211 @@ function checkContent() {
 /* ═══════════════════════════════════════════════════════
    PAGE BINDING
 ═══════════════════════════════════════════════════════ */
+
+/* ───────── Pagination: Manual (default) / Auto ───────── */
+const PGN = { mode: 'manual', busy: false };
+function setPagination(m, silent) {
+  PGN.mode = m === 'auto' ? 'auto' : 'manual';
+  document.querySelectorAll('#pgnRow .vw-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.pgn === PGN.mode));
+  if (!silent) { try { localStorage.setItem('sc_pagination', PGN.mode); } catch (e) {} }
+  if (PGN.mode === 'auto') autoPaginateAll();
+}
+window.addEventListener('load', () => {
+  let m = 'manual'; try { m = localStorage.getItem('sc_pagination') === 'auto' ? 'auto' : 'manual'; } catch (e) {}
+  if (m === 'auto') setPagination('auto', true);
+});
+function _pgnOverflows(c) { return c.scrollHeight > c.clientHeight + 1; }
+function _pgnNextContent(c, create) {
+  const outer = c.closest('.page-outer');
+  let nx = outer && outer.nextElementSibling;
+  while (nx && !nx.classList.contains('page-outer')) nx = nx.nextElementSibling;
+  if (nx) return nx.querySelector('.page-content');
+  if (!create) return null;
+  const uid = Date.now() + '_' + Math.floor(Math.random() * 9999);
+  const no = _buildPageOuter(uid);
+  pgInherit(no.querySelector('.page'), c.closest('.page'));
+  outer.after(no);
+  certMintForPage(no.querySelector('.page'));
+  _refreshPageState();
+  return no.querySelector('.page-content');
+}
+function _pgnSplitText(c, blk) {
+  /* split a text-only block so the part that fits stays; returns the overflow remainder block or null */
+  if (!blk || blk.nodeType !== 1 || ![...blk.childNodes].every(n => n.nodeType === 3)) return null;
+  const full = blk.textContent, words = full.split(/(\s+)/);
+  if (words.length < 3) return null;
+  let lo = 0, hi = words.length;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    blk.textContent = words.slice(0, mid).join('');
+    if (_pgnOverflows(c)) hi = mid - 1; else lo = mid;
+  }
+  if (lo <= 0) { blk.textContent = full; return null; }
+  const rest = words.slice(lo).join('').replace(/^\s+/, '');
+  blk.textContent = words.slice(0, lo).join('').replace(/\s+$/, '');
+  if (!rest) return null;
+  const nb = blk.cloneNode(false); nb.removeAttribute('id'); nb.textContent = rest;
+  return nb;
+}
+function autoPaginate(c) {
+  if (PGN.mode !== 'auto' || PGN.busy || !c || !_pgnOverflows(c)) return;
+  PGN.busy = true;
+  const sel = window.getSelection();
+  let an = sel && sel.rangeCount ? sel.anchorNode : null, ao = sel && sel.rangeCount ? sel.anchorOffset : 0;
+  const hadFocus = an && c.contains(an);
+  let touched = [];
+  try {
+    let guard = 400;
+    while (_pgnOverflows(c) && guard--) {
+      const last = c.lastChild;
+      if (!last) break;
+      const next = _pgnNextContent(c, true);
+      if (!next) break;
+      if (c.childNodes.length === 1 || !c.firstChild || c.firstChild === last) {
+        const rest = _pgnSplitText(c, last);
+        if (!rest) break;
+        next.insertBefore(rest, next.firstChild);
+        /* caret was at the end of the split text */
+        if (hadFocus && an && last.contains(an)) { an = rest.firstChild; ao = Math.min(ao, rest.textContent.length); }
+      } else {
+        next.insertBefore(last, next.firstChild);
+      }
+      if (touched.indexOf(next) < 0) touched.push(next);
+    }
+  } finally { PGN.busy = false; }
+  bindPages();
+  touched.forEach(t => autoPaginate(t));
+  if (hadFocus && an && document.contains(an)) {
+    const host = (an.nodeType === 1 ? an : an.parentElement).closest('.page-content');
+    if (host && host !== c) {
+      host.focus();
+      try { const r = document.createRange(); r.setStart(an, Math.min(ao, an.nodeType === 3 ? an.length : an.childNodes.length)); r.collapse(true); sel.removeAllRanges(); sel.addRange(r); } catch (e) {}
+      try { host.closest('.page-outer').scrollIntoView({ block: 'nearest' }); } catch (e) {}
+    }
+  }
+  try { updatePageIndicator(); renderPageNumbers(); } catch (e) {}
+}
+function autoPaginateAll() {
+  if (PGN.mode !== 'auto') return;
+  document.querySelectorAll('#editorArea .page-content').forEach(c => autoPaginate(c));
+}
+
+function _pgnIsEmpty(c) { return !c.querySelector('img,table,hr,canvas,svg,iframe,video,.fw-field') && !c.textContent.trim(); }
+function _pgnPrevContent(c) {
+  const outer = c.closest('.page-outer');
+  let pv = outer && outer.previousElementSibling;
+  while (pv && !pv.classList.contains('page-outer')) pv = pv.previousElementSibling;
+  return pv ? pv.querySelector('.page-content') : null;
+}
+function _pgnRemovePage(c) {
+  const outer = c.closest('.page-outer');
+  if (!outer || document.querySelectorAll('#editorArea .page-outer').length < 2) return false;
+  outer.remove();
+  S.pageCount = document.querySelectorAll('#editorArea .page').length;
+  try { _refreshPageState(); } catch (e) {}
+  return true;
+}
+function _pgnPullText(cur, f) {
+  if (f.nodeType !== 1 || ![...f.childNodes].every(n => n.nodeType === 3)) return false;
+  const words = f.textContent.split(/(\s+)/);
+  if (words.length < 3) return false;
+  const nb = f.cloneNode(false); nb.removeAttribute('id'); cur.appendChild(nb);
+  let lo = 0, hi = words.length;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    nb.textContent = words.slice(0, mid).join('');
+    if (_pgnOverflows(cur)) hi = mid - 1; else lo = mid;
+  }
+  if (lo <= 0) { nb.remove(); return false; }
+  nb.textContent = words.slice(0, lo).join('').replace(/\s+$/, '');
+  const rest = words.slice(lo).join('').replace(/^\s+/, '');
+  if (rest) f.textContent = rest; else f.remove();
+  return true;
+}
+function autoPull(c) {
+  if (PGN.mode !== 'auto' || PGN.busy) return;
+  PGN.busy = true;
+  let changed = false;
+  try {
+    let cur = c, guard = 200;
+    while (cur && guard--) {
+      if (_pgnOverflows(cur)) break;
+      const next = _pgnNextContent(cur, false);
+      if (!next) break;
+      let moved = false, full = false;
+      while (next.firstChild) {
+        const f = next.firstChild;
+        if (f.nodeType === 3 && !f.textContent.trim()) { f.remove(); continue; }
+        cur.appendChild(f);
+        if (_pgnOverflows(cur)) {
+          cur.removeChild(f); next.insertBefore(f, next.firstChild);
+          if (_pgnPullText(cur, f)) moved = true;
+          full = true; break;
+        }
+        moved = true;
+      }
+      if (moved) changed = true;
+      if (_pgnIsEmpty(next)) { if (_pgnRemovePage(next)) { changed = true; if (full) break; continue; } }
+      if (!moved) break;
+      cur = next;
+    }
+  } finally { PGN.busy = false; }
+  if (changed) { try { bindPages(); updatePageIndicator(); renderPageNumbers(); scheduleAutoSave(); } catch (e) {} }
+}
+function autoReflow(c) { autoPaginate(c); if (c.isConnected) autoPull(c); }
+function autoBackspace(e, c) {
+  if (PGN.mode !== 'auto' || e.key !== 'Backspace' || e.ctrlKey || e.metaKey || e.altKey) return;
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount || !sel.isCollapsed || !c.contains(sel.anchorNode)) return;
+  const r = document.createRange(); r.selectNodeContents(c); r.setEnd(sel.anchorNode, sel.anchorOffset);
+  if (r.toString() !== '' || r.cloneContents().querySelector('img,table,hr,.fw-field')) return;
+  const prev = _pgnPrevContent(c);
+  if (!prev) return;
+  e.preventDefault();
+  const place = (node, off) => { prev.focus(); const rg = document.createRange(); rg.setStart(node, off); rg.collapse(true); sel.removeAllRanges(); sel.addRange(rg); };
+  if (_pgnIsEmpty(c)) {
+    _pgnRemovePage(c);
+    const end = document.createRange(); end.selectNodeContents(prev); end.collapse(false);
+    prev.focus(); sel.removeAllRanges(); sel.addRange(end);
+  } else {
+    const lastP = prev.lastChild, first = c.firstChild;
+    const textOnly = n => n && n.nodeType === 1 && [...n.childNodes].every(x => x.nodeType === 3 || (x.nodeName === 'BR'));
+    if (textOnly(lastP) && textOnly(first) && lastP.tagName === first.tagName) {
+      const len = lastP.textContent.length;
+      const txt = first.textContent;
+      lastP.querySelectorAll('br').forEach(b => b.remove());
+      const tn = document.createTextNode(lastP.textContent + txt);
+      lastP.textContent = ''; lastP.appendChild(tn); first.remove();
+      place(tn, Math.min(len, tn.length));
+    } else {
+      const end = document.createRange(); end.selectNodeContents(prev); end.collapse(false);
+      prev.focus(); sel.removeAllRanges(); sel.addRange(end);
+    }
+  }
+  autoReflow(prev);
+  try { scheduleAutoSave(); updateWordCount(); } catch (er) {}
+}
+
+/* Insert-menu switch labels: scroll only when the full text doesn't fit */
+(function () {
+  function fit() {
+    document.querySelectorAll('#insertDropdown .sc-ov-row .sc-ov-t').forEach(t => {
+      const sp = t.firstElementChild; if (!sp) return;
+      if (!t.dataset.txt) t.dataset.txt = sp.textContent.split('\u2003')[0];
+      const txt = t.dataset.txt;
+      t.classList.add('fit'); sp.textContent = txt;
+      if (!t.clientWidth) return;
+      if (sp.scrollWidth > t.clientWidth) { t.classList.remove('fit'); sp.textContent = txt + '\u2003\u2003' + txt + '\u2003\u2003'; }
+    });
+  }
+  function watch() {
+    const dd = document.getElementById('insertDropdown'); if (!dd) return;
+    new MutationObserver(() => { if (dd.style.display !== 'none') requestAnimationFrame(fit); }).observe(dd, { attributes: true, attributeFilter: ['style', 'class'] });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch); else watch();
+  window.addEventListener('resize', () => { try { fit(); } catch (e) {} });
+})();
+
 function bindPages() {
   document.querySelectorAll('#editorArea .page-content').forEach(el => {
     if (el._bound) return;
@@ -11744,8 +11979,10 @@ function bindPages() {
       if (AW.spellCheck || AW.wordPred) onPageInputAW(e);
       scheduleAutoSave();
       _pgmgrRefreshStats();
+      if (PGN.mode === 'auto') autoReflow(el);
     });
-    el.addEventListener('paste', onPaste);
+    el.addEventListener('keydown', e => autoBackspace(e, el));
+    el.addEventListener('paste', e => { onPaste(e); if (PGN.mode === 'auto') setTimeout(() => autoReflow(el), 60); });
     el.addEventListener('keyup', syncFontSz);
     el.addEventListener('mouseup', syncFontSz);
     el.querySelectorAll('img').forEach(wireImg);
@@ -16778,8 +17015,10 @@ function _imgRefresh() { const m = _imgEl('imageMdl'); if (m && m._scRefresh) m.
 
 function openImageModal() {
   saveRange();
+  _imgCfgMode = false; imgCfgLock(false);
   _editingImg = null; _croppedImgData = null; S.imgData = null; _imgName = ''; _imgDriveLoaded = false;
   imgResetControls();
+  if (imgDefOn()) imgDefApplyToControls(imgDefGet());
   _imgEl('imageFile').value = '';
   _imgEl('imgUrlInput').value = '';
   _imgEl('imgUrlGrid').innerHTML = '';
@@ -16805,6 +17044,7 @@ function imgResetControls() {
   _imgEl('imgBorderSize').value = 2; _imgEl('imgBorderSizeVal').textContent = '2px';
   imgChipSelById('imgBorderStyle', 'none');
   resetImgOnClickFields();
+  imgChipSelById('imgProperty', (typeof solidImgDefault === 'function' && solidImgDefault()) ? 'solid' : 'image');
   _imgEl('imgAltText').value = '';
   _imgEl('imgCropPreviewNote').style.display = 'none';
   const p = _imgEl('imagePreview'); p.style.opacity = ''; p.style.border = ''; p.style.borderRadius = '';
@@ -17132,6 +17372,7 @@ function imgPrimary() {
     imgSetPreview(_croppedImgData || S.imgData);
     SCFlow.go('imageMdl', 'choose'); return;
   }
+  if (_imgCfgMode) { saveImgDefaults(); return; }
   if (_editingImg) applyEditImgAttrs(); else insertImage();
 }
 function imgChoose(mode) {
@@ -17177,13 +17418,176 @@ function getImgStyleFromControls() {
   return style;
 }
 
-function insertImage() {
-  const src = _croppedImgData || S.imgData;
+/* Image property: Image (free, draggable) or Solid (flows inline with the text) */
+function solidImgDefault() { try { return localStorage.getItem('sc_img_solid') === '1'; } catch (e) { return false; } }
+function setSolidImgDefault(on) { try { localStorage.setItem('sc_img_solid', on ? '1' : '0'); } catch (e) {} }
+window.addEventListener('load', () => { const c = document.getElementById('insSolidImg'); if (c) c.checked = solidImgDefault(); });
+function applyImgProperty(img) {
+  const solid = document.querySelector('#imgProperty .sm-chip.active')?.dataset.v === 'solid';
+  if (solid) {
+    img.dataset.solid = '1';
+    img.style.position = 'static'; img.style.left = ''; img.style.top = ''; img.style.zIndex = '';
+    img.style.display = 'inline-block'; img.style.verticalAlign = 'bottom';
+  } else {
+    delete img.dataset.solid;
+    if (img.style.display === 'inline-block') img.style.display = '';
+    img.style.verticalAlign = '';
+  }
+  try { if (S.selImg === img) showResizeH(img); } catch (e) {}
+}
+
+/* ───────── Custom default properties for NEW images ───────── */
+const IMGDEF_KEY = 'sc_img_defaults';
+let _imgCfgMode = false, _imgCfgAdj = null;
+function imgDefGet() { try { return JSON.parse(localStorage.getItem(IMGDEF_KEY)) || {}; } catch (e) { return {}; } }
+function imgDefSet(c) { try { localStorage.setItem(IMGDEF_KEY, JSON.stringify(c)); } catch (e) {} }
+function imgDefOn() { return !!imgDefGet().on; }
+function imgDefSyncUI() {
+  const on = imgDefOn(), cb = document.getElementById('insImgDef'), bt = document.getElementById('imgDefCfgBtn');
+  if (cb) cb.checked = on; if (bt) bt.style.display = on ? 'flex' : 'none';
+  try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+}
+function setImgDefOn(on) { const c = imgDefGet(); c.on = !!on; imgDefSet(c); imgDefSyncUI(); }
+window.addEventListener('load', imgDefSyncUI);
+function imgDefApplyToControls(c) {
+  if (!c || !c.saved) return;
+  _imgEl('imgOpacity').value = c.opacity; _imgEl('imgOpacityVal').textContent = c.opacity + '%';
+  _imgEl('imgRadius').value = c.radius; _imgEl('imgRadiusVal').textContent = c.radius + '%';
+  _imgEl('imgBorderSize').value = c.borderSize; _imgEl('imgBorderSizeVal').textContent = c.borderSize + 'px';
+  _imgEl('imgBorderColor').value = c.borderColor;
+  imgChipSelById('imgBorderStyle', c.borderStyle);
+  imgChipSelById('imgProperty', c.property);
+  imgChipSelById('imgOnClickType', c.onclick);
+  _imgEl('imgOnClickUrl').value = c.url || ''; _imgEl('imgOnClickRedir').checked = c.redir !== false;
+  _imgEl('imgAltText').value = c.alt || '';
+  imgOnClickTypeChange();
+}
+function imgDefSample() {
+  const c = document.createElement('canvas'); c.width = 480; c.height = 320;
+  const x = c.getContext('2d'), g = x.createLinearGradient(0, 0, 0, 320);
+  g.addColorStop(0, '#5aa9e6'); g.addColorStop(1, '#cfe8ff'); x.fillStyle = g; x.fillRect(0, 0, 480, 320);
+  x.fillStyle = '#ffd34d'; x.beginPath(); x.arc(370, 90, 44, 0, 7); x.fill();
+  x.fillStyle = '#4c9a63'; x.beginPath(); x.moveTo(0, 320); x.lineTo(0, 220); x.quadraticCurveTo(130, 130, 260, 230); x.quadraticCurveTo(360, 170, 480, 240); x.lineTo(480, 320); x.fill();
+  x.fillStyle = '#2f6f47'; x.beginPath(); x.moveTo(0, 320); x.lineTo(0, 270); x.quadraticCurveTo(160, 220, 300, 290); x.lineTo(340, 320); x.fill();
+  return c.toDataURL('image/png');
+}
+async function imgBakeAdj(src, adj) {
+  try {
+    const im = await _imgLoadEl(src), w = im.naturalWidth || im.width, h = im.naturalHeight || im.height;
+    const k = Math.min(1, 4096 / Math.max(w, h));
+    const a = document.createElement('canvas'); a.width = Math.max(1, Math.round(w * k)); a.height = Math.max(1, Math.round(h * k));
+    a.getContext('2d').drawImage(im, 0, 0, a.width, a.height);
+    const o = document.createElement('canvas'); o.width = a.width; o.height = a.height;
+    pedDrawAdj(o.getContext('2d'), a, Object.assign({}, PED_DEF, adj));
+    return o.toDataURL('image/png');
+  } catch (e) { return src; }
+}
+let _imgCfgHooked = false;
+function _imgCfgHook() {
+  if (_imgCfgHooked || typeof pedCommit !== 'function') return; _imgCfgHooked = true;
+  const orig = pedCommit;
+  pedCommit = function () {
+    if (_imgCfgMode && !pedIsDef()) {
+      const acc = _imgCfgAdj || (_imgCfgAdj = {});
+      Object.keys(PED_DEF).forEach(k => { acc[k] = (acc[k] || 0) + (PED.adj[k] || 0); });
+    }
+    return orig.apply(this, arguments);
+  };
+}
+function imgCfgLock(on) {
+  const b = document.getElementById('imgEditBtn'); if (!b) return;
+  b.disabled = !!on; b.style.opacity = on ? '.45' : ''; b.style.pointerEvents = on ? 'none' : '';
+  b.title = on ? 'The photo editor is per image, so it is not available when setting defaults' : '';
+}
+function configureNewImages() {
+  _imgCfgHook();
+  imgCfgLock(true);
+  _imgCfgMode = true; _imgCfgAdj = null;
+  _editingImg = null; _croppedImgData = null; _imgName = 'Sample image';
+  imgResetControls();
+  imgDefApplyToControls(imgDefGet());
+  const sample = imgDefSample();
+  S.imgData = sample;
+  imgSetPreview(sample); imgRenderPicked();
+  _imgEl('imgEdBack').style.display = 'none';
+  imgTogglePreview(false);
+  imgCtrlPreview();
+  SCFlow.go('imageMdl', 'edit');
+  setupImgDZ();
+  openMdl('imageMdl');
+  const pb = _imgEl('imgPrimaryBtn'); const lab = () => { if (pb && _imgCfgMode) pb.textContent = 'Save as default'; };
+  lab(); setTimeout(lab, 60); setTimeout(lab, 300);
+}
+
+/* Hold the "Sample image" label: 0.5 s accident check, then a 2.5 s fill; when it completes the defaults revert to original */
+(function () {
+  const CHECK_MS = 500, FILL_MS = 2500;
+  let tCheck = null, tDone = null, raf = 0, fill = null, sx = 0, sy = 0, down = false, lab = null;
+  function stop() {
+    clearTimeout(tCheck); clearTimeout(tDone); cancelAnimationFrame(raf); tCheck = tDone = null; down = false;
+    if (lab) lab.classList.remove('imgcfg-hold');
+    if (fill) { const f = fill; fill = null; f.remove(); }
+  }
+  function revert() {
+    stop();
+    const c = imgDefGet(); imgDefSet({ on: !!c.on });
+    imgResetControls(); try { imgCtrlPreview(); } catch (e) {}
+    try { showToast('Image properties reverted to original', 'info'); } catch (e) {}
+  }
+  function bind() {
+    lab = document.getElementById('imgPreviewLabel'); if (!lab || lab._holdBound) return; lab._holdBound = true;
+    lab.addEventListener('pointerdown', e => {
+      if (!_imgCfgMode) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      stop(); down = true; sx = e.clientX; sy = e.clientY;
+      lab.classList.add('imgcfg-hold');
+      tCheck = setTimeout(() => {
+        if (!down || !_imgCfgMode) { stop(); return; }   /* released or moved away: it was accidental */
+        fill = document.createElement('span'); fill.className = 'imgcfg-hold-fill'; lab.insertBefore(fill, lab.firstChild);
+        /* drive the width from the clock, so no theme/transition override (e.g. dark mode) can make it jump to full */
+        const t0 = performance.now();
+        const step = now => {
+          if (!fill) return;
+          const k = Math.min(1, (now - t0) / FILL_MS);
+          fill.style.setProperty('width', (k * 100).toFixed(1) + '%', 'important');
+          if (k >= 1) revert(); else raf = requestAnimationFrame(step);
+        };
+        fill.style.setProperty('width', '0%', 'important');
+        raf = requestAnimationFrame(step);
+      }, CHECK_MS);
+    });
+    lab.addEventListener('pointermove', e => { if (down && !fill && Math.hypot(e.clientX - sx, e.clientY - sy) > 8) stop(); });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => lab.addEventListener(t, stop));
+    lab.addEventListener('contextmenu', e => { if (_imgCfgMode) e.preventDefault(); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind); else bind();
+})();
+function saveImgDefaults() {
+  const c = imgDefGet();
+  c.saved = true;
+  c.opacity = +_imgEl('imgOpacity').value; c.radius = +_imgEl('imgRadius').value;
+  c.borderStyle = document.querySelector('#imgBorderStyle .sm-chip.active')?.dataset.v || 'none';
+  c.borderSize = +_imgEl('imgBorderSize').value; c.borderColor = _imgEl('imgBorderColor').value;
+  c.property = document.querySelector('#imgProperty .sm-chip.active')?.dataset.v || 'image';
+  c.onclick = document.querySelector('#imgOnClickType .sm-chip.active')?.dataset.v || 'none';
+  c.url = _imgEl('imgOnClickUrl').value.trim(); c.redir = _imgEl('imgOnClickRedir').checked;
+  c.alt = _imgEl('imgAltText').value.trim();
+  if (_imgCfgAdj) { c.adj = _imgCfgAdj; }
+  imgDefSet(c);
+  _imgCfgMode = false; _imgCfgAdj = null; imgCfgLock(false);
+  S.imgData = null; _croppedImgData = null;
+  const pb = _imgEl('imgPrimaryBtn'); if (pb) pb.textContent = 'Next';
+  closeMdl('imageMdl');
+  try { showToast('Saved. Every new image will start with these properties', 'success'); } catch (e) {}
+}
+async function insertImage() {
+  let src = _croppedImgData || S.imgData;
   if (!src) { showToast('Choose an image first', 'error'); return; }
   restoreRange();
   const img = makeImg(src);
   img.style.cssText = getImgStyleFromControls();
   img.alt = _imgEl('imgAltText').value.trim();
+  applyImgProperty(img);
   applyImgOnClick(img);
   insertAtCursor(img);
   S.imgData = null; _croppedImgData = null;
@@ -17195,6 +17599,7 @@ function insertImage() {
 
 /* Edit Attributes — open the modal straight on the edit stage for an existing img */
 function openEditImgAttrs() {
+  _imgCfgMode = false; imgCfgLock(false);
   const img = _imgPopupTarget;   // save BEFORE hiding (hideImgPopup nulls _imgPopupTarget)
   hideImgPopup();
   if (!img) return;
@@ -17214,6 +17619,7 @@ function openEditImgAttrs() {
   _imgEl('imgBorderSize').value = bSize; _imgEl('imgBorderSizeVal').textContent = bSize + 'px';
   _imgEl('imgBorderColor').value = rgbToHex(bColor);
   imgChipSelById('imgBorderStyle', ['solid','dashed','dotted'].includes(bStyle) ? bStyle : 'none');
+  imgChipSelById('imgProperty', img.dataset.solid === '1' ? 'solid' : 'image');
   const oc = img.dataset.imgOnclick || 'none';
   imgChipSelById('imgOnClickType', oc);
   _imgEl('imgOnClickUrl').value = img.dataset.imgLink || '';
@@ -17234,6 +17640,7 @@ function applyEditImgAttrs() {
   if (src) img.src = src;
   img.style.cssText = getImgStyleFromControls();
   img.alt = _imgEl('imgAltText').value.trim();
+  applyImgProperty(img);
   applyImgOnClick(img);
   closeMdl('imageMdl');
   _editingImg = null;
@@ -17723,6 +18130,7 @@ function startResize(e, img, dir) {
 }
 
 function startImgDrag(e, img) {
+  if (img.dataset.solid === '1') { pickImg(img); return; }   /* Solid: part of the text, no free dragging */
   e.preventDefault(); e.stopPropagation();
   pickImg(img); S.isDragging = true;
   const t = e.touches ? e.touches[0] : e;
@@ -42139,7 +42547,7 @@ if(ew&&ew.parentNode){
   const row=document.createElement('label');row.className='sc-ov-row';row.title='Allow overlapping (default for new items)';
   row.innerHTML='<span class="material-symbols-outlined">layers</span><span class="sc-ov-t"><span>Allow overlapping (default for new items)&emsp;&emsp;Allow overlapping (default for new items)&emsp;&emsp;</span></span><input type="checkbox" class="sc-ov-def" checked><span class="sc-ov-sw"></span>';
   row.addEventListener('mousedown',e=>e.stopPropagation());
-  ew.parentNode.insertBefore(row,ew.parentNode.querySelector('.ew-sec-lbl')||ew);
+  ew.parentNode.insertBefore(row,ew);
 }
 sync();
 
