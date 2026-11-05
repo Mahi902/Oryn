@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sugarcane Editor</title>
-<meta name="sceditor-version" content="225">
+<meta name="sceditor-version" content="230">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -869,6 +869,33 @@ input:checked+.toggle-slider:before{transform:translateX(18px);}
 .editor-area.pl-cols{display:grid;grid-template-columns:repeat(var(--pl-cols,1),max-content);justify-content:center;justify-items:center;align-items:start;column-gap:40px;align-content:start;}
 .editor-area.pl-cols>.add-page-btn{grid-column:1/-1;justify-self:center;}
 body.pl-on .editor-area-wrapper{justify-content:safe center;}
+
+
+/* Page orientation (Viewing > Layout): Vertical = pages under each other, Horizontal = pages side by side */
+.editor-area.pl-cols.pl-h{grid-template-columns:none;grid-auto-flow:column;grid-template-rows:repeat(var(--pl-cols,1),max-content);justify-content:start;align-content:start;}
+.editor-area.pl-cols.pl-h>.add-page-btn{grid-column:auto;grid-row:1/-1;align-self:center;width:auto;min-width:120px;flex-direction:column;padding:32px 22px;}
+body.pl-on .editor-area-wrapper{touch-action:pan-x pan-y;}
+.editor-area-wrapper{touch-action:pan-x pan-y;}
+.editor-area.zooming{transition:none;}
+/* Pages panel: swipe left = page options, swipe right = select */
+.pgmgr-item{touch-action:pan-y;position:relative;}
+.pgmgr-item.swiping{transition:none;z-index:2;}
+.pgmgr-item.swipe-l{box-shadow:inset 3px 0 0 hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1));}
+.pgmgr-item.swipe-r{box-shadow:inset -3px 0 0 hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1));}
+/* Add-page button on the side: icon only, hold menu stacked */
+.editor-area.pl-cols.pl-h>.add-page-btn{font-size:0;padding:18px 14px;min-width:0;gap:0;}
+.editor-area.pl-cols.pl-h>.add-page-btn .material-symbols-outlined{font-size:28px;}
+.editor-area.pl-cols.pl-h>.apb-choose{grid-column:auto;grid-row:1/-1;align-self:center;}
+.apb-choose.apb-v{flex-direction:column;}
+.apb-choose.apb-v button{flex:1;font-size:0;gap:0;padding:0;height:auto;}
+/* Zoom / position mini-map */
+#zoomMiniMap{position:fixed;right:18px;bottom:18px;z-index:60;padding:6px;border-radius:10px;background:linear-gradient(180deg,var(--ui-shell),var(--ui-shell-2));border:1px solid var(--ui-line);box-shadow:none;opacity:0;transform:translateY(6px) scale(.96);pointer-events:none;transition:opacity .25s,transform .25s;}
+#zoomMiniMap.show{opacity:.38;transform:none;}
+#zoomMiniMap .zmm-box{position:relative;overflow:hidden;border-radius:4px;}
+#zoomMiniMap .zmm-pg{position:absolute;background:#fff;border:1px solid rgba(0,0,0,.18);box-sizing:border-box;border-radius:1px;}
+body.dark #zoomMiniMap .zmm-pg{background:#3a3a3e;border-color:#555;}
+#zoomMiniMap .zmm-vp{position:absolute;box-sizing:border-box;border:2px solid hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1));background:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1) / .22);border-radius:2px;}
+@media print{#zoomMiniMap{display:none!important}}
 
 /* A4 Page */
 .page{width:var(--pg-w,21cm);min-width:var(--pg-w,21cm);max-width:var(--pg-w,21cm);height:var(--pg-h,29.7cm);min-height:var(--pg-h,29.7cm);max-height:var(--pg-h,29.7cm);background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.12);position:relative;padding:2cm;flex-shrink:0;overflow:hidden;}
@@ -4227,7 +4254,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v226…</p>
+    <p class="loading-text">Loading Sugarcane v230…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -5244,6 +5271,15 @@ function waitForSugarcaneAddons(){
               </div>
             </div>
 
+            <!-- Enable Viewing Preview -->
+            <div class="sb-toggle-row" style="padding:6px 10px 2px;">
+              <span class="sb-toggle-label" style="font-weight:600;font-size:12px;">Enable Viewing Preview</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="viewPreviewEnabled" checked onchange="toggleViewPreview(this.checked)"/>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
             <!-- Enable Lazy Pages -->
             <div class="sb-toggle-row" style="padding:6px 10px 2px;">
               <span class="sb-toggle-label" style="font-weight:600;font-size:12px;">Enable Lazy Pages</span>
@@ -5267,6 +5303,10 @@ function waitForSugarcaneAddons(){
             <!-- ── Layout (pages per row) ── -->
             <div style="height:1px;background:hsl(calc(var(--sc-h,210) + 0) calc(53.3% * var(--sc-s,1)) calc(94.1% + var(--sc-l,0%) * 0));margin:6px 10px 4px;"></div>
             <div class="vw-sub-title">Layout</div>
+            <div class="vw-mode-row" id="vwOrientRow">
+              <button class="vw-mode-btn active" data-orient="v" onclick="setPageOrient('v')" title="Vertical: pages under each other (default)"><svg class="vw-lay-ico" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="6" y="2.5" width="12" height="8" rx="1.2"/><rect x="6" y="13.5" width="12" height="8" rx="1.2"/></svg>Vertical</button>
+              <button class="vw-mode-btn" data-orient="h" onclick="setPageOrient('h')" title="Horizontal: pages beside each other"><svg class="vw-lay-ico" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="2.5" y="6" width="8" height="12" rx="1.2"/><rect x="13.5" y="6" width="8" height="12" rx="1.2"/></svg>Horizontal</button>
+            </div>
             <div class="vw-mode-row" id="vwLayoutRow">
               <button class="vw-mode-btn active" data-cols="1" onclick="setPageLayout(1)" title="One page per row (default)"><svg class="vw-lay-ico" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="7.00" y="3" width="10.00" height="18" rx="1.2"/></svg>One</button>
               <button class="vw-mode-btn" data-cols="2" onclick="setPageLayout(2)" title="Two pages side by side"><svg class="vw-lay-ico" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="3.00" y="3" width="8.25" height="18" rx="1.2"/><rect x="12.75" y="3" width="8.25" height="18" rx="1.2"/></svg>Two</button>
@@ -9071,7 +9111,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 226; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 230; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -19568,10 +19608,43 @@ function doWarpPage() {
 /* ═══════════════════════════════════════════════════════
    ZOOM
 ═══════════════════════════════════════════════════════ */
-function adjustZoom(d) { S.zoom = Math.max(30, Math.min(200, S.zoom + d)); applyZoom(); }
-function resetZoom() { S.zoom = 100; applyZoom(); }
+function adjustZoom(d) { zoomAt(S.zoom + d); }
+function resetZoom() { zoomAt(100); }
+/* Zoom keeping a screen point (fx,fy, relative to the editor viewport) fixed, so you can move anywhere on the page */
+function zoomAt(nz, fx, fy, noAnim) {
+  const wrap = document.getElementById('editorAreaWrapper');
+  const z0 = (S.zoom || 100) / 100;
+  nz = Math.max(30, Math.min(200, Math.round(nz)));
+  if (!wrap) { S.zoom = nz; applyZoom(); return; }
+  if (fx == null) { fx = wrap.clientWidth / 2; fy = wrap.clientHeight / 2; }
+  const ml0 = parseFloat(document.getElementById('editorArea').style.marginLeft) || 0;
+  const cx = (wrap.scrollLeft + fx - ml0) / z0, cy = (wrap.scrollTop + fy) / z0;
+  S.zoom = nz;
+  const area = document.getElementById('editorArea');
+  if (noAnim) area.classList.add('zooming');
+  applyZoom();
+  const z1 = nz / 100, ml1 = parseFloat(area.style.marginLeft) || 0;
+  wrap.scrollLeft = cx * z1 + ml1 - fx;
+  wrap.scrollTop = cy * z1 - fy;
+  showZoomMiniMap();
+}
+function _zoomBox() {
+  const area = document.getElementById('editorArea'), wrap = document.getElementById('editorAreaWrapper');
+  if (!area || !wrap) return;
+  const z = (S.zoom || 100) / 100;
+  /* top-left origin + margins that match the scaled size => the whole page is reachable by scrolling */
+  area.style.transformOrigin = '0 0';
+  area.style.alignSelf = 'flex-start';
+  wrap.style.justifyContent = 'flex-start';
+  area.style.marginLeft = '0px'; area.style.marginRight = '0px'; area.style.marginBottom = '0px';
+  const W = area.offsetWidth, H = area.offsetHeight;
+  area.style.marginRight = ((z - 1) * W) + 'px';
+  area.style.marginBottom = ((z - 1) * H) + 'px';
+  area.style.marginLeft = Math.max(0, (wrap.clientWidth - W * z) / 2) + 'px';
+}
 function applyZoom() {
   document.getElementById('editorArea').style.transform = `scale(${S.zoom / 100})`;
+  _zoomBox();
   const zStr = S.zoom + '%';
   const zd = document.getElementById('zoomDisplay');
   if (zd) zd.textContent = zStr;
@@ -19579,11 +19652,101 @@ function applyZoom() {
   if (vpZd) vpZd.textContent = zStr;
   syncResizeHandle();
 }
+window.addEventListener('resize', () => { try { if (S.zoom !== 100) _zoomBox(); } catch (e) {} });
+
+/* Mini-map (bottom right): pages in grey, current view in blue */
+let _zmmTimer = null, _zmmRaf = 0;
+function toggleViewPreview(on) {
+  try { localStorage.setItem('sc_view_preview', on ? '1' : '0'); } catch (e) {}
+  if (!on) { const mm = document.getElementById('zoomMiniMap'); if (mm) mm.classList.remove('show'); }
+}
+window.addEventListener('load', () => {
+  let on = true; try { on = localStorage.getItem('sc_view_preview') !== '0'; } catch (e) {}
+  const c = document.getElementById('viewPreviewEnabled'); if (c) c.checked = on;
+});
+function showZoomMiniMap() {
+  { const c = document.getElementById('viewPreviewEnabled'); if (c && !c.checked) return; }
+  cancelAnimationFrame(_zmmRaf);
+  _zmmRaf = requestAnimationFrame(() => {
+    const area = document.getElementById('editorArea'), wrap = document.getElementById('editorAreaWrapper');
+    if (!area || !wrap) return;
+    let mm = document.getElementById('zoomMiniMap');
+    if (!mm) { mm = document.createElement('div'); mm.id = 'zoomMiniMap'; mm.innerHTML = '<div class="zmm-box"></div>'; document.body.appendChild(mm); }
+    const z = (S.zoom || 100) / 100;
+    const wr = wrap.getBoundingClientRect();
+    /* current page = the one most visible in the viewport */
+    let best = null, bestA = -1;
+    area.querySelectorAll(':scope > .page-outer').forEach(o => {
+      const r = o.getBoundingClientRect();
+      const ov = Math.max(0, Math.min(r.right, wr.right) - Math.max(r.left, wr.left)) * Math.max(0, Math.min(r.bottom, wr.bottom) - Math.max(r.top, wr.top));
+      if (ov > bestA) { bestA = ov; best = o; }
+    });
+    if (!best) return;
+    const pg = best.querySelector('.page') || best;
+    const pr = pg.getBoundingClientRect();
+    const PW = pr.width / z, PH = pr.height / z;
+    if (!PW || !PH) return;
+    const sc = Math.min(90 / PW, 120 / PH);
+    const box = mm.firstChild;
+    box.style.width = PW * sc + 'px'; box.style.height = PH * sc + 'px';
+    box.innerHTML = '';
+    const clone = pg.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+    clone.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+    clone.style.cssText += ';position:absolute;left:0;top:0;margin:0;transform-origin:0 0;pointer-events:none;width:' + PW + 'px;height:' + PH + 'px;transform:scale(' + sc + ')';
+    box.appendChild(clone);
+    const x0 = Math.max(0, (wr.left - pr.left) / z), y0 = Math.max(0, (wr.top - pr.top) / z);
+    const x1 = Math.min(PW, (wr.right - pr.left) / z), y1 = Math.min(PH, (wr.bottom - pr.top) / z);
+    const vp = document.createElement('div');
+    vp.className = 'zmm-vp';
+    vp.style.cssText = `left:${x0 * sc}px;top:${y0 * sc}px;width:${Math.max(3, (x1 - x0) * sc)}px;height:${Math.max(3, (y1 - y0) * sc)}px`;
+    box.appendChild(vp);
+    mm.classList.add('show');
+    clearTimeout(_zmmTimer);
+    _zmmTimer = setTimeout(() => mm.classList.remove('show'), 1400);
+  });
+}
+(function () {
+  const bind = () => {
+    const wrap = document.getElementById('editorAreaWrapper'), area = document.getElementById('editorArea');
+    if (!wrap || wrap._pz) return; wrap._pz = true;
+    wrap.addEventListener('scroll', () => { if (!wrap._pinching) showZoomMiniMap(); }, { passive: true });
+    wrap.addEventListener('wheel', e => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      e.preventDefault();
+      const r = wrap.getBoundingClientRect();
+      zoomAt((S.zoom || 100) * Math.exp(-e.deltaY * 0.01), e.clientX - r.left, e.clientY - r.top);
+    }, { passive: false });
+    let pin = null;
+    const d2 = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+    wrap.addEventListener('touchstart', e => {
+      if (e.touches.length === 2) {
+        wrap._pinching = true; area.classList.add('zooming');
+        pin = { d: d2(e.touches), z: S.zoom || 100 };
+      }
+    }, { passive: true });
+    wrap.addEventListener('touchmove', e => {
+      if (!pin || e.touches.length !== 2) return;
+      e.preventDefault();
+      const r = wrap.getBoundingClientRect(), t = e.touches;
+      const mx = (t[0].clientX + t[1].clientX) / 2 - r.left, my = (t[0].clientY + t[1].clientY) / 2 - r.top;
+      /* anchor = content under the previous centre; moving two fingers also pans */
+      zoomAt(pin.z * d2(t) / pin.d, mx, my, true);
+    }, { passive: false });
+    const end = e => {
+      if (e.touches.length < 2 && pin) { pin = null; wrap._pinching = false; area.classList.remove('zooming'); showZoomMiniMap(); }
+    };
+    wrap.addEventListener('touchend', end, { passive: true });
+    wrap.addEventListener('touchcancel', end, { passive: true });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind); else bind();
+})();
 
 /* ═══════════════════════════════════════════════════════
    VIEWING DROPDOWN (SIDEBAR)
 ═══════════════════════════════════════════════════════ */
-const VW = { open: false, mode: 'editing', layout: '1-single', panelOpen: false };
+const VW = { open: false, mode: 'editing', layout: '1-single', panelOpen: false, orient: 'v' };
 
 /* Page under a screen point (any part of the page, margins included).
    Rect-based, so the element being dragged, selection overlays or handles
@@ -19614,10 +19777,12 @@ function setPageLayout(n, silent) {
   }
   VW.layout = n;
   if (area) {
-    area.classList.toggle('pl-cols', n > 1);
-    if (n > 1) area.style.setProperty('--pl-cols', n); else area.style.removeProperty('--pl-cols');
+    const _h = VW.orient === 'h';
+    area.classList.toggle('pl-h', _h);
+    area.classList.toggle('pl-cols', n > 1 || _h);
+    if (n > 1 || _h) area.style.setProperty('--pl-cols', n); else area.style.removeProperty('--pl-cols');
   }
-  document.body.classList.toggle('pl-on', n > 1);
+  document.body.classList.toggle('pl-on', n > 1 || VW.orient === 'h');
   document.querySelectorAll('#vwLayoutRow .vw-mode-btn').forEach(b =>
     b.classList.toggle('active', parseInt(b.dataset.cols, 10) === n));
   const row = document.getElementById('vwLayoutRow');
@@ -19637,6 +19802,13 @@ function setPageLayout(n, silent) {
   }
   try { syncResizeHandle(); } catch (e) {}
   try { updatePageIndicator(); } catch (e) {}
+  try { applyZoom(); } catch (e) {}
+}
+function setPageOrient(o, silent) {
+  VW.orient = (o === 'h') ? 'h' : 'v';
+  document.querySelectorAll('#vwOrientRow .vw-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.orient === VW.orient));
+  if (!silent) { try { localStorage.setItem('sc_page_orient', VW.orient); } catch (e) {} }
+  setPageLayout(VW.layout, silent);
 }
 /* Touch devices have no hover: first tap opens the picker, next tap chooses */
 document.addEventListener('click', e => {
@@ -19649,6 +19821,9 @@ document.addEventListener('click', e => {
 window.addEventListener('load', () => {
   let n = 1;
   try { n = parseInt(localStorage.getItem('sc_page_layout'), 10) || 1; } catch (e) {}
+  let o = 'v';
+  try { o = localStorage.getItem('sc_page_orient') === 'h' ? 'h' : 'v'; } catch (e) {}
+  if (o === 'h') { VW.orient = 'h'; setPageOrient('h', true); }
   if (n > 1) setPageLayout(n, true);
 });
 
@@ -22728,23 +22903,58 @@ function renderPageManagerList() {
     item.appendChild(info);
     item.appendChild(check);
 
-    let pressTimer = null, longPressed = false;
-    const startPress = () => {
-      longPressed = false;
-      pressTimer = setTimeout(() => {
-        longPressed = true;
-        if (PGMGR.multiMode) togglePageManagerMultiSelect(n);
-        else enterPageManagerMultiMode(n);
-      }, 480);
+    /* Swipe: pull left = page options (single tap actions), pull right = select, back to centre = deselect */
+    const TH = 46;
+    let sx = null, sy = 0, zone = 'c', dragged = false, pid = null, enteredMulti = false;
+    const setZone = (nz) => {
+      if (nz === zone) return;
+      const prev = zone; zone = nz;
+      const detail = document.getElementById('pgmgrDetail'), bar = document.getElementById('pgmgrMultiBar');
+      item.classList.toggle('swipe-l', zone === 'l');
+      item.classList.toggle('swipe-r', zone === 'r');
+      if (navigator.vibrate) { try { navigator.vibrate(10); } catch (e) {} }
+      if (prev === 'l') { PGMGR.selected = null; if (detail) detail.style.display = 'none'; item.classList.remove('selected'); }
+      if (prev === 'r') {
+        PGMGR.multiSelected.delete(n);
+        if (enteredMulti && !PGMGR.multiSelected.size) { PGMGR.multiMode = false; if (bar) bar.style.display = 'none'; }
+        else updatePageManagerMultiCount();
+        item.classList.remove('selected');
+      }
+      if (zone === 'l') {
+        if (PGMGR.multiMode) { PGMGR.multiMode = false; PGMGR.multiSelected = new Set(); if (bar) bar.style.display = 'none'; }
+        PGMGR.selected = n; if (detail) detail.style.display = 'block'; item.classList.add('selected'); _pgmgrRefreshStats();
+      } else if (zone === 'r') {
+        if (!PGMGR.multiMode) { enteredMulti = true; PGMGR.multiMode = true; PGMGR.selected = null; PGMGR.multiSelected = new Set(); if (detail) detail.style.display = 'none'; }
+        PGMGR.multiSelected.add(n); if (bar) bar.style.display = 'block'; item.classList.add('selected'); updatePageManagerMultiCount();
+      }
     };
-    const cancelPress = () => clearTimeout(pressTimer);
-    item.addEventListener('mousedown', startPress);
-    item.addEventListener('touchstart', startPress, { passive: true });
-    ['mouseup', 'mouseleave', 'touchend', 'touchcancel'].forEach(ev => item.addEventListener(ev, cancelPress));
+    item.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      sx = e.clientX; sy = e.clientY; zone = 'c'; dragged = false; pid = e.pointerId; enteredMulti = false;
+    });
+    item.addEventListener('pointermove', e => {
+      if (sx === null || e.pointerId !== pid) return;
+      const dx = e.clientX - sx, dy = e.clientY - sy;
+      if (!dragged) {
+        if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy)) return;
+        dragged = true; item.classList.add('swiping');
+        try { item.setPointerCapture(pid); } catch (er) {}
+      }
+      item.style.transform = `translateX(${Math.max(-70, Math.min(70, dx * 0.6))}px)`;
+      setZone(dx <= -TH ? 'l' : dx >= TH ? 'r' : 'c');
+    });
+    const endSwipe = () => {
+      if (sx === null) return;
+      sx = null;
+      if (!dragged) return;
+      item.style.transform = ''; item.classList.remove('swiping');
+      setTimeout(() => { dragged = false; }, 0);
+      renderPageManagerList();
+    };
+    ['pointerup', 'pointercancel'].forEach(ev => item.addEventListener(ev, endSwipe));
     item.addEventListener('click', () => {
-      if (longPressed) { longPressed = false; return; }
+      if (dragged) return;
       if (PGMGR.multiMode) togglePageManagerMultiSelect(n);
-      else selectPageManagerPage(n);
     });
 
     return item;
@@ -44427,7 +44637,9 @@ window.openMapModal=function(img){
       b.innerHTML=`<span class="material-symbols-outlined">${icon}</span>${label}`;
       b.addEventListener('click',e=>{ e.stopPropagation(); e.preventDefault(); closeMenu(); fn&&fn(); }); return b; };
     menu.append(mk('','note_add','Before',insertBeforeLast), mk('apb-cancel','close','Cancel'), mk('','post_add','After',()=>addNewPage()));
-    const w=btn.offsetWidth, h=Math.max(btn.offsetHeight,48); menu.style.width=w+'px'; menu.style.height=h+'px'; menu.style.minHeight=h+'px'; btn.after(menu); btn.style.display='none';
+    const _v=!!btn.closest('.pl-h'); let w=btn.offsetWidth, h=Math.max(btn.offsetHeight,48);
+    if(_v){ menu.classList.add('apb-v'); w=Math.max(w,56); h=3*52+16; }
+    menu.style.width=w+'px'; menu.style.height=h+'px'; menu.style.minHeight=h+'px'; btn.after(menu); btn.style.display='none';
     setTimeout(()=>document.addEventListener('pointerdown',outside,true),0);
   }
   let lastType='mouse';
