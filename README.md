@@ -6,8 +6,11 @@
 
 
 ### 🔹mahi902.GitHub.io/Oryn
-_Last updated: Oct 30, 2026_
+_Last updated: Nov 6, 2026_
 
+> [!WARNING]
+> **This README is out of date!**
+> Some information may no longer reflect the current state of Oryn. An updated version is coming soon.
 
 ## Introduction
 
