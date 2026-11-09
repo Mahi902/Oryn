@@ -7,7 +7,7 @@
 <title>Sugarcane Editor</title>
 <meta name="description" content="Sugarcane Editor: a powerful all-in-one online editor from the Oryn suite. Write, design and edit with add-ons and extensions.">
 <meta name="keywords" content="Sugarcane Editor, SCEditor, DocuWrite Pro, sugarcane, sca add-ons, editor add-ons, extensions, online editor, document editor, online document editor, free document editor, Word alternative, Google Docs alternative, WYSIWYG editor, rich text editor, text editor, write documents online, A4 editor, docs, office, word processor, online word processor, create documents, edit documents, format documents, export document, export PDF, export DOCX, export HTML, print document, page layout, headings, fonts, tables, lists, templates, document templates, resume maker, letter writer, report writer, essay writer, Oryn, Oryn app, Oryn online, Mohtadi Azad Mahi, Education By Mohtadi Azad, mahi902, free online tools, online tools, web tools, browser tools, no signup, no login, no ads, no credit card, free forever, works in browser, client-side, privacy friendly, offline friendly, PWA, progressive web app, productivity tools, productivity suite, document suite, all-in-one workspace, online workspace, Android app, mobile friendly, dark mode, open source, GitHub Pages, Toolstructer, instant, fast, easy to use, secure, no installation, no server upload">
-<meta name="sceditor-version" content="232">
+<meta name="sceditor-version" content="233">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -4271,7 +4271,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v232…</p>
+    <p class="loading-text">Loading Sugarcane v233…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -9144,7 +9144,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 232; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 233; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -42728,15 +42728,38 @@ body.dark .sc-dz.hot{background:hsl(calc(var(--sc-h,210) + -3.3) calc(89% * var(
 .sc-mg-sb .material-symbols-outlined{font-size:18px}
 .sc-mg-sb.active{background:var(--ui-raise,#fff);color:var(--ui-text);box-shadow:var(--ui-shadow-sm)}
 .sc-mg-sb:disabled,.sc-mg-ib2:disabled{opacity:.4;cursor:not-allowed}
-.sc-rm-box{padding:0!important;width:min(980px,96vw)!important;max-width:none!important;height:min(720px,92dvh);max-height:none!important;display:flex;flex-direction:column;overflow:hidden!important;background:hsl(calc(var(--sc-h,210) + 30) calc(24% * var(--sc-s,1)) 96.1%)!important}
-body.dark .sc-rm-box{background:#000!important}
-.sc-rm-hdr{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 14px;flex-shrink:0}
-.sc-rm-hdr .mtitle{margin:0}
-.sc-rm-imp{padding:0 20px 12px;margin:0;flex-shrink:0}
-.sc-rm-box .rec-body{min-height:0}
+.sc-rm-box{width:min(96vw,880px)}
+.sc-rm-box,.sc-imp-box{padding:0!important;overflow:hidden!important;display:flex;flex-direction:column}
+.sc-rm-box .scf-flow,.sc-imp-box .scf-flow{padding:16px 24px 18px;min-height:0;overflow-y:auto}
+.sc-rm-box .mfooter .mbtn,#scMgFootSel .mbtn{display:inline-flex;align-items:center;gap:6px}
+.sc-rm-box .mfooter .mbtn:disabled{opacity:.5;pointer-events:none}
+.sc-rm-card{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-y}
+.sc-rm-card.holding::after{content:'';position:absolute;inset:0;background:var(--scf-a-soft);transform-origin:left center;animation:scRmHold 2.5s linear forwards;pointer-events:none;z-index:3}
+@keyframes scRmHold{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.sc-rm-card.sel{box-shadow:0 0 0 2px var(--scf-a)}
+.sc-rm-chk{position:absolute;top:8px;left:8px;width:22px;height:22px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center;z-index:4;color:#fff}
+.sc-rm-chk .material-symbols-outlined{font-size:15px;opacity:0}
+.sc-rm-card.sel .sc-rm-chk{background:var(--scf-a);border-color:var(--scf-a)}
+.sc-rm-card.sel .sc-rm-chk .material-symbols-outlined{opacity:1}
+.sc-rm-sel .sc-rm-card{cursor:pointer}
+.sc-rm-card{cursor:grab}
+.sc-rm-sel .sc-rm-card.sel{touch-action:none}
+.sc-rm-box .mbtn .material-symbols-outlined,.sc-rm-box .scf-btn .material-symbols-outlined{font-size:16px}
+.sc-rm-box .mtitle,.sc-imp-box .mtitle{display:flex;align-items:center}
+.sc-hold-btn{position:relative!important;overflow:hidden;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.sc-hold-btn.holding::after{content:'';position:absolute;inset:0;background:currentColor;opacity:.3;transform-origin:left center;animation:scRmHold 2.5s linear forwards;pointer-events:none}
+.sc-rm-del.holding::after{background:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(65.1% * var(--sc-rs,1)) calc(50.6% + var(--sc-rl,0%)));opacity:.55}
+.sc-rm-card.dragging{background:transparent!important;box-shadow:none!important;outline:2px dashed var(--scf-a);outline-offset:-2px}
+.sc-rm-card.dragging>*{visibility:hidden}
+.sc-rm-ghost{position:fixed!important;z-index:40000;margin:0;pointer-events:none;transform:scale(1.05) rotate(1.5deg);box-shadow:0 12px 28px rgba(0,0,0,.28)!important;transition:none!important}
+.sc-rm-sel .sc-rm-card .rec-grid-card-dots{display:none}
+.sc-rm-scroll{max-height:min(54vh,480px);overflow-y:auto;padding:2px 2px 10px}
+.sc-imp-box{max-width:560px}
+.scf-card:disabled{opacity:.5;pointer-events:none}
 .sc-rm-card{cursor:default}.sc-rm-card:active{transform:none;opacity:1}
 .sc-rm-card .rec-grid-card-cover img{width:100%;height:100%;object-fit:cover;display:block}
-.sc-rm-card .rec-grid-card-cover>.material-symbols-outlined{font-size:38px;color:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1))}
+.sc-rm-card .rec-grid-card-cover>.material-symbols-outlined{font-size:38px;color:var(--ui-muted)}
+.sc-imp-box .scf-card[data-dest] .material-symbols-outlined{color:var(--ui-text)}
 .sc-rm-card .rec-grid-card-dots{position:static;flex:none}
 .sc-rm-card .rec-grid-card-dots:disabled{opacity:.4;cursor:not-allowed}
 .sc-rm-card .sc-rm-del:hover{background:hsl(calc(3.2 * var(--sc-hk,1) + var(--sc-rb,0)) calc(70% * var(--sc-rs,1)) calc(55% + var(--sc-rl,0%)) / .15);color:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(65.1% * var(--sc-rs,1)) calc(50.6% + var(--sc-rl,0%)))}
@@ -42782,7 +42805,21 @@ body.dark .sc-mg-clr-fill{background:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb
 'use strict';
 const toast=(m,t)=>{try{showToast(m,t||'info')}catch(e){}};
 const tb=document.querySelector('.toolbar');if(!tb)return;
-const ic=n=>'<span class="material-symbols-outlined">'+n+'</span>';
+/* Two-tone icons in the editor's own icon system (data-dwi masks: 28% fill + 1.8 stroke).
+   Existing icons are reused (upload_file, smartphone, cloud, cloud_upload, delete, check…); only the missing ones are added here. */
+(function(){
+  const duo=(fill,line)=>'url("data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="'+fill+'" transform="translate(1.4 1.4)" fill-opacity=".28"/><path d="'+line+'" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>')+'")';
+  const DRIVE='M8.5 4h7L21 13.5l-3.5 6h-11L3 13.5z';
+  const defs={
+    inventory_2:[ 'M5 10h14v9a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19z','M5 10h14v9a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19z M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V10H4z M10 14h4' ],
+    add_to_drive:[ DRIVE, DRIVE+' M8.5 4L15 15.5M9 15.5h12' ],
+    move_to_inbox:[ 'M3 13l2.5-6.5h13L21 13v5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18z','M3 13l2.5-6.5h13L21 13v5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18z M3 13h5l1.5 2.5h5L16 13h5' ]
+  };
+  let css='';
+  for(const n in defs){css+='[data-dwi="'+n+'"]{--dwi:'+duo(defs[n][0],defs[n][1])+'}';if(window.DWI)DWI.register(n)}
+  const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
+})();
+const ic=n=>'<span class="material-symbols-outlined">'+((window.DWI&&DWI.has(n))?n:'widgets')+'</span>';
 const pt=e=>e.touches&&e.touches[0]?e.touches[0]:(e.changedTouches&&e.changedTouches[0]?e.changedTouches[0]:e);
 /* Persistence: IndexedDB (no 5 MB quota; images are stored twice - html + thumb - so sessionStorage filled up and
    save() silently failed, leaving the last *successful* save to come back after a reload). sessionStorage is now only a
@@ -43043,6 +43080,7 @@ function chipDrag(e,it){
    Signed in with Google: the tray can keep items on this device (IndexedDB, as before) or on the cloud
    (one small JSON file in the user's Drive, shared by every browser they sign in on). */
 const CF='sceditor-storage-tray.json';
+let cloudFails=0,cloudErr='';
 const isOn=()=>{try{return typeof _googleUser!=='undefined'&&!!_googleUser}catch(e){return false}};
 try{const v=localStorage.getItem('sc_stash_view');if(v==='device'||v==='cloud'||v==='both')view=v}catch(e){}
 function eff(){return isOn()?view:'device'}
@@ -43068,9 +43106,15 @@ function loadCloud(){
     const mem=items.filter(i=>i.src==='cloud');
     const got=list.filter(x=>x&&x.html).map(x=>({id:uid++,html:x.html,icon:x.icon||'widgets',label:x.label||'Item',thumb:x.th?thumbOf(x.html):(x.thumb||undefined),src:'cloud'}));
     items=items.filter(i=>i.src!=='cloud').concat(got,mem);
-    cloudSig=got.map(i=>i.id).join(',');cloudLoaded=true;
-    apply();
-  })().catch(e=>{cloudNext=Date.now()+15000;console.warn('[Stash cloud load]',e);toast('Couldn’t reach your cloud storage — will retry','warning')}).then(()=>{cloudBusy=false;renderMgr()});
+    cloudSig=got.map(i=>i.id).join(',');cloudLoaded=true;cloudFails=0;cloudErr='';
+    try{apply()}catch(e){console.warn('[Stash render]',e)}
+  })().catch(e=>{
+    cloudErr=String((e&&e.message)||e||'').slice(0,140);
+    cloudNext=Date.now()+Math.min(15000*Math.pow(2,cloudFails),300000);
+    console.warn('[Stash cloud load]',e);
+    if(cloudFails===0)toast('Couldn’t reach your cloud storage'+(cloudErr?' ('+cloudErr+')':'')+' — will retry','warning');
+    cloudFails++;
+  }).then(()=>{cloudBusy=false;try{renderMgr()}catch(e){console.warn('[Stash render]',e)}});
 }
 function cloudSave(){
   if(!cloudLoaded||!isOn()||sigOf()===cloudSig)return;
@@ -43121,27 +43165,56 @@ function stArrows(){
 
 /* ═══ Manage modal: choose Device / Cloud / Both, delete, rearrange, import images ═══ */
 const mdl=document.createElement('div');mdl.className='modal';mdl.id='scStashMdl';
-mdl.innerHTML='<div class="mbox sc-rm-box">'+
- '<div class="sc-rm-hdr"><h2 class="mtitle">'+ic('inventory_2')+'<span>Stored</span></h2><button type="button" class="mclose" id="scMgClose">'+ic('close')+'</button></div>'+
- '<div class="rec-folder-tabs" id="scMgTabs" style="display:none">'+
-   '<button type="button" class="rec-folder-tab active" data-t="device">'+ic('smartphone')+'On this device</button>'+
-   '<button type="button" class="rec-folder-tab" data-t="cloud">'+ic('cloud')+'Drive</button></div>'+
- '<div class="sc-mg-imp sc-rm-imp">'+
-   '<button type="button" class="sc-mg-ib2" data-d="device">'+ic('add_photo_alternate')+'From device</button>'+
-   '<button type="button" class="sc-mg-ib2" data-d="cloud">'+ic('add_to_drive')+'From Drive</button></div>'+
- '<div class="rec-sync-bar" id="scMgNote"><div class="rec-sync-spinner"></div><span>Connecting to your Drive…</span></div>'+
- '<div class="rec-body"><div class="rec-grid" id="scMgList"></div></div></div>';
+mdl.innerHTML='<div class="mbox scf-box sc-rm-box" data-stage="main"><div class="split-modal-header"><h2 class="mtitle"><span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;margin-right:8px;color:var(--ui-text)">inventory_2</span>Stored</h2><button type="button" class="mclose" id="scMgClose"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button></div>'+
+ '<div class="scf-flow"><section class="scf-stage on" data-stage="main">'+
+   '<div class="scf-seg" id="scMgTabs" style="display:none">'+
+     '<button type="button" class="scf-seg-btn on" data-t="device">'+ic('smartphone')+'On this device</button>'+
+     '<button type="button" class="scf-seg-btn" data-t="cloud">'+ic('cloud')+'Drive</button></div>'+
+   '<div class="scf-status" id="scMgNote" style="display:none">Connecting to your Drive…</div>'+
+   '<div class="sc-rm-scroll"><div class="rec-grid" id="scMgList"></div></div>'+
+ '</section></div>'+
+ '<div class="mfooter" id="scMgFootNorm" style="padding:12px 24px;border-top:1px solid var(--ui-divider);margin-top:0"><button type="button" class="mbtn primary" id="scMgImport">'+ic('upload_file')+'Import</button></div>'+
+ '<div class="mfooter" id="scMgFootSel" style="display:none;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 24px;border-top:1px solid var(--ui-divider);margin-top:0"><span class="scf-status" id="scMgSelCnt" style="margin:0"></span><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="mbtn sec" id="scMgSelCancel">Cancel</button><button type="button" class="mbtn sec" id="scMgSelMove"></button><button type="button" class="mbtn danger-btn sc-hold-btn" id="scMgSelDel" title="Hold for 3 seconds to delete">'+ic('delete')+'Delete</button></div></div></div>';
 document.body.appendChild(mdl);
 const fi=document.createElement('input');fi.type='file';fi.accept='image/*';fi.multiple=true;fi.style.display='none';mdl.appendChild(fi);
 const listEl=mdl.querySelector('#scMgList'),noteEl=mdl.querySelector('#scMgNote');
 let mgTab='device';
+const imp=document.createElement('div');imp.className='modal';imp.id='scImpMdl';
+imp.innerHTML='<div class="mbox scf-box sc-imp-box" data-stage="source"><div class="split-modal-header"><h2 class="mtitle"><span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;margin-right:8px;color:var(--ui-text)">upload_file</span>Import</h2><button type="button" class="mclose" id="scImpClose"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button></div>'+
+ '<div class="scf-flow">'+
+  '<section class="scf-stage on" data-stage="source"><div class="scf-cards">'+
+   '<button type="button" class="scf-card" data-src="device">'+ic('upload_file')+'<b>Import from Device</b><small>Choose images from this device.</small></button>'+
+   '<button type="button" class="scf-card" data-src="cloud">'+ic('add_to_drive')+'<b>Import from Drive</b><small id="scImpDriveSm">Pick images from your Google Drive.</small></button>'+
+  '</div></section>'+
+  '<section class="scf-stage" data-stage="dest"><div class="scf-cards">'+
+   '<button type="button" class="scf-card" data-dest="device">'+ic('smartphone')+'<b>Store on Device</b><small>Keep them on this browser only.</small></button>'+
+   '<button type="button" class="scf-card" data-dest="cloud">'+ic('cloud')+'<b>Store on the Cloud</b><small id="scImpCloudSm">Save them to your Drive so they follow you.</small></button>'+
+  '</div><button type="button" class="scf-back" id="scImpBack"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></span>Back</button></section>'+
+ '</div></div>';
+document.body.appendChild(imp);
+let impSrc='device';
 const mdlOpen=()=>mdl.classList.contains('open');
-function openMgr(){openMdl('scStashMdl');renderMgr()}
+function openMgr(){selMode=false;sel.clear();delArm=false;openMdl('scStashMdl');renderMgr()}
 bar.querySelector('.sc-st-title').addEventListener('click',openMgr);
 mdl.querySelector('#scMgClose').onclick=()=>closeMdl('scStashMdl');
 mdl.addEventListener('mousedown',e=>{if(e.target===mdl)closeMdl('scStashMdl')});
-mdl.querySelectorAll('.rec-folder-tab').forEach(b=>b.onclick=()=>{mgTab=b.dataset.t;renderMgr()});
-mdl.querySelectorAll('.sc-mg-ib2[data-d]').forEach(b=>b.onclick=()=>{if(b.disabled)return;if(b.dataset.d==='cloud')pickFromDrive();else fi.click()});
+mdl.querySelectorAll('.scf-seg-btn[data-t]').forEach(b=>b.onclick=()=>{mgTab=b.dataset.t;selMode=false;sel.clear();delArm=false;renderMgr()});
+function openImp(){
+  const on=isOn();
+  imp.querySelectorAll('[data-src="cloud"],[data-dest="cloud"]').forEach(b=>b.disabled=!on);
+  imp.querySelector('#scImpDriveSm').textContent=on?'Pick images from your Google Drive.':'Sign in with Google to use Drive.';
+  imp.querySelector('#scImpCloudSm').textContent=on?'Save them to your Drive so they follow you.':'Sign in with Google to use Drive.';
+  SCFlow.go('scImpMdl','source');openMdl('scImpMdl',{stack:true});
+}
+mdl.querySelector('#scMgImport').onclick=openImp;
+imp.querySelector('#scImpClose').onclick=()=>closeMdl('scImpMdl');
+imp.addEventListener('mousedown',e=>{if(e.target===imp)closeMdl('scImpMdl')});
+imp.querySelector('#scImpBack').onclick=()=>SCFlow.go('scImpMdl','source');
+imp.querySelectorAll('[data-src]').forEach(b=>b.onclick=()=>{if(b.disabled)return;impSrc=b.dataset.src;SCFlow.go('scImpMdl','dest')});
+imp.querySelectorAll('[data-dest]').forEach(b=>b.onclick=()=>{
+  if(b.disabled)return;const dest=b.dataset.dest;
+  if(impSrc==='cloud')pickFromDrive(dest);else{fi._dest=dest;fi.click()}
+});
 function fileToItem(f){return new Promise((res,rej)=>{
   if(!/^image\//.test(f.type))return rej(new Error('not an image'));
   const rd=new FileReader();rd.onerror=()=>rej(rd.error);
@@ -43158,16 +43231,16 @@ function fileToItem(f){return new Promise((res,rej)=>{
     };im.src=rd.result};
   rd.readAsDataURL(f);
 })}
-const impTo=()=>(mgTab==='cloud'&&isOn())?'cloud':'device';
 async function importFiles(fs,dest){
   let ok=0;
   for(const f of fs){try{const r=await fileToItem(f);r.src=dest;items.push(r);ok++}catch(e){}}
-  if(ok&&!shown({src:dest}))setView('both');else apply();
+  mgTab=dest;if(ok&&!shown({src:dest}))setView('both');else apply();
+  closeMdl('scImpMdl');
   toast(ok?'Imported '+ok+' image'+(ok>1?'s':'')+(dest==='cloud'?' to Drive':' to this device'):'No images could be imported',ok?'success':'warning');
 }
-fi.onchange=()=>{const fs=[...fi.files];fi.value='';if(fs.length)importFiles(fs,impTo())};
+fi.onchange=()=>{const fs=[...fi.files];fi.value='';if(fs.length)importFiles(fs,fi._dest||'device')};
 /* From Drive: Google Picker (drive.file scope), then download each pick and store it in the cloud tray */
-async function pickFromDrive(){
+async function pickFromDrive(dest){
   if(!isOn())return;
   try{
     await _loadPicker();
@@ -43193,7 +43266,7 @@ async function pickFromDrive(){
             fs.push(new File([b],doc.name||'Image',{type:b.type&&/^image\//.test(b.type)?b.type:(doc.mimeType||'image/png')}));
           }catch(e){console.warn('[Sugarcane] drive import',e)}
         }
-        await importFiles(fs,impTo());
+        await importFiles(fs,dest);
       })
       .build().setVisible(true);
   }catch(e){
@@ -43201,26 +43274,143 @@ async function pickFromDrive(){
     toast('Could not open the Drive picker','error');
   }
 }
+let busy=0,pendingRender=false;
+function busyInc(){busy++}
+function busyDec(){busy=Math.max(0,busy-1);if(!busy&&pendingRender){pendingRender=false;renderMgr()}}
+let selMode=false,dragSuppress=false;const sel=new Set();let delArm=false,delT=null;
+function exitSel(){selMode=false;sel.clear();delArm=false;clearTimeout(delT);renderMgr()}
+function toggleSel(it){if(sel.has(it))sel.delete(it);else sel.add(it);if(!sel.size){exitSel();return}renderMgr()}
+const HOLD_IDLE=500,HOLD_ANIM=2500;
+/* Hold a card: first 0.5s nothing shows; if still held, 2.5s fill animation, then selection mode starts */
+/* Drag a selected card to a new position (reorders the stored list) */
+function startDrag(e,card,it){
+  const sx=e.clientX,sy=e.clientY,sc=listEl.parentElement;
+  let ghost=null,moved=false,lx=sx,ly=sy,tick=null,gw=0,gh=0;
+  busyInc();
+  try{card.setPointerCapture(e.pointerId)}catch(_){}
+  const place=()=>{
+    if(!ghost)return;
+    ghost.style.left=(lx-gw/2)+'px';ghost.style.top=(ly-gh/2)+'px';
+    for(const c of listEl.children){
+      if(c===card||!c._it)continue;const b=c.getBoundingClientRect();
+      if(lx>b.left&&lx<b.right&&ly>b.top&&ly<b.bottom){listEl.insertBefore(card,lx<b.left+b.width/2?c:c.nextSibling);break}
+    }
+    const r=sc.getBoundingClientRect();
+    if(ly<r.top+28)sc.scrollTop-=10;else if(ly>r.bottom-28)sc.scrollTop+=10;
+  };
+  const mv=ev=>{
+    lx=ev.clientX;ly=ev.clientY;
+    if(!moved){
+      if(Math.hypot(lx-sx,ly-sy)<8)return;
+      moved=true;const b=card.getBoundingClientRect();gw=b.width;gh=b.height;
+      ghost=card.cloneNode(true);ghost.classList.add('sc-rm-ghost');ghost.style.width=gw+'px';
+      const cs=getComputedStyle(card);
+      ghost.style.setProperty('--scf-a',cs.getPropertyValue('--scf-a'));ghost.style.setProperty('--scf-a-soft',cs.getPropertyValue('--scf-a-soft'));
+      document.body.appendChild(ghost);card.classList.add('dragging');tick=setInterval(place,40);
+    }
+    place();
+  };
+  const up=()=>{
+    card.removeEventListener('pointermove',mv);card.removeEventListener('pointerup',up);card.removeEventListener('pointercancel',up);
+    clearInterval(tick);
+    if(!moved){busyDec();return}
+    ghost.remove();card.classList.remove('dragging');busyDec();
+    dragSuppress=true;setTimeout(()=>{dragSuppress=false},60);
+    const order=[...listEl.children].map(c=>c._it).filter(Boolean);
+    const vis=items.filter(i=>mgTab==='cloud'?i.src==='cloud':i.src!=='cloud'),slots=[];
+    items.forEach((i,k)=>{if(vis.includes(i))slots.push(k)});
+    order.forEach((i,k)=>{items[slots[k]]=i});
+    apply();
+  };
+  card.addEventListener('pointermove',mv);card.addEventListener('pointerup',up);card.addEventListener('pointercancel',up);
+}
+function bindHold(card,it){
+  card._it=it;
+  let t1=null,t2=null,sx=0,sy=0,down=false;
+  const reset=()=>{if(down){down=false;busyDec()}clearTimeout(t1);clearTimeout(t2);card.classList.remove('holding')};
+  card.addEventListener('pointerdown',e=>{
+    if((e.button!==undefined&&e.button!==0)||e.target.closest('button'))return;
+    if(e.pointerType!=='touch'||(selMode&&sel.has(it)))startDrag(e,card,it);
+    if(selMode)return;
+    down=true;busyInc();sx=e.clientX;sy=e.clientY;
+    t1=setTimeout(()=>{
+      if(!down)return;
+      card.classList.add('holding');
+      t2=setTimeout(()=>{if(!down)return;reset();selMode=true;sel.clear();sel.add(it);renderMgr()},HOLD_ANIM);
+    },HOLD_IDLE);
+  });
+  card.addEventListener('pointermove',e=>{if(down&&Math.hypot(e.clientX-sx,e.clientY-sy)>10)reset()});
+  ['pointerup','pointerleave','pointercancel'].forEach(t=>card.addEventListener(t,reset));
+  card.addEventListener('contextmenu',e=>e.preventDefault());
+  card.addEventListener('click',()=>{if(selMode&&!dragSuppress)toggleSel(it)});
+}
+function holdAct(b,fn){
+  let t1=null,t2=null,down=false;
+  const reset=()=>{if(down){down=false;busyDec()}clearTimeout(t1);clearTimeout(t2);b.classList.remove('holding')};
+  const start=e=>{
+    if(b.disabled||down)return;
+    if(e.type==='pointerdown'&&e.button!==undefined&&e.button!==0)return;
+    down=true;busyInc();
+    t1=setTimeout(()=>{
+      if(!down)return;
+      b.classList.add('holding');
+      t2=setTimeout(()=>{if(!down)return;reset();fn()},HOLD_ANIM);
+    },HOLD_IDLE);
+  };
+  const stop=e=>{
+    const early=down&&!b.classList.contains('holding')&&e&&(e.type==='pointerup'||e.type==='keyup');
+    reset();if(early)toast('Hold for 3 seconds to delete','info');
+  };
+  b.addEventListener('pointerdown',e=>{e.stopPropagation();start(e)});
+  ['pointerup','pointerleave','pointercancel'].forEach(t=>b.addEventListener(t,stop));
+  b.addEventListener('keydown',e=>{if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();start(e)}});
+  b.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter')stop(e)});
+  b.addEventListener('contextmenu',e=>e.preventDefault());
+  b.onclick=e=>{e.stopPropagation();e.preventDefault()};
+}
+mdl.querySelector('#scMgSelCancel').onclick=exitSel;
+mdl.querySelector('#scMgSelMove').onclick=()=>{
+  if(!sel.size)return;const to=mgTab==='cloud'?'device':'cloud',n=sel.size;
+  sel.forEach(i=>{i.src=to});selMode=false;sel.clear();delArm=false;apply();
+  toast('Moved '+n+' item'+(n>1?'s':'')+(to==='cloud'?' to Drive':' to this device'),'success');
+};
+holdAct(mdl.querySelector('#scMgSelDel'),()=>{
+  if(!sel.size)return;
+  const n=sel.size;items=items.filter(i=>!sel.has(i));selMode=false;sel.clear();apply();
+  toast('Deleted '+n+' item'+(n>1?'s':''),'success');
+});
 function renderMgr(){
   if(!mdlOpen())return;
+  if(busy>0){pendingRender=true;return}
   const on=isOn();if(!on)mgTab='device';
   mdl.querySelector('#scMgTabs').style.display=on?'flex':'none';
-  mdl.querySelectorAll('.rec-folder-tab').forEach(b=>b.classList.toggle('active',b.dataset.t===mgTab));
-  mdl.querySelector('.sc-mg-ib2[data-d="cloud"]').disabled=!on;
-  noteEl.classList.toggle('visible',on&&!cloudLoaded);
+  mdl.querySelectorAll('.scf-seg-btn[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===mgTab));
+  noteEl.style.display=(on&&!cloudLoaded)?'block':'none';
+  mdl.firstElementChild.classList.toggle('sc-rm-sel',selMode);
+  mdl.querySelector('#scMgFootNorm').style.display=selMode?'none':'flex';
+  mdl.querySelector('#scMgFootSel').style.display=selMode?'flex':'none';
+  if(selMode){
+    const to=mgTab==='cloud'?'device':'cloud',mv=mdl.querySelector('#scMgSelMove');
+    mdl.querySelector('#scMgSelCnt').textContent=sel.size+' selected';
+    mv.innerHTML=ic(to==='cloud'?'cloud_upload':'smartphone')+(to==='cloud'?'Move to Drive':'Move to device');
+    mv.disabled=to==='cloud'&&(!on||!cloudLoaded);
+  }
   listEl.innerHTML='';
   const vis=items.filter(i=>mgTab==='cloud'?i.src==='cloud':i.src!=='cloud');
   if(!vis.length){
     const e=document.createElement('div');e.className='rec-empty';e.style.gridColumn='1/-1';
-    e.innerHTML='<span class="material-symbols-outlined" style="font-size:52px;opacity:.45">'+(mgTab==='cloud'?'cloud':'inventory_2')+'</span><div class="rec-empty-title">Nothing here yet</div><div class="rec-empty-sub">'+(mgTab==='cloud'?'Move items to Drive, or import images from Drive.':'Drag an item onto the toolbar, or import images.')+'</div>';
+    const waiting=mgTab==='cloud'&&on&&!cloudLoaded,failed=waiting&&!cloudBusy&&cloudFails>0;
+    e.innerHTML=ic(mgTab==='cloud'?'cloud':'inventory_2').replace('class="material-symbols-outlined"','class="material-symbols-outlined" style="font-size:52px;opacity:.45"')+'<div class="rec-empty-title">'+(failed?'Couldn’t reach Drive':waiting?'Connecting to Drive…':'Nothing here yet')+'</div><div class="rec-empty-sub">'+(failed?(cloudErr||'Check your connection and try again.'):waiting?'Your Drive items will appear here.':mgTab==='cloud'?'Move items to Drive, or import images from Drive.':'Drag an item onto the toolbar, or import images.')+'</div>';
+    if(failed){const rb=document.createElement('button');rb.type='button';rb.className='scf-btn pri';rb.style.marginTop='12px';rb.textContent='Retry';rb.onclick=()=>{cloudNext=0;cloudFails=0;loadCloud();renderMgr()};e.appendChild(rb)}
     listEl.appendChild(e);return;
   }
   vis.forEach(it=>{
-    const cloud=it.src==='cloud',card=document.createElement('div');card.className='rec-grid-card sc-rm-card';card.title=it.label;
+    const cloud=it.src==='cloud',card=document.createElement('div');card.className='rec-grid-card sc-rm-card'+(selMode&&sel.has(it)?' sel':'');card.title=it.label;
     const cover=document.createElement('div');cover.className='rec-grid-card-cover';
     if(it.thumb){const im=document.createElement('img');im.src=it.thumb;im.draggable=false;im.alt='';cover.appendChild(im)}
     else cover.innerHTML=ic(it.icon||'draw');
     if(cloud){const b=document.createElement('div');b.className='rec-grid-live-cloud';b.title='On Drive';b.innerHTML=ic('cloud');cover.appendChild(b)}
+    if(selMode){const ck=document.createElement('div');ck.className='sc-rm-chk';ck.innerHTML=ic('check');cover.appendChild(ck)}
     card.appendChild(cover);
     const bot=document.createElement('div');bot.className='rec-grid-card-bottom';
     const info=document.createElement('div');info.style.cssText='flex:1;min-width:0';
@@ -43230,12 +43420,12 @@ function renderMgr(){
     const btn=(icn,title,cls,fn)=>{const b=document.createElement('button');b.type='button';b.className='rec-grid-card-dots '+cls;b.title=title;b.innerHTML=ic(icn);b.onclick=e=>{e.stopPropagation();fn()};return b};
     if(on){const mv=btn(cloud?'smartphone':'cloud_upload',cloud?'Move back to this device':'Move to Drive','',()=>{it.src=cloud?'device':'cloud';apply()});mv.disabled=!cloudLoaded;bot.appendChild(mv)}
     const cf=document.createElement('div');cf.className='rec-del-confirm grid-confirm';
-    cf.innerHTML='<div class="rec-del-msg">Delete?</div>';
-    const yes=document.createElement('button');yes.type='button';yes.className='rec-del-yes';yes.textContent='Delete';yes.onclick=e=>{e.stopPropagation();items=items.filter(i=>i!==it);apply()};
+    cf.addEventListener('pointerdown',e=>e.stopPropagation());
+    const yes=document.createElement('button');yes.type='button';yes.className='rec-del-yes';yes.textContent='Delete';yes.onclick=e=>{e.stopPropagation();items=items.filter(i=>i!==it);apply();toast('Deleted','success')};
     const no=document.createElement('button');no.type='button';no.className='rec-del-no';no.textContent='Keep';no.onclick=e=>{e.stopPropagation();cf.classList.remove('open')};
     cf.appendChild(yes);cf.appendChild(no);
     bot.appendChild(btn('delete','Delete','sc-rm-del',()=>cf.classList.add('open')));
-    card.appendChild(bot);card.appendChild(cf);listEl.appendChild(card);
+    card.appendChild(bot);card.appendChild(cf);bindHold(card,it);listEl.appendChild(card);
   });
 }
 
