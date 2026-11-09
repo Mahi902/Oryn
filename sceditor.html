@@ -7,7 +7,7 @@
 <title>Sugarcane Editor</title>
 <meta name="description" content="Sugarcane Editor: a powerful all-in-one online editor from the Oryn suite. Write, design and edit with add-ons and extensions.">
 <meta name="keywords" content="Sugarcane Editor, SCEditor, DocuWrite Pro, sugarcane, sca add-ons, editor add-ons, extensions, online editor, document editor, online document editor, free document editor, Word alternative, Google Docs alternative, WYSIWYG editor, rich text editor, text editor, write documents online, A4 editor, docs, office, word processor, online word processor, create documents, edit documents, format documents, export document, export PDF, export DOCX, export HTML, print document, page layout, headings, fonts, tables, lists, templates, document templates, resume maker, letter writer, report writer, essay writer, Oryn, Oryn app, Oryn online, Mohtadi Azad Mahi, Education By Mohtadi Azad, mahi902, free online tools, online tools, web tools, browser tools, no signup, no login, no ads, no credit card, free forever, works in browser, client-side, privacy friendly, offline friendly, PWA, progressive web app, productivity tools, productivity suite, document suite, all-in-one workspace, online workspace, Android app, mobile friendly, dark mode, open source, GitHub Pages, Toolstructer, instant, fast, easy to use, secure, no installation, no server upload">
-<meta name="sceditor-version" content="231">
+<meta name="sceditor-version" content="232">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -4271,7 +4271,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v231…</p>
+    <p class="loading-text">Loading Sugarcane v232…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -9144,7 +9144,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 231; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 232; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -42709,6 +42709,73 @@ body.dark .sc-rad-it:not(.stack):hover{border-color:hsl(calc(var(--sc-h,210) + -
 body.dark .sc-rad-it b,body.dark .wcm-item .sc-wcm-n{background:hsl(calc(var(--sc-h,210) + 1) calc(72.6% * var(--sc-s,1)) calc(48.6% + var(--sc-l,0%) * 1));}
 body.dark #scRad{background:rgba(0,0,0,.35);}
 </style>
+<style id="sc-stash-style2">
+.sc-stash button.sc-st-title{background:none;border:none;font-family:inherit;cursor:pointer;padding:5px 8px;border-radius:9px}
+.sc-stash button.sc-st-title:hover{background:var(--ui-chip)}
+.sc-stash button.sc-st-title>.material-symbols-outlined:last-child{font-size:16px}
+.sc-stash .sc-st-empty{font-size:12px;color:var(--ui-muted);align-self:center;white-space:nowrap;padding:0 6px}
+.sc-stash .sc-st-drop{border:none!important;background:none!important;padding:0;gap:8px;align-items:stretch}
+.sc-dz{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;min-height:38px;border:2px dashed hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1));border-radius:12px;color:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1));font-weight:700;font-size:14px;transition:background .12s}
+.sc-dz .material-symbols-outlined{font-size:20px;color:inherit}
+.sc-dz.hot{background:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1) / .12);border-style:solid}
+body.dark .sc-dz{border-color:hsl(calc(var(--sc-h,210) + -3.3) calc(89% * var(--sc-s,1)) calc(67.8% + var(--sc-l,0%) * 0.4));color:hsl(calc(var(--sc-h,210) + -3.1) calc(89.7% * var(--sc-s,1)) calc(77.1% + var(--sc-l,0%) * 0))}
+body.dark .sc-dz.hot{background:hsl(calc(var(--sc-h,210) + -3.3) calc(89% * var(--sc-s,1)) calc(67.8% + var(--sc-l,0%) * 0.4) / .2)}
+.sc-chip .sc-chip-src{display:flex}.sc-chip .sc-chip-src .material-symbols-outlined{font-size:14px;opacity:.6}
+#scStashMdl .mtitle{display:flex;align-items:center;gap:8px}
+#scStashMdl .mtitle .material-symbols-outlined{font-size:22px;color:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1))}
+.sc-mg-seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:var(--ui-chip);margin-bottom:10px}
+.sc-mg-sb{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:none;background:none;border-radius:9px;padding:8px 6px;font:inherit;font-size:13px;font-weight:600;color:var(--ui-muted);cursor:pointer}
+.sc-mg-sb .material-symbols-outlined{font-size:18px}
+.sc-mg-sb.active{background:var(--ui-raise,#fff);color:var(--ui-text);box-shadow:var(--ui-shadow-sm)}
+.sc-mg-sb:disabled,.sc-mg-ib2:disabled{opacity:.4;cursor:not-allowed}
+.sc-rm-box{padding:0!important;width:min(980px,96vw)!important;max-width:none!important;height:min(720px,92dvh);max-height:none!important;display:flex;flex-direction:column;overflow:hidden!important;background:hsl(calc(var(--sc-h,210) + 30) calc(24% * var(--sc-s,1)) 96.1%)!important}
+body.dark .sc-rm-box{background:#000!important}
+.sc-rm-hdr{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 14px;flex-shrink:0}
+.sc-rm-hdr .mtitle{margin:0}
+.sc-rm-imp{padding:0 20px 12px;margin:0;flex-shrink:0}
+.sc-rm-box .rec-body{min-height:0}
+.sc-rm-card{cursor:default}.sc-rm-card:active{transform:none;opacity:1}
+.sc-rm-card .rec-grid-card-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.sc-rm-card .rec-grid-card-cover>.material-symbols-outlined{font-size:38px;color:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1))}
+.sc-rm-card .rec-grid-card-dots{position:static;flex:none}
+.sc-rm-card .rec-grid-card-dots:disabled{opacity:.4;cursor:not-allowed}
+.sc-rm-card .sc-rm-del:hover{background:hsl(calc(3.2 * var(--sc-hk,1) + var(--sc-rb,0)) calc(70% * var(--sc-rs,1)) calc(55% + var(--sc-rl,0%)) / .15);color:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(65.1% * var(--sc-rs,1)) calc(50.6% + var(--sc-rl,0%)))}
+.sc-mg-sec{margin-bottom:4px}
+.sc-mg-lbl{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ui-muted);margin:2px 2px 6px}
+.sc-mg-imp .sc-mg-ib2{flex:1;justify-content:center}
+.sc-mg-tag{display:inline-flex;align-items:center;gap:3px}
+.sc-mg-tag .material-symbols-outlined{font-size:12px}
+.sc-mg-save{flex:none;display:inline-flex;align-items:center;gap:4px;border:1px solid var(--ui-line);background:var(--ui-raise,#fff);color:var(--ui-text);border-radius:999px;padding:4px 10px 4px 8px;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.sc-mg-save .material-symbols-outlined{font-size:16px;color:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1))}
+.sc-mg-save:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:480px){.sc-mg-mv{display:none}.sc-mg-tag{display:none}}
+.sc-mg-note{font-size:12px;color:var(--ui-muted);margin:0 2px 10px}
+.sc-mg-imp{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.sc-mg-ib2{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--ui-line);background:var(--ui-chip);color:var(--ui-text);border-radius:999px;padding:7px 12px;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.sc-mg-ib2 .material-symbols-outlined{font-size:18px;color:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1))}
+.sc-mg-list{display:flex;flex-direction:column;gap:6px;max-height:44vh;overflow-y:auto;overscroll-behavior:contain}
+.sc-mg-empty{font-size:13px;color:var(--ui-muted);text-align:center;padding:22px 10px}
+.sc-mg-row{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:12px;background:var(--ui-chip);border:1px solid var(--ui-line)}
+.sc-mg-row.drag{opacity:.75;box-shadow:var(--ui-shadow-lg,0 6px 18px rgba(0,0,0,.25))}
+.sc-mg-th{width:36px;height:36px;border-radius:8px;object-fit:cover;flex:none;display:flex;align-items:center;justify-content:center;background:var(--ui-raise,#fff)}
+.sc-mg-th .material-symbols-outlined{font-size:20px;color:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1))}
+.sc-mg-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;color:var(--ui-text)}
+.sc-mg-tag{flex:none;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--ui-raise,#fff);color:var(--ui-muted)}
+.sc-mg-ib{width:30px;height:30px;border:none;background:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ui-muted);padding:0;flex:none}
+.sc-mg-ib .material-symbols-outlined{font-size:19px;color:inherit}
+.sc-mg-ib:hover{background:var(--ui-raise,#fff);color:var(--ui-text)}
+.sc-mg-ib.del:hover{color:#e5484d}
+.sc-mg-clr{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;padding:8px 20px;border-radius:999px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;transition:background .15s,opacity .15s;border:1px solid hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(65.1% * var(--sc-rs,1)) calc(50.6% + var(--sc-rl,0%)));background:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(82.6% * var(--sc-rs,1)) calc(95.5% + var(--sc-rl,0%)));color:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(65.1% * var(--sc-rs,1)) calc(50.6% + var(--sc-rl,0%)))}
+.sc-mg-clr:hover,.sc-mg-clr.holding{background:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(81.8% * var(--sc-rs,1)) calc(91.4% + var(--sc-rl,0%)))}
+.sc-mg-clr.off{opacity:.4;pointer-events:none}
+.sc-mg-clr-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(65.1% * var(--sc-rs,1)) calc(50.6% + var(--sc-rl,0%)) / .3);pointer-events:none}
+.sc-mg-clr-content{position:relative;display:flex;align-items:center;gap:6px}
+.sc-mg-clr .material-symbols-outlined{font-size:16px;color:inherit}
+body.dark .sc-mg-clr{background:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(38.1% * var(--sc-rs,1)) calc(16.5% + var(--sc-rl,0%)));border-color:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(72.6% * var(--sc-rs,1)) calc(77.1% + var(--sc-rl,0%)));color:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(72.6% * var(--sc-rs,1)) calc(77.1% + var(--sc-rl,0%)))}
+body.dark .sc-mg-clr:hover,body.dark .sc-mg-clr.holding{background:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(37.0% * var(--sc-rs,1)) calc(21.2% + var(--sc-rl,0%)))}
+body.dark .sc-mg-clr-fill{background:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(72.6% * var(--sc-rs,1)) calc(77.1% + var(--sc-rl,0%)) / .3)}
+.sc-mg-h{cursor:grab;touch-action:none}.sc-mg-h:active{cursor:grabbing}
+</style>
 <script id="sc-stash-script">
 /* ═══ STORAGE TRAY ═══ drag an element up onto the toolbar to store it (data intact); drag it back out onto any page. */
 (function(){
@@ -42717,19 +42784,80 @@ const toast=(m,t)=>{try{showToast(m,t||'info')}catch(e){}};
 const tb=document.querySelector('.toolbar');if(!tb)return;
 const ic=n=>'<span class="material-symbols-outlined">'+n+'</span>';
 const pt=e=>e.touches&&e.touches[0]?e.touches[0]:(e.changedTouches&&e.changedTouches[0]?e.changedTouches[0]:e);
-const SK='sc_stash_v1';
-let items=[],mode='closed',dragging=false,uid=1;
-try{items=JSON.parse(sessionStorage.getItem(SK)||'[]');uid=items.reduce((m,i)=>Math.max(m,i.id),0)+1}catch(e){items=[]}
-function save(){try{sessionStorage.setItem(SK,JSON.stringify(items))}catch(e){}}
+/* Persistence: IndexedDB (no 5 MB quota; images are stored twice - html + thumb - so sessionStorage filled up and
+   save() silently failed, leaving the last *successful* save to come back after a reload). sessionStorage is now only a
+   fallback + one-time migration source. Rows are bucketed per tab so tabs never overwrite each other. */
+const SK='sc_stash_v1',TK='sc_stash_tab',DBN='SCStashDB',DBS='items',STALE=14*864e5;
+let items=[],mode='closed',dragging=false,uid=1,loaded=false,warned=false,persisted=new Set(),q=Promise.resolve(),dbp=null;
+let pord=new Map(),stL=null,stR=null,cloudId=null,cloudLoaded=false,cloudSig='',cloudT=0,cloudQ=Promise.resolve(),cloudBusy=false,cloudNext=0,view='both';
+let tabId;try{tabId=sessionStorage.getItem(TK);if(!tabId){tabId=Date.now().toString(36)+Math.random().toString(36).slice(2,8);sessionStorage.setItem(TK,tabId)}}catch(e){tabId='t'+Math.random().toString(36).slice(2,8)}
+const clean=it=>({id:it.id,html:it.html,icon:it.icon,label:it.label,thumb:it.thumb,src:'device'});
+const rng=()=>IDBKeyRange.bound(tabId+':',tabId+':\uffff');
+try{items=JSON.parse(sessionStorage.getItem(SK)||'[]');if(!Array.isArray(items))items=[];uid=items.reduce((m,i)=>Math.max(m,i.id||0),0)+1}catch(e){items=[]}
+function db(){
+  if(dbp)return dbp;
+  dbp=new Promise((res,rej)=>{
+    if(!window.indexedDB)return rej(new Error('no idb'));
+    const r=indexedDB.open(DBN,1);
+    r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(DBS))r.result.createObjectStore(DBS,{keyPath:'k'})};
+    r.onsuccess=()=>{r.result.onversionchange=()=>{try{r.result.close()}catch(_){}dbp=null};res(r.result)};
+    r.onerror=()=>rej(r.error);r.onblocked=()=>rej(new Error('blocked'));
+  });
+  dbp.catch(()=>{dbp=null});
+  return dbp;
+}
+function warnFull(){if(warned)return;warned=true;toast('Storage is full — stored items may not survive a reload','warning')}
+function fallback(snap){ /* IndexedDB unavailable: sessionStorage, shrinking if needed, and never fail silently */
+  try{sessionStorage.setItem(SK,JSON.stringify(snap));return}catch(e){}
+  try{sessionStorage.setItem(SK,JSON.stringify(snap.map(i=>Object.assign({},i,{thumb:undefined}))));return}catch(e){}
+  warnFull();
+}
+/* resolves true only when the write really reached IndexedDB */
+function save(){
+  if(!loaded)return Promise.resolve(false); /* never write before the stored items were read back, or an empty state would clobber them */
+  const snap=items.filter(i=>i.src!=='cloud').map(clean),ord=new Map(snap.map((i,k)=>[i.id,k]));
+  q=q.then(()=>db()).then(d=>new Promise((res,rej)=>{
+    const tx=d.transaction(DBS,'readwrite'),st=tx.objectStore(DBS),now=Date.now();
+    persisted.forEach(id=>{if(!ord.has(id))st.delete(tabId+':'+id)});
+    snap.forEach(i=>{if(!persisted.has(i.id)||pord.get(i.id)!==ord.get(i.id))st.put(Object.assign({k:tabId+':'+i.id,tab:tabId,t:now,o:ord.get(i.id)},i))});
+    tx.oncomplete=()=>{persisted=new Set(ord.keys());pord=ord;res(true)};
+    tx.onerror=tx.onabort=()=>rej(tx.error||new Error('tx failed'));
+  })).catch(()=>{fallback(snap);return false});
+  return q;
+}
+window.addEventListener('pagehide',()=>{try{if(loaded)save()}catch(_){}});
+(function loadStash(){
+  db().then(d=>new Promise((res,rej)=>{
+    const tx=d.transaction(DBS,'readwrite'),st=tx.objectStore(DBS),now=Date.now();
+    let rows=[];
+    st.put({k:'meta:'+tabId,tab:tabId,t:now,meta:1}); /* mark this tab as alive */
+    const g=st.getAll(rng());g.onsuccess=()=>{rows=g.result||[]};
+    const m=st.getAll(IDBKeyRange.bound('meta:','meta:\uffff')); /* drop buckets of tabs not seen for 2 weeks */
+    m.onsuccess=()=>{(m.result||[]).forEach(r=>{if(r.tab!==tabId&&now-r.t>STALE){st.delete(IDBKeyRange.bound(r.tab+':',r.tab+':\uffff'));st.delete(r.k)}})};
+    tx.oncomplete=()=>res(rows);tx.onerror=tx.onabort=()=>rej(tx.error);
+  })).then(rows=>{
+    rows.sort((a,b)=>(a.o!=null?a.o:a.id)-(b.o!=null?b.o:b.id));
+    persisted=new Set(rows.map(r=>r.id));pord=new Map(rows.map(r=>[r.id,r.o]));
+    rows.forEach(r=>{uid=Math.max(uid,r.id+1)});
+    if(rows.length){
+      const seen=new Set(rows.map(r=>r.html));
+      const extra=items.filter(i=>i.src==='cloud'||!seen.has(i.html)).map(i=>Object.assign({},i,{id:uid++})); /* legacy / added while loading */
+      items=rows.map(clean).concat(extra);
+    }
+  }).catch(()=>{}).then(()=>{
+    loaded=true;apply();
+    /* legacy sessionStorage copy is removed only once the data is safely in IndexedDB */
+    save().then(ok=>{if(ok)try{sessionStorage.removeItem(SK)}catch(_){}});
+  });
+})();
 
 const bar=document.createElement('div');bar.id='scStash';bar.className='toolbar sc-stash';
 bar.innerHTML='<button class="tbtn sc-st-col" title="Collapse — back to toolbar">'+ic('chevron_left')+'</button>'+
- '<div class="sc-st-title">'+ic('inventory_2')+'<span>Stored</span><b class="sc-st-n">0</b></div>'+
- '<div class="sc-st-drop">'+ic('move_to_inbox')+'<span>Drop here to store</span></div>'+
- '<div class="sc-st-items"></div>'+
- '<button class="tbtn sc-st-clr" title="Hold 3 seconds to delete all stored items"><span class="sc-clr-fill"></span><span class="sc-clr-content">'+ic('delete')+'Delete</span></button>';
+ '<button type="button" class="sc-st-title" title="Manage stored items">'+ic('inventory_2')+'<span class="sc-st-name">Stored</span><b class="sc-st-n">0</b>'+ic('expand_more')+'</button>'+
+ '<div class="sc-st-drop"></div>'+
+ '<div class="sc-st-items"></div>';
 tb.insertAdjacentElement('afterend',bar);
-const itemsEl=bar.querySelector('.sc-st-items');
+const itemsEl=bar.querySelector('.sc-st-items'),dropEl=bar.querySelector('.sc-st-drop');
 itemsEl.addEventListener('wheel',e=>{if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){itemsEl.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
 const ghost=document.createElement('div');ghost.id='scStashGhost';document.body.appendChild(ghost);
 
@@ -42737,49 +42865,31 @@ const exp=document.createElement('button');exp.className='tbtn sc-st-exp';exp.ti
 exp.innerHTML=ic('inventory_2')+'<b class="sc-st-badge">0</b>';
 exp.onclick=()=>{mode='open';apply()};
 bar.querySelector('.sc-st-col').onclick=()=>{mode='closed';apply()};
-const clrBtn=bar.querySelector('.sc-st-clr'),clrFill=clrBtn.querySelector('.sc-clr-fill');
-const CLR_MS=3000;let clrT=null;
-function clrStart(e){
-  if(e.type==='mousedown'&&e.button!==0)return;
-  if(!items.length)return;
-  e.preventDefault();e.stopPropagation();
-  clrBtn.classList.add('holding');
-  clrFill.style.transition='none';clrFill.style.width='0%';
-  requestAnimationFrame(()=>{clrFill.style.transition='width '+CLR_MS+'ms linear';clrFill.style.width='100%'});
-  clearTimeout(clrT);
-  clrT=setTimeout(()=>{clrReset();items=[];save();apply();toast('Storage cleared','success')},CLR_MS);
-}
-function clrReset(){
-  clearTimeout(clrT);clrT=null;clrBtn.classList.remove('holding');
-  clrFill.style.transition='width .15s ease';clrFill.style.width='0%';
-}
-clrBtn.addEventListener('mousedown',clrStart);
-clrBtn.addEventListener('touchstart',clrStart,{passive:false});
-['mouseup','mouseleave','touchend','touchcancel'].forEach(t=>clrBtn.addEventListener(t,clrReset));
-clrBtn.addEventListener('contextmenu',e=>e.preventDefault());
 
 function apply(){
-  const n=items.length;
-  if(!n&&!dragging)mode='closed';
-  const showBar=dragging||(mode==='open'&&n);
+  const total=items.length,vis=shownItems(),n=vis.length;
+  if(!total&&!dragging)mode='closed';
+  const showBar=dragging||(mode==='open'&&total);
   tb.classList.toggle('sc-tb-hide',!!showBar);
   bar.classList.toggle('show',!!showBar);bar.classList.toggle('drag',dragging);
   bar.querySelector('.sc-st-n').textContent=n;
-  exp.querySelector('.sc-st-badge').textContent=n;
-  if(n&&!exp.isConnected)tb.insertBefore(exp,tb.firstChild);
-  if(!n&&exp.isConnected)exp.remove();
+  bar.querySelector('.sc-st-name').textContent=titleName();
+  exp.querySelector('.sc-st-badge').textContent=total;
+  if(total&&!exp.isConnected)tb.insertBefore(exp,tb.firstChild);
+  if(!total&&exp.isConnected)exp.remove();
+  if(dragging)buildDrop();
   itemsEl.innerHTML='';
-  items.forEach(it=>itemsEl.appendChild(chip(it)));
-  save();
+  vis.forEach(it=>itemsEl.appendChild(chip(it)));
+  if(!n&&total){const e=document.createElement('div');e.className='sc-st-empty';e.textContent='Nothing here — tap “'+titleName()+'” to change what is shown';itemsEl.appendChild(e)}
+  save();cloudSave();renderMgr();stArrows();
 }
 let lastTouchAt=0;
 function chip(it){
   const c=document.createElement('div');c.className='sc-chip';c.title='Drag onto a page to move it out · click to place a copy (stays stored)';
   if(it.thumb){const im=document.createElement('img');im.src=it.thumb;im.draggable=false;c.appendChild(im)}
   else c.insertAdjacentHTML('beforeend',ic(it.icon));
+  if(isOn()&&eff()==='both')c.insertAdjacentHTML('beforeend','<span class="sc-chip-src" title="'+(it.src==='cloud'?'On the cloud':'On this device')+'">'+ic(it.src==='cloud'?'cloud':'smartphone')+'</span>');
   const l=document.createElement('span');l.textContent=it.label;c.appendChild(l);
-  const x=document.createElement('button');x.className='sc-chip-x';x.innerHTML=ic('close');x.title='Remove';
-  x.onclick=e=>{e.stopPropagation();items=items.filter(i=>i!==it);apply()};c.appendChild(x);
   /* a tap on touch screens also fires emulated mouse events — ignore those so one tap can't act twice */
   c.addEventListener('mousedown',e=>{if(Date.now()-lastTouchAt<800)return;chipDrag(e,it)});
   c.addEventListener('touchstart',e=>{lastTouchAt=Date.now();chipDrag(e,it)},{passive:false});
@@ -42804,7 +42914,23 @@ function snapshot(el){
 
 /* ---- drag an element INTO the tray ---- */
 let cur=null;
-function over(p){const r=bar.getBoundingClientRect();return bar.classList.contains('show')&&p.clientX>=r.left&&p.clientX<=r.right&&p.clientY>=r.top&&p.clientY<=r.bottom}
+function buildDrop(){
+  const two=isOn(),key=two?'2':'1';
+  if(dropEl.dataset.k===key)return;dropEl.dataset.k=key;
+  dropEl.innerHTML=two
+    ?'<div class="sc-dz" data-z="device">'+ic('smartphone')+'<span>Store on device</span></div><div class="sc-dz" data-z="cloud">'+ic('cloud_upload')+'<span>Store on the cloud</span></div>'
+    :'<div class="sc-dz" data-z="device">'+ic('move_to_inbox')+'<span>Drop here to store</span></div>';
+}
+function zoneAt(p){
+  if(!bar.classList.contains('show'))return null;
+  const R=bar.getBoundingClientRect();
+  if(p.clientX<R.left||p.clientX>R.right||p.clientY<R.top||p.clientY>R.bottom)return null;
+  const dz=[...dropEl.querySelectorAll('.sc-dz')];
+  if(dz.length<2)return dz.length?'device':null;
+  const a=dz[0].getBoundingClientRect(),b=dz[1].getBoundingClientRect();
+  return p.clientX<(a.right+b.left)/2?'device':'cloud';
+}
+function hotZone(z){dropEl.querySelectorAll('.sc-dz').forEach(d=>d.classList.toggle('hot',d.dataset.z===z))}
 function begin(el,e){
   if(cur||!el)return;
   const p0=pt(e||{clientX:0,clientY:0});
@@ -42816,7 +42942,7 @@ function mv(e){
   if(!cur)return;const p=pt(e);cur.last=p;
   if(!cur.moved&&Math.hypot(p.clientX-cur.x0,p.clientY-cur.y0)>8){cur.moved=true;dragging=true;
     const d=describe(cur.el);ghost.innerHTML=ic(d.icon)+'<span></span>';ghost.lastChild.textContent=d.label;apply()}
-  if(cur.moved){const o=over(p);bar.classList.toggle('hot',o);
+  if(cur.moved){hotZone(zoneAt(p));
     ghost.style.display='flex';ghost.style.left=(p.clientX+14)+'px';ghost.style.top=(p.clientY+14)+'px'}
 }
 function up(e){
@@ -42824,18 +42950,18 @@ function up(e){
   document.removeEventListener('mousemove',mv,true);document.removeEventListener('touchmove',mv,true);
   document.removeEventListener('mouseup',up,true);document.removeEventListener('touchend',up,true);
   const c=cur;cur=null;
-  const p=pt(e);const hit=c.moved&&over(p.clientX!==undefined?p:c.last);
-  ghost.style.display='none';bar.classList.remove('hot');
+  const p=pt(e);const hit=c.moved&&zoneAt(p.clientX!==undefined?p:c.last);
+  ghost.style.display='none';bar.classList.remove('hot');hotZone(null);
   const wasDrag=dragging;dragging=false;
   if(hit){
-    const rec=snapshot(c.el);items.push(rec);
+    const rec=snapshot(c.el);rec.src=(hit==='cloud'&&isOn())?'cloud':'device';items.push(rec);
     setTimeout(()=>{ // after the editor's own drag-end handlers have run
       const host=c.el.closest('.sc-banner-shield')||c.el;
       try{S.lockedImgs.delete(host)}catch(_){}
       host.remove();
       try{hideImgPopup()}catch(_){}try{depickImg()}catch(_){}try{checkContent()}catch(_){}
       mode=mode==='open'?'open':'closed';apply();
-      toast('Stored — drag it from the tray onto any page','success');
+      toast(rec.src==='cloud'?'Stored on the cloud — drag it from the tray onto any page':'Stored on this device — drag it from the tray onto any page','success');
     },0);
   } else if(wasDrag)apply();
 }
@@ -42912,6 +43038,207 @@ function chipDrag(e,it){
   document.addEventListener('mouseup',u,true);document.addEventListener('touchend',u,true);document.addEventListener('touchcancel',u,true);
 }
 
+
+/* ═══ CLOUD / DEVICE STORAGE ═══
+   Signed in with Google: the tray can keep items on this device (IndexedDB, as before) or on the cloud
+   (one small JSON file in the user's Drive, shared by every browser they sign in on). */
+const CF='sceditor-storage-tray.json';
+const isOn=()=>{try{return typeof _googleUser!=='undefined'&&!!_googleUser}catch(e){return false}};
+try{const v=localStorage.getItem('sc_stash_view');if(v==='device'||v==='cloud'||v==='both')view=v}catch(e){}
+function eff(){return isOn()?view:'device'}
+function shown(i){const v=eff();return v==='both'||(v==='cloud'?i.src==='cloud':i.src!=='cloud')}
+function shownItems(){return items.filter(shown)}
+function titleName(){return !isOn()?'Stored':eff()==='cloud'?'Cloud':eff()==='device'?'Device':'Stored'}
+function setView(v){view=v;try{localStorage.setItem('sc_stash_view',v)}catch(e){}apply()}
+function clearShown(){const n=shownItems().length;items=items.filter(i=>!shown(i));apply();if(n)toast('Storage cleared','success')}
+const sigOf=()=>items.filter(i=>i.src==='cloud').map(i=>i.id).join(',');
+function thumbOf(html){try{const t=document.createElement('template');t.innerHTML=html;const im=t.content.querySelector('img');return im&&im.getAttribute('src')||undefined}catch(e){}}
+function cloudBody(){
+  return JSON.stringify({v:1,items:items.filter(i=>i.src==='cloud').map(i=>{const th=!!(i.thumb&&String(i.thumb).slice(0,5)==='data:');
+    return{html:i.html,icon:i.icon,label:i.label,thumb:th?'':(i.thumb||''),th:th?1:0}})});
+}
+function loadCloud(){
+  if(!isOn()||cloudLoaded||cloudBusy||Date.now()<cloudNext)return;
+  cloudBusy=true;
+  (async()=>{
+    const r=await driveRequest('files?q='+encodeURIComponent("name='"+CF+"' and trashed=false")+'&fields=files(id,modifiedTime)&orderBy=modifiedTime+desc&pageSize=1');
+    const d=await r.json(),f=(d.files||[])[0];let list=[];
+    if(f){cloudId=f.id;const txt=await driveGetContent(f.id);try{list=JSON.parse(txt).items||[]}catch(e){list=[]}}
+    if(!isOn())return;
+    const mem=items.filter(i=>i.src==='cloud');
+    const got=list.filter(x=>x&&x.html).map(x=>({id:uid++,html:x.html,icon:x.icon||'widgets',label:x.label||'Item',thumb:x.th?thumbOf(x.html):(x.thumb||undefined),src:'cloud'}));
+    items=items.filter(i=>i.src!=='cloud').concat(got,mem);
+    cloudSig=got.map(i=>i.id).join(',');cloudLoaded=true;
+    apply();
+  })().catch(e=>{cloudNext=Date.now()+15000;console.warn('[Stash cloud load]',e);toast('Couldn’t reach your cloud storage — will retry','warning')}).then(()=>{cloudBusy=false;renderMgr()});
+}
+function cloudSave(){
+  if(!cloudLoaded||!isOn()||sigOf()===cloudSig)return;
+  clearTimeout(cloudT);
+  cloudT=setTimeout(()=>{
+    const sig=sigOf(),body=cloudBody();
+    cloudQ=cloudQ.then(async()=>{
+      if(cloudId)await driveUpdateFile(cloudId,body);
+      else{const f=await driveCreateFile(CF,body);cloudId=f.id}
+      cloudSig=sig;
+    }).catch(e=>{console.warn('[Stash cloud save]',e);toast('Couldn’t save to the cloud — will retry','warning');setTimeout(cloudSave,10000)});
+  },700);
+}
+let wasOn=false;
+function authTick(){
+  const on=isOn();
+  if(on===wasOn){if(on&&!cloudLoaded)loadCloud();return}
+  wasOn=on;
+  if(on)loadCloud();
+  else{cloudLoaded=false;cloudId=null;cloudSig='';cloudNext=0;items=items.filter(i=>i.src!=='cloud');try{closeMdl('scStashMdl')}catch(_){}}
+  dropEl.dataset.k='';apply();
+}
+setInterval(authTick,1000);authTick();
+
+/* ═══ Scroll arrows on the tray (same look + behaviour as the toolbar's) ═══ */
+function stArrows(){
+  if(!stL){
+    const mk=(cls,icn,dir)=>{const b=document.createElement('button');b.type='button';b.className='ew-tbarrow '+cls;
+      b.setAttribute('aria-label',dir<0?'Scroll stored items left':'Scroll stored items right');b.innerHTML=ic(icn);
+      b.addEventListener('mousedown',e=>e.preventDefault());
+      let hold=0,raf=0,did=false;
+      const step=()=>{itemsEl.scrollLeft+=dir*13;raf=requestAnimationFrame(step)};
+      const stop=()=>{clearTimeout(hold);hold=0;if(raf){cancelAnimationFrame(raf);raf=0}};
+      b.addEventListener('pointerdown',e=>{if(e.button>0)return;did=false;try{b.setPointerCapture(e.pointerId)}catch(err){}hold=setTimeout(()=>{did=true;step()},220)});
+      ['pointerup','pointercancel','pointerleave'].forEach(t=>b.addEventListener(t,stop));
+      b.addEventListener('click',()=>{if(did){did=false;return}itemsEl.scrollBy({left:dir*Math.round(itemsEl.clientWidth*.6),behavior:'smooth'})});
+      document.body.appendChild(b);return b};
+    stL=mk('l','chevron_left',-1);stR=mk('r','chevron_right',1);
+    itemsEl.addEventListener('scroll',stArrows,{passive:true});
+    window.addEventListener('resize',stArrows);
+    try{new ResizeObserver(stArrows).observe(itemsEl)}catch(e){}
+    setInterval(stArrows,1500);
+  }
+  const hid=!bar.classList.contains('show')||bar.classList.contains('drag')||itemsEl.offsetParent===null,r=itemsEl.getBoundingClientRect();
+  const canL=!hid&&itemsEl.scrollLeft>2,canR=!hid&&itemsEl.scrollLeft+itemsEl.clientWidth<itemsEl.scrollWidth-2;
+  [[stL,canL,r.left],[stR,canR,r.right-26]].forEach(([b,on,x])=>{b.style.display=on?'flex':'none';if(on){b.style.left=x+'px';b.style.top=r.top+'px';b.style.height=r.height+'px'}});
+}
+
+/* ═══ Manage modal: choose Device / Cloud / Both, delete, rearrange, import images ═══ */
+const mdl=document.createElement('div');mdl.className='modal';mdl.id='scStashMdl';
+mdl.innerHTML='<div class="mbox sc-rm-box">'+
+ '<div class="sc-rm-hdr"><h2 class="mtitle">'+ic('inventory_2')+'<span>Stored</span></h2><button type="button" class="mclose" id="scMgClose">'+ic('close')+'</button></div>'+
+ '<div class="rec-folder-tabs" id="scMgTabs" style="display:none">'+
+   '<button type="button" class="rec-folder-tab active" data-t="device">'+ic('smartphone')+'On this device</button>'+
+   '<button type="button" class="rec-folder-tab" data-t="cloud">'+ic('cloud')+'Drive</button></div>'+
+ '<div class="sc-mg-imp sc-rm-imp">'+
+   '<button type="button" class="sc-mg-ib2" data-d="device">'+ic('add_photo_alternate')+'From device</button>'+
+   '<button type="button" class="sc-mg-ib2" data-d="cloud">'+ic('add_to_drive')+'From Drive</button></div>'+
+ '<div class="rec-sync-bar" id="scMgNote"><div class="rec-sync-spinner"></div><span>Connecting to your Drive…</span></div>'+
+ '<div class="rec-body"><div class="rec-grid" id="scMgList"></div></div></div>';
+document.body.appendChild(mdl);
+const fi=document.createElement('input');fi.type='file';fi.accept='image/*';fi.multiple=true;fi.style.display='none';mdl.appendChild(fi);
+const listEl=mdl.querySelector('#scMgList'),noteEl=mdl.querySelector('#scMgNote');
+let mgTab='device';
+const mdlOpen=()=>mdl.classList.contains('open');
+function openMgr(){openMdl('scStashMdl');renderMgr()}
+bar.querySelector('.sc-st-title').addEventListener('click',openMgr);
+mdl.querySelector('#scMgClose').onclick=()=>closeMdl('scStashMdl');
+mdl.addEventListener('mousedown',e=>{if(e.target===mdl)closeMdl('scStashMdl')});
+mdl.querySelectorAll('.rec-folder-tab').forEach(b=>b.onclick=()=>{mgTab=b.dataset.t;renderMgr()});
+mdl.querySelectorAll('.sc-mg-ib2[data-d]').forEach(b=>b.onclick=()=>{if(b.disabled)return;if(b.dataset.d==='cloud')pickFromDrive();else fi.click()});
+function fileToItem(f){return new Promise((res,rej)=>{
+  if(!/^image\//.test(f.type))return rej(new Error('not an image'));
+  const rd=new FileReader();rd.onerror=()=>rej(rd.error);
+  rd.onload=()=>{const im=new Image();im.onerror=()=>rej(new Error('bad image'));
+    im.onload=()=>{
+      let w=im.naturalWidth||200,h=im.naturalHeight||200,data=rd.result;const MAX=1600;
+      if(Math.max(w,h)>MAX&&f.type!=='image/svg+xml'){
+        const k=MAX/Math.max(w,h),cv=document.createElement('canvas');cv.width=Math.round(w*k);cv.height=Math.round(h*k);
+        cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);data=cv.toDataURL(f.type==='image/png'?'image/png':'image/jpeg',.9);w=cv.width;
+      }
+      const dw=Math.max(40,Math.min(320,w));
+      res({id:uid++,html:'<img src="'+data+'" style="position:absolute;width:'+dw+'px;height:auto;max-width:100%" draggable="false">',
+        icon:'image',label:((f.name||'Image').replace(/\.[^.]+$/,'')||'Image').slice(0,22),thumb:data});
+    };im.src=rd.result};
+  rd.readAsDataURL(f);
+})}
+const impTo=()=>(mgTab==='cloud'&&isOn())?'cloud':'device';
+async function importFiles(fs,dest){
+  let ok=0;
+  for(const f of fs){try{const r=await fileToItem(f);r.src=dest;items.push(r);ok++}catch(e){}}
+  if(ok&&!shown({src:dest}))setView('both');else apply();
+  toast(ok?'Imported '+ok+' image'+(ok>1?'s':'')+(dest==='cloud'?' to Drive':' to this device'):'No images could be imported',ok?'success':'warning');
+}
+fi.onchange=()=>{const fs=[...fi.files];fi.value='';if(fs.length)importFiles(fs,impTo())};
+/* From Drive: Google Picker (drive.file scope), then download each pick and store it in the cloud tray */
+async function pickFromDrive(){
+  if(!isOn())return;
+  try{
+    await _loadPicker();
+    const token=await _getToken();
+    const view=new google.picker.DocsView(google.picker.ViewId.DOCS_IMAGES).setIncludeFolders(true).setMimeTypes('image/png,image/jpeg,image/gif,image/webp,image/svg+xml');
+    new google.picker.PickerBuilder()
+      .addView(view)
+      .addView(new google.picker.DocsUploadView())
+      .enableFeature(google.picker.Feature.MULTISELECT_ENABLED)
+      .setOAuthToken(token)
+      .setDeveloperKey(GOOGLE_API_KEY)
+      .setAppId(GOOGLE_CLIENT_ID.split('-')[0])
+      .setOrigin(window.location.protocol+'//'+window.location.host)
+      .setCallback(async d=>{
+        if(d.action!==google.picker.Action.PICKED)return;
+        toast('Importing from Drive…','info');
+        const fs=[];
+        for(const doc of d.docs){
+          try{
+            const r=await fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(doc.id)+'?alt=media',{headers:{Authorization:'Bearer '+token}});
+            if(!r.ok)throw new Error('HTTP '+r.status);
+            const b=await r.blob();
+            fs.push(new File([b],doc.name||'Image',{type:b.type&&/^image\//.test(b.type)?b.type:(doc.mimeType||'image/png')}));
+          }catch(e){console.warn('[Sugarcane] drive import',e)}
+        }
+        await importFiles(fs,impTo());
+      })
+      .build().setVisible(true);
+  }catch(e){
+    console.warn('[Sugarcane] picker',e);
+    toast('Could not open the Drive picker','error');
+  }
+}
+function renderMgr(){
+  if(!mdlOpen())return;
+  const on=isOn();if(!on)mgTab='device';
+  mdl.querySelector('#scMgTabs').style.display=on?'flex':'none';
+  mdl.querySelectorAll('.rec-folder-tab').forEach(b=>b.classList.toggle('active',b.dataset.t===mgTab));
+  mdl.querySelector('.sc-mg-ib2[data-d="cloud"]').disabled=!on;
+  noteEl.classList.toggle('visible',on&&!cloudLoaded);
+  listEl.innerHTML='';
+  const vis=items.filter(i=>mgTab==='cloud'?i.src==='cloud':i.src!=='cloud');
+  if(!vis.length){
+    const e=document.createElement('div');e.className='rec-empty';e.style.gridColumn='1/-1';
+    e.innerHTML='<span class="material-symbols-outlined" style="font-size:52px;opacity:.45">'+(mgTab==='cloud'?'cloud':'inventory_2')+'</span><div class="rec-empty-title">Nothing here yet</div><div class="rec-empty-sub">'+(mgTab==='cloud'?'Move items to Drive, or import images from Drive.':'Drag an item onto the toolbar, or import images.')+'</div>';
+    listEl.appendChild(e);return;
+  }
+  vis.forEach(it=>{
+    const cloud=it.src==='cloud',card=document.createElement('div');card.className='rec-grid-card sc-rm-card';card.title=it.label;
+    const cover=document.createElement('div');cover.className='rec-grid-card-cover';
+    if(it.thumb){const im=document.createElement('img');im.src=it.thumb;im.draggable=false;im.alt='';cover.appendChild(im)}
+    else cover.innerHTML=ic(it.icon||'draw');
+    if(cloud){const b=document.createElement('div');b.className='rec-grid-live-cloud';b.title='On Drive';b.innerHTML=ic('cloud');cover.appendChild(b)}
+    card.appendChild(cover);
+    const bot=document.createElement('div');bot.className='rec-grid-card-bottom';
+    const info=document.createElement('div');info.style.cssText='flex:1;min-width:0';
+    const nm=document.createElement('div');nm.className='rec-grid-card-name';nm.textContent=it.label;
+    const mt=document.createElement('div');mt.className='rec-grid-card-meta';mt.textContent=cloud?'Drive':'On this device';mt.style.padding='0';
+    info.appendChild(nm);info.appendChild(mt);bot.appendChild(info);
+    const btn=(icn,title,cls,fn)=>{const b=document.createElement('button');b.type='button';b.className='rec-grid-card-dots '+cls;b.title=title;b.innerHTML=ic(icn);b.onclick=e=>{e.stopPropagation();fn()};return b};
+    if(on){const mv=btn(cloud?'smartphone':'cloud_upload',cloud?'Move back to this device':'Move to Drive','',()=>{it.src=cloud?'device':'cloud';apply()});mv.disabled=!cloudLoaded;bot.appendChild(mv)}
+    const cf=document.createElement('div');cf.className='rec-del-confirm grid-confirm';
+    cf.innerHTML='<div class="rec-del-msg">Delete?</div>';
+    const yes=document.createElement('button');yes.type='button';yes.className='rec-del-yes';yes.textContent='Delete';yes.onclick=e=>{e.stopPropagation();items=items.filter(i=>i!==it);apply()};
+    const no=document.createElement('button');no.type='button';no.className='rec-del-no';no.textContent='Keep';no.onclick=e=>{e.stopPropagation();cf.classList.remove('open')};
+    cf.appendChild(yes);cf.appendChild(no);
+    bot.appendChild(btn('delete','Delete','sc-rm-del',()=>cf.classList.add('open')));
+    card.appendChild(bot);card.appendChild(cf);listEl.appendChild(card);
+  });
+}
+
 /* hook the editor's drag starters (images + banners go through startImgDrag; text boxes call SCStash.begin) */
 const _sid=window.startImgDrag;
 if(typeof _sid==='function')window.startImgDrag=function(e,img){try{if(!S.lockedImgs.has(img))begin(img,e)}catch(_){}return _sid.apply(this,arguments)};
@@ -42927,10 +43254,10 @@ function closeRad(){
   rad.el.remove();rad=null;
 }
 function openRad(x,y){
-  if(!items.length)return;closeRad();
+  const L=shownItems();if(!L.length)return;closeRad();
   const W=innerWidth,H=innerHeight,cx=Math.min(Math.max(x,70),W-70),cy=Math.min(Math.max(y,70),H-70);
-  const N=items.length,ring=N<=12,S=ring?1:4,per=Math.ceil(N/S),PAGE=25;
-  const groups=[];for(let k=0;k<S;k++)groups.push(items.slice(k*per,(k+1)*per));
+  const N=L.length,ring=N<=12,S=ring?1:4,per=Math.ceil(N/S),PAGE=25;
+  const groups=[];for(let k=0;k<S;k++)groups.push(L.slice(k*per,(k+1)*per));
   const el=document.createElement('div');el.id='scRad';
   const lyr=document.createElement('div');el.appendChild(lyr);
   const xb=document.createElement('button');xb.className='sc-rad-x';xb.title='Close';xb.innerHTML=ic('close');
@@ -42971,7 +43298,7 @@ function openRad(x,y){
     lyr.innerHTML='';
     if(ring){
       const r=Math.max(84,N*52/(2*Math.PI));
-      items.forEach((it,i)=>{const a=-Math.PI/2+2*Math.PI*i/N;lyr.appendChild(tile(it,cx+r*Math.cos(a),cy+r*Math.sin(a)))});
+      L.forEach((it,i)=>{const a=-Math.PI/2+2*Math.PI*i/N;lyr.appendChild(tile(it,cx+r*Math.cos(a),cy+r*Math.sin(a)))});
     }else{
       const {sec,lvl}=st;
       groups.forEach((g,k)=>{if(g.length&&!(k===sec&&lvl>0))lyr.appendChild(badge(g,k,sec>=0&&lvl>0))});
