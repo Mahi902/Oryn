@@ -95,19 +95,6 @@
     ]
   },
   {
-    "name": "Templates",
-    "short_name": "Templates",
-    "description": "Browse document templates",
-    "url": "https://mahi902.github.io/Oryn/temp.html",
-    "icons": [
-      {
-        "src": "https://mahi902.github.io/Oryn/img/templates-shortcut-icon.png",
-        "sizes": "640x640",
-        "type": "image/png"
-      }
-    ]
-  },
-  {
     "name": "Collaborate",
     "short_name": "Collaborate",
     "description": "Collaborate on documents with others",
@@ -115,6 +102,19 @@
     "icons": [
       {
         "src": "https://mahi902.github.io/Oryn/img/collaborate-shortcut-icon.png",
+        "sizes": "640x640",
+        "type": "image/png"
+      }
+    ]
+  },
+  {
+    "name": "Templates",
+    "short_name": "Templates",
+    "description": "Browse document templates",
+    "url": "https://mahi902.github.io/Oryn/temp.html",
+    "icons": [
+      {
+        "src": "https://mahi902.github.io/Oryn/img/templates-shortcut-icon.png",
         "sizes": "640x640",
         "type": "image/png"
       }
