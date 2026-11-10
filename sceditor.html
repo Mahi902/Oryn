@@ -7,7 +7,7 @@
 <title>Sugarcane Editor</title>
 <meta name="description" content="Sugarcane Editor: a powerful all-in-one online editor from the Oryn suite. Write, design and edit with add-ons and extensions.">
 <meta name="keywords" content="Sugarcane Editor, SCEditor, DocuWrite Pro, sugarcane, sca add-ons, editor add-ons, extensions, online editor, document editor, online document editor, free document editor, Word alternative, Google Docs alternative, WYSIWYG editor, rich text editor, text editor, write documents online, A4 editor, docs, office, word processor, online word processor, create documents, edit documents, format documents, export document, export PDF, export DOCX, export HTML, print document, page layout, headings, fonts, tables, lists, templates, document templates, resume maker, letter writer, report writer, essay writer, Oryn, Oryn app, Oryn online, Mohtadi Azad Mahi, Education By Mohtadi Azad, mahi902, free online tools, online tools, web tools, browser tools, no signup, no login, no ads, no credit card, free forever, works in browser, client-side, privacy friendly, offline friendly, PWA, progressive web app, productivity tools, productivity suite, document suite, all-in-one workspace, online workspace, Android app, mobile friendly, dark mode, open source, GitHub Pages, Toolstructer, instant, fast, easy to use, secure, no installation, no server upload">
-<meta name="sceditor-version" content="233">
+<meta name="sceditor-version" content="234">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -4271,7 +4271,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v233…</p>
+    <p class="loading-text">Loading Sugarcane v234…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -9144,7 +9144,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 233; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 234; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -42918,7 +42918,9 @@ function apply(){
   itemsEl.innerHTML='';
   vis.forEach(it=>itemsEl.appendChild(chip(it)));
   if(!n&&total){const e=document.createElement('div');e.className='sc-st-empty';e.textContent='Nothing here — tap “'+titleName()+'” to change what is shown';itemsEl.appendChild(e)}
-  save();cloudSave();renderMgr();stArrows();
+  save();cloudSave();
+  try{renderMgr()}catch(e){console.warn('[Stash render]',e)}
+  try{stArrows()}catch(e){console.warn('[Stash arrows]',e)}
 }
 let lastTouchAt=0;
 function chip(it){
@@ -42952,7 +42954,7 @@ function snapshot(el){
 /* ---- drag an element INTO the tray ---- */
 let cur=null;
 function buildDrop(){
-  const two=isOn(),key=two?'2':'1';
+  const two=isOn()&&cloudLoaded,key=two?'2':'1';
   if(dropEl.dataset.k===key)return;dropEl.dataset.k=key;
   dropEl.innerHTML=two
     ?'<div class="sc-dz" data-z="device">'+ic('smartphone')+'<span>Store on device</span></div><div class="sc-dz" data-z="cloud">'+ic('cloud_upload')+'<span>Store on the cloud</span></div>'
@@ -42991,7 +42993,7 @@ function up(e){
   ghost.style.display='none';bar.classList.remove('hot');hotZone(null);
   const wasDrag=dragging;dragging=false;
   if(hit){
-    const rec=snapshot(c.el);rec.src=(hit==='cloud'&&isOn())?'cloud':'device';items.push(rec);
+    const rec=snapshot(c.el);rec.src=(hit==='cloud'&&isOn()&&cloudLoaded)?'cloud':'device';items.push(rec);
     setTimeout(()=>{ // after the editor's own drag-end handlers have run
       const host=c.el.closest('.sc-banner-shield')||c.el;
       try{S.lockedImgs.delete(host)}catch(_){}
@@ -43137,7 +43139,7 @@ function authTick(){
   else{cloudLoaded=false;cloudId=null;cloudSig='';cloudNext=0;items=items.filter(i=>i.src!=='cloud');try{closeMdl('scStashMdl')}catch(_){}}
   dropEl.dataset.k='';apply();
 }
-setInterval(authTick,1000);authTick();
+/* authTick() is started at the very END of this module (see bottom): it calls apply() -> renderMgr(), which need consts declared further down */
 
 /* ═══ Scroll arrows on the tray (same look + behaviour as the toolbar's) ═══ */
 function stArrows(){
@@ -43551,6 +43553,7 @@ function openRad(x,y){
 })();
 window.SCStash={begin,get items(){return items},openRadial:openRad,closeRadial:closeRad};
 apply();
+setInterval(authTick,1000);authTick();
 })();
 </script>
 <script>
