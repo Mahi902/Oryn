@@ -1,0 +1,147 @@
+/* ── Sidebar configuration ────────────────────────────────────────────── */
+.cc-cfg-label{display:block; font-size:11px; color:#888; margin:12px 0 5px; font-weight:600; text-transform:uppercase; letter-spacing:.4px;}
+.cc-cfg-input{
+  width:100%; padding:8px 10px; border:1px solid #e0e0e0; border-radius:8px;
+  font-size:13px; background:#fafafa; font-family:inherit; outline:none; box-sizing:border-box;
+}
+.cc-cfg-input:focus{border-color:#c96442; background:#fff;}
+body.dark .cc-cfg-input{background:#252525; border-color:#333; color:#eee;}
+
+.cc-input-row{display:flex; gap:6px; align-items:stretch;}
+.cc-input-row .cc-cfg-input{flex:1; min-width:0;}
+.cc-paste-btn{
+  flex-shrink:0; width:36px; display:flex; align-items:center; justify-content:center;
+  border:1px solid #e0e0e0; border-radius:8px; background:#fafafa; color:#666; cursor:pointer;
+}
+.cc-paste-btn .material-symbols-outlined{font-size:17px;}
+.cc-paste-btn:hover{background:#fbf1ec; border-color:#c96442; color:#c96442;}
+body.dark .cc-paste-btn{background:#252525; border-color:#333; color:#ccc;}
+body.dark .cc-paste-btn:hover{background:#2e211c; border-color:#c96442; color:#e8a58c;}
+
+.cc-open-chat-btn{
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  width:100%; padding:9px; margin-top:14px; border:none; border-radius:9px;
+  background:#c96442; color:#fff; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;
+}
+.cc-open-chat-btn .material-symbols-outlined{font-size:17px;}
+.cc-open-chat-btn:hover{background:#b0553a;}
+
+.cc-seg{display:flex; border:1px solid #e0e0e0; border-radius:8px; overflow:hidden;}
+.cc-seg button{flex:1; padding:7px 6px; border:none; background:#fafafa; font-size:11px; font-weight:600; cursor:pointer; color:#555; font-family:inherit; border-right:1px solid #e0e0e0;}
+.cc-seg button:last-child{border-right:none;}
+.cc-seg button.active{background:#c96442; color:#fff;}
+body.dark .cc-seg button{background:#252525; color:#ccc; border-color:#333;}
+
+.cc-elgrid{display:grid; grid-template-columns:1fr 1fr; gap:4px 10px; margin-top:2px;}
+.cc-el-item{display:flex; align-items:center; gap:6px; font-size:12px; color:#555; cursor:pointer; padding:3px 0;}
+.cc-el-item input{accent-color:#c96442; width:14px; height:14px; margin:0;}
+body.dark .cc-el-item{color:#ccc;}
+
+/* ── Chat panel ───────────────────────────────────────────────────────── */
+.cc-panel{
+  position:fixed; z-index:998000; display:none; flex-direction:column;
+  width:340px; height:440px; max-width:92vw; max-height:78vh;
+  background:#fff; border-radius:16px; overflow:hidden;
+  box-shadow:0 16px 44px rgba(0,0,0,.28); border:1px solid rgba(0,0,0,.06);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+body.dark .cc-panel{background:#1a1a1a; border-color:rgba(255,255,255,.08);}
+.cc-panel.cc-docked{right:18px; bottom:18px;}
+.cc-panel.cc-floating{box-shadow:0 20px 60px rgba(0,0,0,.4);}
+
+.cc-header{
+  display:flex; align-items:center; gap:8px; padding:11px 12px;
+  background:#c96442; color:#fff; flex-shrink:0; cursor:default; user-select:none;
+}
+.cc-panel.cc-floating .cc-header{cursor:grab; touch-action:none;}
+.cc-header-ic{font-size:18px;}
+.cc-header-title{font-size:13px; font-weight:700; flex:1;}
+.cc-header-actions{display:flex; gap:2px;}
+.cc-icon-btn{background:rgba(255,255,255,.15); border:none; border-radius:7px; width:26px; height:26px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#fff;}
+.cc-icon-btn:hover{background:rgba(255,255,255,.28);}
+.cc-icon-btn .material-symbols-outlined{font-size:16px;}
+
+.cc-messages{flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px; background:#f7f8fa;}
+body.dark .cc-messages{background:#141414;}
+
+.cc-msg{max-width:84%; padding:8px 11px; border-radius:13px; font-size:12.5px; line-height:1.45; white-space:pre-wrap; word-break:break-word;}
+.cc-msg-user{align-self:flex-end; background:#c96442; color:#fff; border-bottom-right-radius:4px;}
+.cc-msg-assistant{align-self:flex-start; background:#fff; color:#222; border:1px solid #e6e6e6; border-bottom-left-radius:4px;}
+body.dark .cc-msg-assistant{background:#232323; color:#eee; border-color:#333;}
+.cc-msg-tool{display:none;}
+.cc-msg.cc-thinking{color:#999; font-style:italic;}
+
+.cc-cmdblock{align-self:stretch; background:#fbf1ec; border:1px solid #f1d6ca; border-radius:11px; padding:8px 10px; font-size:11.5px;}
+body.dark .cc-cmdblock{background:#2e211c; border-color:#5c3a2d;}
+.cc-cmdblock.cc-cmdblock-pending{border-color:#f5c26b; background:#fff8ec;}
+body.dark .cc-cmdblock.cc-cmdblock-pending{background:#332a17; border-color:#6b5322;}
+.cc-cmdblock.cc-clickgate{border-color:#e57373; background:#fdeeee;}
+body.dark .cc-cmdblock.cc-clickgate{background:#3a1f1f; border-color:#7a3a3a;}
+.cc-clickgate-notice{display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#c0392b; margin-bottom:6px;}
+body.dark .cc-clickgate-notice{color:#ff8a80;}
+.cc-clickgate-notice .material-symbols-outlined{font-size:16px;}
+.cc-approve-clicks{background:#c0392b; color:#fff;}
+.cc-approve-clicks:hover{background:#a5311f;}
+.cc-risky-row{border-top:1px dashed #e0e0e0; margin-top:10px; padding-top:10px;}
+body.dark .cc-risky-row{border-color:#333;}
+.cc-cmdblock.cc-cmdblock-denied{opacity:.55;}
+.cc-cmdrow{display:flex; flex-direction:column; gap:2px; padding:3px 0; border-bottom:1px dashed rgba(0,0,0,.08);}
+.cc-cmdrow:last-child{border-bottom:none;}
+.cc-cmdrow code{font-family:"SF Mono",Consolas,monospace; color:#b0553a; font-size:11.5px;}
+body.dark .cc-cmdrow code{color:#e8a58c;}
+.cc-cmdresult{color:#666; font-size:11px;}
+body.dark .cc-cmdresult{color:#aaa;}
+.cc-cmdrow-done .cc-cmdresult::before{content:'→ ';}
+
+.cc-approve-row{display:flex; gap:6px; margin-top:8px;}
+.cc-approve-btn{flex:1; padding:6px; border:none; border-radius:7px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit;}
+.cc-approve-all{background:#c96442; color:#fff;}
+.cc-approve-all:hover{background:#b0553a;}
+.cc-deny-all{background:#e0e0e0; color:#555;}
+.cc-deny-all:hover{background:#d2d2d2;}
+body.dark .cc-deny-all{background:#333; color:#ccc;}
+
+.cc-inputrow{display:flex; gap:7px; padding:9px; border-top:1px solid #eee; background:#fff; flex-shrink:0;}
+body.dark .cc-inputrow{background:#1a1a1a; border-color:#2a2a2a;}
+.cc-input{
+  flex:1; resize:none; border:1px solid #e0e0e0; border-radius:10px; padding:8px 10px;
+  font-size:12.5px; font-family:inherit; outline:none; max-height:80px; background:#fafafa;
+}
+.cc-input:focus{border-color:#c96442; background:#fff;}
+body.dark .cc-input{background:#232323; border-color:#333; color:#eee;}
+.cc-send-btn{
+  width:36px; height:36px; flex-shrink:0; border:none; border-radius:10px;
+  background:#c96442; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.cc-send-btn:hover{background:#b0553a;}
+.cc-send-btn:disabled{background:#9aa5b1; cursor:default;}
+
+@media (max-width:600px){
+  .cc-panel.cc-docked{right:10px; bottom:74px; width:88vw;}
+}
+
+/* ── Claude-layer extras ───────────────────────────────────────────────── */
+.cc-cmdrow-err .cc-cmdresult{color:#c0392b;}
+body.dark .cc-cmdrow-err .cc-cmdresult{color:#ff8a80;}
+.cc-cmdrow-err .cc-cmdresult::before{content:'✕ ';}
+.cc-msg-wide{max-width:100%; align-self:stretch; font-family:"SF Mono",Consolas,monospace; font-size:11px; overflow-x:auto;}
+.cc-msg-wide pre{margin:0; white-space:pre;}
+.cc-msg-tool{display:none;}
+.cc-stop-btn{
+  width:36px; height:36px; flex-shrink:0; border:none; border-radius:10px;
+  background:#c0392b; color:#fff; cursor:pointer; align-items:center; justify-content:center;
+}
+.cc-stop-btn:hover{background:#a5311f;}
+.cc-inputrow{position:relative;}
+.cc-palette{
+  flex-shrink:0; max-height:170px; overflow-y:auto; background:#fff; border-top:1px solid #eee;
+}
+body.dark .cc-palette{background:#1a1a1a; border-color:#2a2a2a;}
+.cc-pal-item{display:flex; gap:8px; align-items:baseline; padding:6px 12px; font-size:12px; cursor:pointer; color:#333;}
+.cc-pal-item b{font-family:"SF Mono",Consolas,monospace; color:#c96442; flex-shrink:0;}
+.cc-pal-item span{color:#888; font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.cc-pal-item:hover{background:#fbf1ec;}
+body.dark .cc-pal-item{color:#ddd;}
+body.dark .cc-pal-item:hover{background:#2e211c;}
+.cc-msg code{font-family:"SF Mono",Consolas,monospace; font-size:11.5px; background:rgba(0,0,0,.06); padding:1px 4px; border-radius:4px;}
+body.dark .cc-msg code{background:rgba(255,255,255,.1);}
