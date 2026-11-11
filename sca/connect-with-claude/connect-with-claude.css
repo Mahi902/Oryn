@@ -181,3 +181,28 @@ body.dark .cc-msg code{background:rgba(255,255,255,.1);}
 body.dark .cc-guide{background:#252525; border-color:#333;}
 body.dark .cc-guide-body{color:#ddd;}
 body.dark .cc-guide-body code{background:#333;}
+
+
+/* ── Full guide window ────────────────────────────────────────────────── */
+.cc-guide-btn{display:flex; align-items:center; justify-content:center; gap:6px; width:100%; padding:8px; margin:6px 0 4px; border:1px solid #c96442; border-radius:9px; background:#fff; color:#c96442; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;}
+.cc-guide-btn .material-symbols-outlined{font-size:17px;}
+.cc-guide-btn:hover{background:#fbf1ec;}
+body.dark .cc-guide-btn{background:#252525;}
+.cc-guide-modal{position:fixed; inset:0; z-index:1000000; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.5); padding:12px; box-sizing:border-box;}
+.cc-guide-card{width:min(640px,100%); max-height:100%; display:flex; flex-direction:column; background:#fff; color:#222; border-radius:14px; box-shadow:0 12px 48px rgba(0,0,0,.4); overflow:hidden; font-family:inherit;}
+body.dark .cc-guide-card{background:#1a1a1a; color:#eee;}
+.cc-guide-top{display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#c96442; color:#fff; font-size:15px;}
+.cc-guide-x{border:none; background:rgba(0,0,0,.2); color:#fff; width:30px; height:30px; border-radius:50%; font-size:20px; line-height:1; cursor:pointer;}
+.cc-guide-scroll{overflow-y:auto; padding:6px 16px 18px; font-size:14px; line-height:1.55; -webkit-overflow-scrolling:touch;}
+.cc-guide-scroll h4{margin:18px 0 4px; font-size:15px; color:#c96442;}
+.cc-guide-scroll ol,.cc-guide-scroll ul{padding-left:20px; margin:6px 0;}
+.cc-guide-scroll li{margin:7px 0;}
+.cc-guide-scroll code.cc-copy{display:inline-block; cursor:pointer; background:#eee; color:#222; padding:2px 7px; border-radius:6px; font-size:13px; margin:2px 0; border:1px dashed #bbb; word-break:break-word;}
+body.dark .cc-guide-scroll code.cc-copy{background:#333; color:#eee; border-color:#555;}
+.cc-copy-eg{background:#eee; padding:1px 6px; border-radius:5px; border:1px dashed #bbb; font-size:13px;}
+body.dark .cc-copy-eg{background:#333; border-color:#555;}
+code.cc-copy.cc-copied{background:#2f855a !important; color:#fff !important; border-color:#2f855a !important;}
+code.cc-copy.cc-copied::after{content:" ✓ copied";}
+.cc-g-note{font-size:12.5px; color:#777;}
+.cc-g-warn{background:#fff6e5; border:1px solid #f0d28a; color:#6b4a00; border-radius:8px; padding:8px 10px; font-size:13px;}
+body.dark .cc-g-warn{background:#3a2e12; border-color:#6b5517; color:#f3d98b;}

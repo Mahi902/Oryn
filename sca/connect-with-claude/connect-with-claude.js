@@ -2262,6 +2262,81 @@
       workT = setTimeout(() => { if(workEl) workEl.style.display = 'none'; workCount = 0; }, 2500);
     }, 1200);
   }
+  // ── Built-in guide (opens inside the editor; also /guide) ────────────
+  const chip = t => '<code class="cc-copy" data-copy="' + t + '" title="Tap to copy">' + t + '</code>';
+  function guideContent(){
+    return '' +
+      '<p>Claude on claude.ai can click, type and run commands in this editor for you. You set it up <b>once</b> (about 15 minutes). Tap any <span class="cc-copy-eg">grey box</span> to copy it.</p>' +
+      '<p><b>You need:</b> a free Cloudflare account, a free GitHub account, and a Claude account that allows custom connectors. On a phone, use Chrome and switch on <i>Desktop site</i> (Chrome menu) when a page looks cramped.</p>' +
+      '<h4>Part 1 &middot; Put the relay online (once)</h4>' +
+      '<p class="cc-g-note">The relay is a small free helper between Claude and this tab.</p>' +
+      '<ol>' +
+        '<li>Go to <b>github.com/mahi902/Oryn</b> and tap <b>Fork</b>, then <b>Create fork</b>. This makes your own copy.</li>' +
+        '<li>Go to <b>dash.cloudflare.com</b> and sign in.</li>' +
+        '<li>Tap <b>Workers &amp; Pages</b> &rarr; <b>Create application</b> &rarr; <b>Import a repository</b> (it may say &ldquo;Connect to Git&rdquo;).</li>' +
+        '<li>Choose <b>GitHub</b>, allow access, and pick your forked <b>Oryn</b>.</li>' +
+        '<li>Fill the boxes, typing by hand in lowercase with no spaces:<br>Project name: ' + chip('sugarcane-claude') + '<br>Root directory: ' + chip('claude-relay') + '<br>Deploy command: ' + chip('npx wrangler deploy') + ' (or leave the default)<br>Build command: leave empty</li>' +
+        '<li>Tap <b>Save and Deploy</b> and wait one or two minutes.</li>' +
+        '<li>Copy the address ending in <code>workers.dev</code>. That is your <b>Worker URL</b>. If you cannot see it: Workers &amp; Pages &rarr; sugarcane-claude &rarr; Settings &rarr; Domains &amp; Routes.</li>' +
+      '</ol>' +
+      '<h4>Part 2 &middot; Link the relay to this editor (once)</h4>' +
+      '<ol>' +
+        '<li>Close this guide and find <b>Bridge mode</b> in Claude Configuration.</li>' +
+        '<li>Paste your Worker URL into <b>Relay Worker URL</b>.</li>' +
+        '<li>Turn <b>Bridge mode</b> on and wait for <i>Connected</i>.</li>' +
+        '<li>Tap the <b>copy</b> button next to <b>Connector URL</b>.</li>' +
+      '</ol>' +
+      '<p class="cc-g-warn"><b>The Connector URL is a password.</b> Anyone who has it can control this tab. Never post it. If it leaks, tap the circular-arrows button to make a new one.</p>' +
+      '<h4>Part 3 &middot; Link Claude to the relay (once)</h4>' +
+      '<ol>' +
+        '<li>Open <b>claude.ai</b> (Desktop site on a phone).</li>' +
+        '<li>Go to <b>Settings</b> &rarr; <b>Connectors</b> &rarr; <b>Add custom connector</b>.</li>' +
+        '<li>Paste the Connector URL, name it &ldquo;Sugarcane&rdquo;, and save.</li>' +
+        '<li>Back here, turn on <b>Allow UI Control</b>. Without it Claude cannot click or type.</li>' +
+      '</ol>' +
+      '<h4>Part 4 &middot; Use it (every time)</h4>' +
+      '<ol>' +
+        '<li>Keep this tab <b>open and on screen</b>. A sleeping tab disconnects, then reconnects by itself when you return.</li>' +
+        '<li>In claude.ai, ask: ' + chip('Use the Sugarcane connector and make the title bold.') + '</li>' +
+        '<li>Watch the bar at the top: <b>orange</b> = Claude is working (tap <b>Stop</b> to cancel), <b>yellow</b> = needs your approval (open the Claude chat and tap Approve or Deny), <b>green</b> = finished.</li>' +
+      '</ol>' +
+      '<h4>If something goes wrong</h4>' +
+      '<ul>' +
+        '<li><b>&ldquo;Retrying&hellip;&rdquo;</b>: the Relay Worker URL has a typo, or the relay is not deployed.</li>' +
+        '<li><b>Claude says the tab is not connected</b>: turn Bridge mode on and keep the tab open and awake.</li>' +
+        '<li><b>Claude says a permission is off</b>: turn on the switch it names in Claude Configuration.</li>' +
+        '<li><b>Cloudflare rejects the project name</b>: type it by hand, using only lowercase letters, numbers and dashes.</li>' +
+        '<li><b>The Cloudflare build fails</b>: open the failed build and read the last red lines. Check that Root directory is claude-relay.</li>' +
+      '</ul>' +
+      '<p class="cc-g-note">Safety: Claude only acts within the switches you turn on, and it cannot change them itself. Turn Bridge mode off when you are not using it. Never share your Connector URL, GitHub token or Cloudflare token.</p>' +
+      '<p class="cc-g-note">Open this guide any time with the button in Claude Configuration, or by typing <code>/guide</code> in the chat.</p>';
+  }
+  let guideEl = null;
+  function closeGuide(){ if(guideEl) guideEl.style.display = 'none'; }
+  function openGuide(){
+    if(!guideEl){
+      guideEl = document.createElement('div');
+      guideEl.className = 'cc-guide-modal';
+      guideEl.setAttribute('data-cc-ui', '1'); guideEl.dataset.sugarcaneAddon = 'connect-with-claude';
+      guideEl.innerHTML = '<div class="cc-guide-card" role="dialog" aria-label="Connect Claude guide">' +
+        '<div class="cc-guide-top"><b>Connect Claude to Sugarcane</b><button type="button" class="cc-guide-x" aria-label="Close">&times;</button></div>' +
+        '<div class="cc-guide-scroll cc-guide-body">' + guideContent() + '</div></div>';
+      document.body.appendChild(guideEl);
+      guideEl.querySelector('.cc-guide-x').addEventListener('click', closeGuide);
+      guideEl.addEventListener('click', async e => {
+        if(e.target === guideEl){ closeGuide(); return; }
+        const c = e.target.closest && e.target.closest('.cc-copy');
+        if(!c) return;
+        const t = c.getAttribute('data-copy');
+        try { await navigator.clipboard.writeText(t); }
+        catch(err){ const r = document.createRange(); r.selectNodeContents(c); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); try { document.execCommand('copy'); } catch(e2){} }
+        c.classList.add('cc-copied'); setTimeout(() => c.classList.remove('cc-copied'), 1200);
+      });
+      document.addEventListener('keydown', e => { if(e.key === 'Escape' && guideEl && guideEl.style.display !== 'none') closeGuide(); });
+    }
+    guideEl.style.display = 'flex';
+    guideEl.querySelector('.cc-guide-scroll').scrollTop = 0;
+  }
   function setBusy(b){
     if(!sendBtn) return;
     sendBtn.disabled = b;
@@ -2519,6 +2594,7 @@
     names.help = 'List every manual command.';
     names.stop = 'Stop whatever Claude is doing.';
     names.clear = 'Clear this document\'s chat history.';
+    names.guide = 'Open the step-by-step setup guide.';
     return names;
   }
   function helpText(){
@@ -2529,6 +2605,7 @@
     name = name.toLowerCase();
     if(name === 'help') return helpText();
     if(name === 'stop'){ requestStop(); return 'Stopping.'; }
+    if(name === 'guide'){ openGuide(); return 'Opened the setup guide.'; }
     if(name === 'clear'){ chat = []; saveChat(); renderHistory(); return ''; }
     if(ACTIONS[name] && ACTIONS[name].manual && name !== 'ask'){
       const A = ACTIONS[name];
@@ -2688,7 +2765,7 @@
             '<div class="cc-guide-body">' +
               '<p class="cc-guide-h">First time only</p>' +
               '<ol>' +
-                '<li><b>Put the relay online.</b> It is a free helper that sits between Claude and this editor. Follow the guide here: <a href="https://github.com/mahi902/Oryn/blob/main/claude-relay/GUIDE.md" target="_blank" rel="noopener">claude-relay/GUIDE.md</a>. At the end you get an address ending in <code>workers.dev</code>.</li>' +
+                '<li><b>Put the relay online.</b> It is a free helper that sits between Claude and this editor. Tap <b>Open full guide</b> below for the exact taps. At the end you get an address ending in <code>workers.dev</code>.</li>' +
                 '<li><b>Paste that address</b> into &ldquo;Relay Worker URL&rdquo; below.</li>' +
                 '<li><b>Turn Bridge mode on.</b> Wait until the text says <i>Connected</i>.</li>' +
                 '<li><b>Tap the copy button</b> next to &ldquo;Connector URL&rdquo;. This link is a password, so keep it private.</li>' +
@@ -2711,6 +2788,7 @@
               '</ul>' +
             '</div>' +
           '</details>' +
+          '<button type="button" class="cc-guide-btn" id="ccGuideBtn"><span class="material-symbols-outlined">menu_book</span>Open full guide</button>' +
           '<div class="aw-row cc-risky-row">' +
             '<div><div class="aw-row-label">Bridge mode (Claude connector)</div><div class="aw-row-sub">Lets Claude on claude.ai drive this tab through your relay Worker, no API key needed. Uses the same permissions as the chat panel.</div></div>' +
             '<label class="toggle-switch"><input type="checkbox" id="ccBridgeToggle"><span class="toggle-slider"></span></label>' +
@@ -2792,6 +2870,7 @@
     syncExploreSeg();
 
     document.getElementById('ccOpenChatBtn').addEventListener('click', () => togglePanel(true));
+    document.getElementById('ccGuideBtn').addEventListener('click', openGuide);
 
     const brToggle = document.getElementById('ccBridgeToggle'), brUrl = document.getElementById('ccBridgeUrlInput'), brConn = document.getElementById('ccBridgeConnInput');
     const syncConn = () => { brConn.value = (bridgeValidBase() && cfg.bridgeToken) ? bridgeConnectorUrl() : ''; };
