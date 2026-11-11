@@ -1,3 +1,5 @@
+**Not technical? Read [GUIDE.md](GUIDE.md) instead. It has plain step-by-step instructions.**
+
 # Sugarcane <-> Claude relay
 
 Lets Claude (claude.ai) drive your open Sugarcane/Oryn tab through a custom MCP connector.

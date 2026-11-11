@@ -2226,6 +2226,42 @@
     panelEl.style.display = show ? 'flex' : 'none';
     if(show){ inputEl.focus(); clampPanelToViewport(); }
   }
+  // ── "Claude is working" indicator ────────────────────────────────────
+  let workEl = null, workT = null, workCount = 0;
+  function ensureWorkEl(){
+    if(workEl && document.body.contains(workEl)) return workEl;
+    workEl = document.createElement('div');
+    workEl.id = 'ccWorking'; workEl.className = 'cc-working';
+    workEl.setAttribute('data-cc-ui', '1'); workEl.dataset.sugarcaneAddon = 'connect-with-claude';
+    workEl.innerHTML = '<span class="cc-working-spin"></span>' +
+      '<div class="cc-working-text"><b class="cc-working-title"></b><span class="cc-working-sub"></span></div>' +
+      '<button type="button" class="cc-working-stop">Stop</button>';
+    document.body.appendChild(workEl);
+    workEl.querySelector('.cc-working-stop').addEventListener('click', requestStop);
+    return workEl;
+  }
+  function setWorking(state, detail){
+    clearTimeout(workT);
+    const el = ensureWorkEl();
+    if(state === 'run') workCount++;
+    el.dataset.state = state;
+    el.querySelector('.cc-working-title').textContent =
+      state === 'wait' ? 'Claude needs your approval' : state === 'done' ? 'Claude finished' : 'Claude is working…';
+    el.querySelector('.cc-working-sub').textContent =
+      state === 'wait' ? 'Open the Claude chat and tap Approve or Deny' :
+      state === 'done' ? workCount + (workCount === 1 ? ' action' : ' actions') + ' done' :
+      clip(String(detail || ''), 70) + (workCount > 1 ? '  ·  action ' + workCount : '');
+    el.style.display = 'flex';
+  }
+  function endWorking(){
+    clearTimeout(workT);
+    // short grace period so back-to-back actions don't flicker "finished"
+    workT = setTimeout(() => {
+      if(!workEl) return;
+      setWorking('done');
+      workT = setTimeout(() => { if(workEl) workEl.style.display = 'none'; workCount = 0; }, 2500);
+    }, 1200);
+  }
   function setBusy(b){
     if(!sendBtn) return;
     sendBtn.disabled = b;
@@ -2318,11 +2354,16 @@
   async function executeToolUses(uses){
     const box = renderBlock(uses.map(toolLabel));
     let approved = true;
-    if(!cfg.autoExecute && uses.some(needsApproval)) approved = await askApproval(box);
+    if(!cfg.autoExecute && uses.some(needsApproval)){
+      setWorking('wait');
+      if(panelEl && (panelEl.style.display === 'none' || !panelEl.style.display)) togglePanel(true);
+      approved = await askApproval(box);
+    }
     const results = [], log = [];
     for(let i = 0; i < uses.length; i++){
       const tu = uses[i];
       let out;
+      if(approved && !stopRequested) setWorking('run', toolLabel(tu));
       if(!approved){
         out = {text: 'The user denied this action. Do not repeat it without being asked.', error: true};
       } else if(stopRequested){
@@ -2346,6 +2387,7 @@
       if(approved && !stopRequested && cfg.clickCooldown && i < uses.length - 1 && A && A.ui) await sleep(COOLDOWN_MS);
     }
     chat.push({role: 'tool', text: log.join('\n'), t: Date.now()}); saveChat();
+    endWorking();
     return results;
   }
 
@@ -2641,6 +2683,34 @@
             '<label class="toggle-switch"><input type="checkbox" id="ccClickCooldownToggle"><span class="toggle-slider"></span></label>' +
           '</div>' +
 
+          '<details class="cc-guide">' +
+            '<summary>Step-by-step setup guide</summary>' +
+            '<div class="cc-guide-body">' +
+              '<p class="cc-guide-h">First time only</p>' +
+              '<ol>' +
+                '<li><b>Put the relay online.</b> It is a free helper that sits between Claude and this editor. Follow the guide here: <a href="https://github.com/mahi902/Oryn/blob/main/claude-relay/GUIDE.md" target="_blank" rel="noopener">claude-relay/GUIDE.md</a>. At the end you get an address ending in <code>workers.dev</code>.</li>' +
+                '<li><b>Paste that address</b> into &ldquo;Relay Worker URL&rdquo; below.</li>' +
+                '<li><b>Turn Bridge mode on.</b> Wait until the text says <i>Connected</i>.</li>' +
+                '<li><b>Tap the copy button</b> next to &ldquo;Connector URL&rdquo;. This link is a password, so keep it private.</li>' +
+                '<li><b>Open claude.ai</b> &rarr; Settings &rarr; Connectors &rarr; Add custom connector. Paste the link and save.</li>' +
+                '<li><b>Turn on &ldquo;Allow UI Control&rdquo;</b> further down, so Claude is allowed to click and type.</li>' +
+              '</ol>' +
+              '<p class="cc-guide-h">Every time you use it</p>' +
+              '<ol>' +
+                '<li>Keep this editor tab <b>open and on screen</b>. A sleeping tab disconnects.</li>' +
+                '<li>In claude.ai, ask for something, for example: <i>&ldquo;Use the Sugarcane connector and make the title bold.&rdquo;</i></li>' +
+                '<li>Watch the orange bar at the top of the screen. It shows <b>Claude is working</b> and what it is doing. Tap <b>Stop</b> on it to cancel.</li>' +
+                '<li>If the bar says <b>Claude needs your approval</b>, open the Claude chat and tap <b>Approve</b> or <b>Deny</b>.</li>' +
+              '</ol>' +
+              '<p class="cc-guide-h">If something is wrong</p>' +
+              '<ul>' +
+                '<li><b>&ldquo;Retrying&hellip;&rdquo;</b>: the Relay Worker URL has a typo.</li>' +
+                '<li><b>Claude says the tab is not connected</b>: Bridge mode is off, or this tab is closed or asleep.</li>' +
+                '<li><b>Claude says a permission is off</b>: turn on the switch it names in this section.</li>' +
+                '<li><b>Link leaked?</b> Tap the circular-arrows button to make a new one, then paste the new one into claude.ai.</li>' +
+              '</ul>' +
+            '</div>' +
+          '</details>' +
           '<div class="aw-row cc-risky-row">' +
             '<div><div class="aw-row-label">Bridge mode (Claude connector)</div><div class="aw-row-sub">Lets Claude on claude.ai drive this tab through your relay Worker, no API key needed. Uses the same permissions as the chat panel.</div></div>' +
             '<label class="toggle-switch"><input type="checkbox" id="ccBridgeToggle"><span class="toggle-slider"></span></label>' +

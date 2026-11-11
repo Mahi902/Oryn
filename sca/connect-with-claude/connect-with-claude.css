@@ -145,3 +145,39 @@ body.dark .cc-pal-item{color:#ddd;}
 body.dark .cc-pal-item:hover{background:#2e211c;}
 .cc-msg code{font-family:"SF Mono",Consolas,monospace; font-size:11.5px; background:rgba(0,0,0,.06); padding:1px 4px; border-radius:4px;}
 body.dark .cc-msg code{background:rgba(255,255,255,.1);}
+
+
+/* ── "Claude is working" bar ──────────────────────────────────────────── */
+.cc-working{
+  position:fixed; z-index:999000; left:50%; transform:translateX(-50%);
+  top:calc(10px + env(safe-area-inset-top, 0px)); max-width:calc(100vw - 24px); width:max-content;
+  display:none; align-items:center; gap:10px; padding:8px 8px 8px 12px;
+  background:#c96442; color:#fff; border-radius:999px; box-shadow:0 6px 24px rgba(0,0,0,.28);
+  font-family:inherit; font-size:13px; box-sizing:border-box;
+}
+.cc-working-spin{flex-shrink:0; width:16px; height:16px; border-radius:50%; border:2.5px solid rgba(255,255,255,.4); border-top-color:#fff; animation:ccspin .8s linear infinite;}
+.cc-working-text{display:flex; flex-direction:column; min-width:0; line-height:1.25;}
+.cc-working-title{font-weight:700; font-size:13px;}
+.cc-working-sub{font-size:11px; opacity:.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:60vw;}
+.cc-working-stop{flex-shrink:0; border:none; border-radius:999px; padding:6px 12px; background:rgba(0,0,0,.25); color:#fff; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit;}
+.cc-working-stop:hover{background:rgba(0,0,0,.4);}
+.cc-working[data-state="wait"]{background:#b7791f; animation:ccpulse 1.2s ease-in-out infinite;}
+.cc-working[data-state="done"]{background:#2f855a;}
+.cc-working[data-state="done"] .cc-working-spin,.cc-working[data-state="done"] .cc-working-stop{display:none;}
+.cc-working[data-state="wait"] .cc-working-spin{animation-duration:2s;}
+@keyframes ccspin{to{transform:rotate(360deg);}}
+@keyframes ccpulse{50%{box-shadow:0 6px 30px rgba(183,121,31,.7);}}
+@media (prefers-reduced-motion:reduce){.cc-working-spin,.cc-working[data-state="wait"]{animation:none;}}
+
+/* ── Setup guide ──────────────────────────────────────────────────────── */
+.cc-guide{margin:10px 0 4px; border:1px solid #e0e0e0; border-radius:9px; background:#fafafa; font-size:12px;}
+.cc-guide summary{cursor:pointer; padding:9px 11px; font-weight:700; color:#c96442;}
+.cc-guide-body{padding:0 12px 10px; line-height:1.5; color:#444;}
+.cc-guide-body ol,.cc-guide-body ul{margin:4px 0 8px; padding-left:18px;}
+.cc-guide-body li{margin:4px 0;}
+.cc-guide-h{margin:8px 0 2px; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.4px; color:#888;}
+.cc-guide-body code{background:#eee; padding:1px 4px; border-radius:4px; font-size:11px;}
+.cc-guide-body a{color:#c96442;}
+body.dark .cc-guide{background:#252525; border-color:#333;}
+body.dark .cc-guide-body{color:#ddd;}
+body.dark .cc-guide-body code{background:#333;}
