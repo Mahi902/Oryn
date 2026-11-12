@@ -56,6 +56,9 @@
     clickCooldown: true,      // when on, a multi-command reply executes one command at a time with a pause between
     allowScreenShare: false,  // sends a live on-screen clickable-control snapshot every message,
                               // and lifts the click batch limit entirely
+    autoConnect: true,        // connect to the relay automatically when the editor loads
+    autoReconnect: true,      // keep retrying if the connection drops
+    reconnectOnFocus: true,   // retry right away when the tab wakes up or the network returns
     agentCursors: true,       // show a labelled cursor for each agent while it acts
     bridgeEnabled: false,     // Bridge mode: let MCP agents drive this tab through a relay Worker
     bridgeUrl: '',            // base URL of your relay Worker
@@ -2164,6 +2167,7 @@
         '<span class="material-symbols-outlined aam-header-ic">forum</span>' +
         '<span class="aam-header-title">Agent Chat</span>' +
         '<div class="aam-header-actions">' +
+          '<button type="button" class="aam-icon-btn aam-link-btn" id="aamLinkBtn" title="Connect / disconnect"><span class="material-symbols-outlined">link_off</span></button>' +
           '<button type="button" class="aam-icon-btn" id="aamCursorBtn" title="Show / hide agent cursors"><span class="material-symbols-outlined">near_me</span></button>' +
           '<button type="button" class="aam-icon-btn" id="aamClearBtn" title="Clear this document\'s chat history"><span class="material-symbols-outlined">delete_sweep</span></button>' +
           '<button type="button" class="aam-icon-btn" id="aamDockBtn" title="Dock/undock"><span class="material-symbols-outlined">picture_in_picture</span></button>' +
@@ -2189,7 +2193,8 @@
 
     panelEl.querySelector('#aamCloseBtn').addEventListener('click', () => togglePanel(false));
     panelEl.querySelector('#aamCursorBtn').addEventListener('click', () => { cfg.agentCursors = !cfg.agentCursors; saveCfg(); syncCursorUI(); if(!cfg.agentCursors) agents.forEach(a => a.cur && a.cur.classList.remove('show')); });
-    syncCursorUI(); renderAgentUI();
+    panelEl.querySelector('#aamLinkBtn').addEventListener('click', () => { const o = bridgeStatus === 'connected' || bridgeStatus === 'connecting' || bridgeStatus === 'retry'; const r = o ? bridgeStop() : bridgeStart(); if(r) addSys(r); });
+    syncCursorUI(); renderAgentUI(); syncBridgeUI();
     panelEl.querySelector('#aamClearBtn').addEventListener('click', () => {
       if(!confirm('Clear this document\'s Agent Chat history? This cannot be undone.')) return;
       chat = []; saveChat(); renderHistory();
@@ -2565,15 +2570,36 @@
     });
     return tools;
   }
+  function clearAgents(){ [...agents.keys()].forEach(dropAgent); }
+  function bridgeStart(){
+    if(!bridgeValidBase()){ setBridgeStatus('badurl'); return 'Enter your relay Worker URL first (Agent Configuration).'; }
+    cfg.bridgeEnabled = true; if(!cfg.bridgeToken) cfg.bridgeToken = newBridgeToken();
+    saveCfg(); bridgeTries = 0; bridgeConnect(); return 'Connecting to the relay…';
+  }
+  function bridgeStop(){
+    cfg.bridgeEnabled = false; saveCfg(); bridgeConnect(); return 'Disconnected. Agents can no longer reach this editor.';
+  }
+  function syncBridgeUI(){
+    const on = bridgeStatus === 'connected', busy = bridgeStatus === 'connecting' || bridgeStatus === 'retry';
+    const c = document.getElementById('aamConnectBtn'), d = document.getElementById('aamDisconnectBtn');
+    if(c) c.disabled = on || busy; if(d) d.disabled = bridgeStatus === 'off' || bridgeStatus === 'badurl';
+    const l = document.getElementById('aamLinkBtn');
+    if(l){
+      l.dataset.state = bridgeStatus; l.title = on ? 'Connected — tap to disconnect' : busy ? 'Connecting… tap to cancel' : 'Disconnected — tap to connect';
+      const ic = l.querySelector('.material-symbols-outlined'); if(ic) ic.textContent = on || busy ? 'link' : 'link_off';
+    }
+  }
   function setBridgeStatus(s){
     bridgeStatus = s;
+    syncBridgeUI();
     const el = document.getElementById('aamBridgeStatus');
     if(!el) return;
     const label = {
-      off: 'Bridge is off.',
+      off: 'Disconnected.',
       connecting: 'Connecting to the relay…',
       connected: 'Connected. Add the connector URL to your agent (Claude: Settings → Connectors; ChatGPT: Settings → Connectors → Developer mode).',
-      retry: 'Disconnected — retrying…',
+      retry: 'Connection lost — retrying…',
+      dropped: 'Connection lost. Auto-reconnect is off — tap Connect.',
       badurl: 'Enter your relay Worker URL (https://…).'
     }[s] || s;
     el.textContent = label + (bridgeCalls ? ' Tool calls this session: ' + bridgeCalls + '.' : '');
@@ -2584,7 +2610,7 @@
     clearTimeout(bridgeRetryT);
     if(bridgeWS){ const o = bridgeWS; bridgeWS = null; o.onclose = null; try { o.close(); } catch(e){} }
     clearInterval(bridgeBeat); bridgeBeat = null;
-    if(!cfg.bridgeEnabled){ setBridgeStatus('off'); return; }
+    if(!cfg.bridgeEnabled){ clearAgents(); setBridgeStatus('off'); return; }
     if(!bridgeValidBase()){ setBridgeStatus('badurl'); return; }
     if(!cfg.bridgeToken){ cfg.bridgeToken = newBridgeToken(); saveCfg(); }
     setBridgeStatus('connecting');
@@ -2604,11 +2630,12 @@
       else if(m.t === 'agents' || m.t === 'agent' || m.t === 'delivered' || m.t === 'say') onRelayEvent(m);
       else if(m.t === 'cancel'){ if(pendingStop){ const f = pendingStop; pendingStop = null; f(); } }
     };
-    ws.onclose = () => { if(bridgeWS !== ws) return; bridgeWS = null; clearInterval(bridgeBeat); bridgeBeat = null; setBridgeStatus('retry'); bridgeSchedule(); };
+    ws.onclose = () => { if(bridgeWS !== ws) return; bridgeWS = null; clearInterval(bridgeBeat); bridgeBeat = null; clearAgents(); setBridgeStatus('retry'); bridgeSchedule(); };
     ws.onerror = () => {};
   }
   function bridgeSchedule(){
     if(!cfg.bridgeEnabled) return;
+    if(!cfg.autoReconnect){ setBridgeStatus('dropped'); return; }
     clearTimeout(bridgeRetryT);
     bridgeRetryT = setTimeout(bridgeConnect, Math.min(30000, 1000 * Math.pow(2, Math.min(bridgeTries++, 5))));
   }
@@ -2646,6 +2673,8 @@
     names.stop = 'Stop whatever the agents are doing.';
     names.clear = 'Clear this document\'s chat history.';
     names.guide = 'Open the step-by-step setup guide.';
+    names.connect = 'Connect to the relay so agents can reach this editor.';
+    names.disconnect = 'Disconnect from the relay (agents lose access).';
     return names;
   }
   function helpText(){
@@ -2657,6 +2686,8 @@
     if(name === 'help') return helpText();
     if(name === 'stop'){ requestStop(); return 'Stopping.'; }
     if(name === 'guide'){ openGuide(); return 'Opened the setup guide.'; }
+    if(name === 'connect') return bridgeStart();
+    if(name === 'disconnect') return bridgeStop();
     if(name === 'clear'){ chat = []; saveChat(); renderHistory(); return ''; }
     if(ACTIONS[name] && ACTIONS[name].manual && name !== 'ask'){
       const A = ACTIONS[name];
@@ -2803,10 +2834,8 @@
             '</div>' +
           '</details>' +
           '<button type="button" class="aam-guide-btn" id="aamGuideBtn"><span class="material-symbols-outlined">menu_book</span>Open full guide</button>' +
-          '<div class="aw-row aam-risky-row">' +
-            '<div><div class="aw-row-label">Bridge mode (MCP agents)</div><div class="aw-row-sub">Lets Claude, ChatGPT or any MCP agent drive this tab through your relay Worker. Uses the same permissions as the chat panel.</div></div>' +
-            '<label class="toggle-switch"><input type="checkbox" id="aamBridgeToggle"><span class="toggle-slider"></span></label>' +
-          '</div>' +
+          '<label class="aam-cfg-label">Agent connection</label>' +
+          '<div class="aw-row-sub" style="margin-bottom:4px">Lets Claude, ChatGPT or any MCP agent drive this tab through your relay Worker. Uses the same permissions as the chat panel.</div>' +
           '<label class="aam-cfg-label">Relay Worker URL</label>' +
           '<input type="text" class="aam-cfg-input" id="aamBridgeUrlInput" placeholder="https://all-agent-mcp.you.workers.dev" autocomplete="off">' +
           '<label class="aam-cfg-label">Connector URL (secret, paste into your agent)</label>' +
@@ -2816,6 +2845,19 @@
             '<button type="button" class="aam-paste-btn" id="aamBridgeRegenBtn" title="New secret (disconnects the old connector URL)"><span class="material-symbols-outlined">autorenew</span></button>' +
           '</div>' +
           '<div class="aw-row-sub aam-bridge-status" id="aamBridgeStatus" style="margin-top:5px"></div>' +
+          '<div class="aam-conn-row"><button type="button" class="aam-conn-btn aam-conn-go" id="aamConnectBtn"><span class="material-symbols-outlined">link</span>Connect</button><button type="button" class="aam-conn-btn aam-conn-stop" id="aamDisconnectBtn"><span class="material-symbols-outlined">link_off</span>Disconnect</button></div>' +
+          '<div class="aw-row">' +
+            '<div><div class="aw-row-label">Auto-connect</div><div class="aw-row-sub">Connect by itself whenever the editor opens.</div></div>' +
+            '<label class="toggle-switch"><input type="checkbox" id="aamAutoConnectToggle"><span class="toggle-slider"></span></label>' +
+          '</div>' +
+          '<div class="aw-row">' +
+            '<div><div class="aw-row-label">Auto-reconnect</div><div class="aw-row-sub">Keep retrying if the connection drops.</div></div>' +
+            '<label class="toggle-switch"><input type="checkbox" id="aamAutoReconnectToggle"><span class="toggle-slider"></span></label>' +
+          '</div>' +
+          '<div class="aw-row">' +
+            '<div><div class="aw-row-label">Reconnect on wake</div><div class="aw-row-sub">Retry right away when the tab wakes up or the network comes back.</div></div>' +
+            '<label class="toggle-switch"><input type="checkbox" id="aamFocusReconnectToggle"><span class="toggle-slider"></span></label>' +
+          '</div>' +
 
           '<button type="button" class="aam-open-chat-btn" id="aamOpenChatBtn"><span class="material-symbols-outlined">chat</span>Open Agent Chat</button>' +
         '</div>' +
@@ -2868,16 +2910,16 @@
     document.getElementById('aamOpenChatBtn').addEventListener('click', () => togglePanel(true));
     document.getElementById('aamGuideBtn').addEventListener('click', openGuide);
 
-    const brToggle = document.getElementById('aamBridgeToggle'), brUrl = document.getElementById('aamBridgeUrlInput'), brConn = document.getElementById('aamBridgeConnInput');
+    const brUrl = document.getElementById('aamBridgeUrlInput'), brConn = document.getElementById('aamBridgeConnInput');
     const syncConn = () => { brConn.value = (bridgeValidBase() && cfg.bridgeToken) ? bridgeConnectorUrl() : ''; };
-    brToggle.checked = !!cfg.bridgeEnabled;
     brUrl.value = cfg.bridgeUrl;
     if(cfg.bridgeEnabled && !cfg.bridgeToken){ cfg.bridgeToken = newBridgeToken(); saveCfg(); }
     syncConn(); setBridgeStatus(bridgeStatus);
-    brToggle.addEventListener('change', () => {
-      cfg.bridgeEnabled = brToggle.checked;
-      if(cfg.bridgeEnabled && !cfg.bridgeToken) cfg.bridgeToken = newBridgeToken();
-      saveCfg(); syncConn(); bridgeTries = 0; bridgeConnect();
+    document.getElementById('aamConnectBtn').addEventListener('click', () => { cfg.bridgeUrl = brUrl.value.trim(); bridgeStart(); syncConn(); });
+    document.getElementById('aamDisconnectBtn').addEventListener('click', () => { bridgeStop(); });
+    [['aamAutoConnectToggle', 'autoConnect'], ['aamAutoReconnectToggle', 'autoReconnect'], ['aamFocusReconnectToggle', 'reconnectOnFocus']].forEach(([id, key]) => {
+      const el = document.getElementById(id); el.checked = !!cfg[key];
+      el.addEventListener('change', () => { cfg[key] = el.checked; saveCfg(); });
     });
     brUrl.addEventListener('change', () => { cfg.bridgeUrl = brUrl.value.trim(); saveCfg(); syncConn(); if(cfg.bridgeEnabled){ bridgeTries = 0; bridgeConnect(); } });
     document.getElementById('aamBridgeCopyBtn').addEventListener('click', async () => {
@@ -2928,7 +2970,12 @@
     hookToasts(); setTimeout(hookToasts, 1500); setTimeout(hookToasts, 5000);
     buildSidebarSection();
     injectInsertMenuEntry();
-    if(cfg.bridgeEnabled) bridgeConnect();
+    // auto-connect on load; otherwise start disconnected until the user taps Connect
+    if(cfg.autoConnect && bridgeValidBase()){ cfg.bridgeEnabled = true; if(!cfg.bridgeToken){ cfg.bridgeToken = newBridgeToken(); } saveCfg(); bridgeConnect(); }
+    else { cfg.bridgeEnabled = false; }
+    const wake = () => { if(cfg.reconnectOnFocus && cfg.bridgeEnabled && !(bridgeWS && bridgeWS.readyState === 1)){ bridgeTries = 0; bridgeConnect(); } };
+    document.addEventListener('visibilitychange', () => { if(!document.hidden) wake(); });
+    window.addEventListener('online', wake);
     setInterval(() => { if(panelEl && panelEl.style.display !== 'none') ensureCurrentDocChat(); }, 1500);
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once: true});

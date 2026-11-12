@@ -231,3 +231,13 @@ body.dark .aam-target{background:#252525; border-color:#333;}
 .aam-cursor.pulse .aam-cursor-ring{animation:aamring .6s ease-out;}
 @keyframes aamring{0%{opacity:.9; transform:scale(.3);}100%{opacity:0; transform:scale(1.6);}}
 @media (prefers-reduced-motion:reduce){.aam-cursor{transition:opacity .2s;} .aam-cursor.pulse .aam-cursor-ring{animation:none;}}
+
+.aam-conn-row{display:flex; gap:8px; margin:8px 0 4px;}
+.aam-conn-btn{flex:1; display:flex; align-items:center; justify-content:center; gap:5px; padding:8px; border-radius:9px; font:600 12.5px inherit; font-family:inherit; cursor:pointer; border:1px solid #5b5bd6; background:#5b5bd6; color:#fff;}
+.aam-conn-btn .material-symbols-outlined{font-size:17px;}
+.aam-conn-stop{background:#fff; color:#c0392b; border-color:#c0392b;}
+body.dark .aam-conn-stop{background:#252525; color:#ff8a80; border-color:#ff8a80;}
+.aam-conn-btn:disabled{opacity:.4; cursor:default;}
+.aam-link-btn[data-state="connected"]{color:#7ee0a0;}
+.aam-link-btn[data-state="connecting"],.aam-link-btn[data-state="retry"]{color:#ffd37a;}
+.aam-bridge-status[data-state="connected"]{color:#2f855a;}
