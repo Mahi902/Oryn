@@ -1,0 +1,8 @@
+name: All Agent MCP
+icon: https://mahi902.github.io/Oryn/sca/all-agent-mcp/icon.svg
+version: 1.0.0
+creator: Mohtadi Azad Mahi
+description: Lets any MCP-capable AI agent (Claude, ChatGPT, Gemini, Copilot and more) drive the editor through a free self-hosted relay Worker. Agents introduce themselves by name and the editor reacts: the top bar, chat and a per-agent collaboration cursor show who is doing what (cursors can be turned off). Several agents can work at once on the same connector URL. Agents run the editor's slash commands and can operate the UI like a person (snapshot, click, drag, type, keys, scroll, screenshots). Agent Chat lets you message the agents, which they read with their next action or by checking in, and lets them reply. The new toast_log command lets an agent replay the last editor log entries as toasts. Same permission switches as before: page/element scopes, auto-execute or approve-each-time, gated UI control and optional Screen Share. Agent Chat and Agent Configuration are hidden from agents. Open the built-in guide with /guide.
+p/html:
+p/css: https://mahi902.github.io/Oryn/sca/all-agent-mcp/all-agent-mcp.css
+p/js: https://mahi902.github.io/Oryn/sca/all-agent-mcp/all-agent-mcp.js
