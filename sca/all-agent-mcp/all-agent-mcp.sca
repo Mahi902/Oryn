@@ -1,6 +1,6 @@
 name: All Agent MCP
 icon: https://mahi902.github.io/Oryn/sca/all-agent-mcp/icon.svg
-version: 2.0.0
+version: 2.0.1
 creator: Mohtadi Azad Mahi
 description: Lets any MCP-capable AI agent (Claude, ChatGPT, Gemini, Copilot and more) drive the editor through a free self-hosted relay Worker. Version 2 adds a dedicated Agents card with five windows: Agent List (named agents with brand icons, 5-digit IDs, approve / kick), Agent Chat (chat, Agent Board and a Manage tab to mute agents and wipe chat or board; chat and board can float), Agent History, Agent Permissions (per agent) and Agent Configurations. New agents can be set to need your approval, fake agents from probes no longer appear, and every window follows light and dark mode. The top banner disappears when the master switch is off. Open the built-in guide with /guide.
 p/html:
