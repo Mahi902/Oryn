@@ -7,7 +7,7 @@
 <title>Sugarcane Editor</title>
 <meta name="description" content="Sugarcane Editor: a powerful all-in-one online editor from the Oryn suite. Write, design and edit with add-ons and extensions.">
 <meta name="keywords" content="Sugarcane Editor, SCEditor, DocuWrite Pro, sugarcane, sca add-ons, editor add-ons, extensions, online editor, document editor, online document editor, free document editor, Word alternative, Google Docs alternative, WYSIWYG editor, rich text editor, text editor, write documents online, A4 editor, docs, office, word processor, online word processor, create documents, edit documents, format documents, export document, export PDF, export DOCX, export HTML, print document, page layout, headings, fonts, tables, lists, templates, document templates, resume maker, letter writer, report writer, essay writer, Oryn, Oryn app, Oryn online, Mohtadi Azad Mahi, Education By Mohtadi Azad, mahi902, free online tools, online tools, web tools, browser tools, no signup, no login, no ads, no credit card, free forever, works in browser, client-side, privacy friendly, offline friendly, PWA, progressive web app, productivity tools, productivity suite, document suite, all-in-one workspace, online workspace, Android app, mobile friendly, dark mode, open source, GitHub Pages, Toolstructer, instant, fast, easy to use, secure, no installation, no server upload">
-<meta name="sceditor-version" content="236">
+<meta name="sceditor-version" content="237">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -2827,6 +2827,33 @@ body.dark .fb-opt-danger .material-symbols-outlined{color:hsl(calc(1.1 * var(--s
 body.dark .fb-opt-danger:hover{background:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(46.8% * var(--sc-rs,1)) calc(15.5% + var(--sc-rl,0%))) !important;color:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(100.0% * var(--sc-rs,1)) calc(71.0% + var(--sc-rl,0%))) !important;}
 body.dark .fb-opt-danger:hover .material-symbols-outlined{color:hsl(calc(0.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(100.0% * var(--sc-rs,1)) calc(71.0% + var(--sc-rl,0%))) !important;}
 
+/* ── Desktop dropdown ⇄ modal toggle (Paragraph style + Insert) ── */
+.dd-expand-btn{display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;padding:2px;border-radius:4px;opacity:.5;transition:opacity .15s,background .15s;}
+.dd-expand-btn:hover{opacity:1;background:#f0f0f0;}
+body.dark .dd-expand-btn:hover{background:#3a3a3c;}
+.dd-expand-btn .material-symbols-outlined{font-size:16px;color:var(--ui-muted,#777);}
+#insertDropdown>.dd-expand-btn{position:absolute;right:16px;bottom:14px;z-index:5;background:var(--ui-raise,#fff);box-shadow:var(--ui-shadow-sm);}
+.dd-expand-sticky{position:sticky;bottom:6px;height:0;display:flex;justify-content:flex-end;overflow:visible;padding-right:6px;pointer-events:none;}
+.dd-expand-sticky .dd-expand-btn{pointer-events:auto;transform:translateY(-100%);background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.15);}
+body.dark .dd-expand-sticky .dd-expand-btn{background:#2c2c2e;}
+#ddModalBackdrop{display:none;position:fixed;inset:0;z-index:9090;background:rgba(0,0,0,.35);}
+body.dark #ddModalBackdrop{background:rgba(0,0,0,.55);}
+#ddModalBackdrop.open{display:block;}
+@media(min-width:769px){
+  #formatBlockDropdown.dd-modal,#insertDropdown.dd-modal{left:50%!important;top:50%!important;transform:translate(-50%,-50%);animation:none!important;width:min(560px,92vw);max-height:86vh;border-radius:16px!important;box-shadow:0 20px 60px rgba(0,0,0,.35)!important;}
+  #formatBlockDropdown.dd-modal{padding:8px 0!important;max-height:80vh;}
+  #insertDropdown.dd-modal .insert-dd-list{max-height:calc(86vh - 30px);grid-template-columns:repeat(3,1fr);}
+}
+@media(max-width:768px){.dd-expand-btn,.dd-expand-sticky{display:none!important;}}
+/* ── Scroll-assist buttons outside every modal (desktop) ── */
+.sc-sa-btn{position:fixed;display:none;width:34px;height:34px;align-items:center;justify-content:center;padding:0;border-radius:50%;cursor:pointer;color:var(--ui-link);background:linear-gradient(180deg,var(--ui-shell),var(--ui-shell-2));border:1px solid var(--ui-line);box-shadow:var(--ui-shadow-sm,0 2px 8px rgba(0,0,0,.2));}
+.sc-sa-btn:hover{color:var(--ui-text);}
+.sc-sa-btn svg{display:block;pointer-events:none;}
+@media(min-width:769px){
+  .modal.open .mbox,.modal[style*="display: flex"] .mbox,.modal[style*="display:flex"] .mbox{max-width:calc(100vw - 124px)!important;}
+  #formatBlockDropdown.dd-modal,#insertDropdown.dd-modal{max-width:calc(100vw - 124px);}
+}
+@media(max-width:768px){.sc-sa-btn{display:none!important;}}
 /* ── Form Fields (Insert → Forms) ─────────────────────────────── */
 .forms-dd-back{display:flex;align-items:center;gap:6px;padding:8px 6px;margin-bottom:4px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:hsl(calc(var(--sc-h,210) + 1.9) calc(80.3% * var(--sc-s,1)) calc(41.8% + var(--sc-l,0%) * 1));grid-column:1/-1;}
 .forms-dd-back:hover{background:hsl(calc(var(--sc-h,210) + -4.6) calc(86.7% * var(--sc-s,1)) calc(94.1% + var(--sc-l,0%) * 0));}
@@ -4272,7 +4299,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v236…</p>
+    <p class="loading-text">Loading Sugarcane v237…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -5160,6 +5187,7 @@ function waitForSugarcaneAddons(){
       <div class="fb-opt" data-val="pre" onmousedown="event.preventDefault()" onclick="applyFormatBlock('pre','Preformatted')" style="padding:8px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:12px;font-family:monospace;transition:background .12s;">Preformatted</div>
       <div class="fb-sep"></div>
       <div class="fb-opt fb-opt-danger" data-val="remove" onmousedown="event.preventDefault()" onclick="removeBlockStyle()" style="padding:8px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px;transition:background .12s;"><span class="material-symbols-outlined" style="font-size:15px">format_clear</span>Remove Style</div>
+      <div class="dd-expand-sticky"><button class="dd-expand-btn" type="button" onmousedown="event.preventDefault();event.stopPropagation()" onclick="toggleDdModal('formatBlockDropdown')" title="Expand to modal"><span class="material-symbols-outlined">unfold_more</span></button></div>
     </div>
     <div class="toolbar-sep"></div>
     <div class="size-group">
@@ -5223,6 +5251,7 @@ function waitForSugarcaneAddons(){
       <div class="insert-dd-list" id="ewDdList" style="display:none;">
         <div class="forms-dd-back" onclick="closeFormsMenu()"><span class="material-symbols-outlined">arrow_back</span>Editor Widgets</div>
       </div>
+      <button class="dd-expand-btn" type="button" onmousedown="event.stopPropagation()" onclick="toggleDdModal('insertDropdown')" title="Expand to modal"><span class="material-symbols-outlined">unfold_more</span></button>
     </div>
     <div class="toolbar-sep"></div>
     <button class="font-chooser-btn" onclick="openFontChooser('document')" id="fontChooserToolbarBtn">
@@ -9188,7 +9217,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 236; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 237; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -12326,6 +12355,124 @@ function addFontOption(name) { addFcFontOption(name); }
 ═══════════════════════════════════════════════════════ */
 let _fbSavedRange = null;
 
+
+/* ── Scroll assist: up/down buttons just outside the open modal (desktop) ── */
+(function(){
+  if (window.__scScrollAssist) return; window.__scScrollAssist = true;
+  const GAP = 12, W = 34;
+  const mk = (dir, ic) => {
+    const b = document.createElement('button'); b.type='button'; b.className='sc-sa-btn';
+    b.setAttribute('aria-label', dir<0 ? 'Scroll up' : 'Scroll down');
+    b.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+ic+'"/></svg>';
+    b.addEventListener('mousedown', e => { e.preventDefault(); e.stopPropagation(); });
+    let hold=0, raf=0, did=false;
+    const step = () => { if (cur.sc) cur.sc.scrollTop += dir*18; raf = requestAnimationFrame(step); };
+    const stop = () => { clearTimeout(hold); hold=0; if (raf){ cancelAnimationFrame(raf); raf=0; } };
+    b.addEventListener('pointerdown', e => { if (e.button>0) return; did=false; try{b.setPointerCapture(e.pointerId);}catch(err){} hold=setTimeout(()=>{ did=true; step(); },220); });
+    ['pointerup','pointercancel','pointerleave'].forEach(t => b.addEventListener(t, stop));
+    b.addEventListener('click', () => { if (did){ did=false; return; } if (cur.sc) cur.sc.scrollBy({top: dir*Math.round(cur.sc.clientHeight*.7), behavior:'smooth'}); });
+    document.body.appendChild(b); return b;
+  };
+  const up = mk(-1,'M6 14.5l6-6 6 6'), dn = mk(1,'M6 9.5l6 6 6-6');
+  const cur = {sc:null};
+  const shown = el => { const cs = getComputedStyle(el); return cs.display!=='none' && cs.visibility!=='hidden' && parseFloat(cs.opacity||'1')>0.05; };
+  function findTarget(){
+    if (window.innerWidth <= 768) return null;
+    // dropdown-as-modal first (sits above regular modals)
+    for (const id of ['insertDropdown','formatBlockDropdown']) {
+      const dd = document.getElementById(id);
+      if (dd && dd.classList.contains('dd-modal') && dd.style.display==='block') {
+        let sc = dd;
+        if (id==='insertDropdown') sc = [...dd.querySelectorAll('.insert-dd-list')].find(l => l.style.display!=='none') || dd;
+        return {box:dd, sc, z:9101};
+      }
+    }
+    let best=null, bz=-1;
+    document.querySelectorAll('.modal').forEach(m => {
+      if (!shown(m)) return;
+      const z = parseInt(getComputedStyle(m).zIndex,10) || 0;
+      if (z >= bz) { bz=z; best=m; }
+    });
+    if (!best) return null;
+    const box = best.querySelector('.mbox') || best.firstElementChild;
+    if (!box || !shown(box)) return null;
+    return {box, sc:box, z:bz+1};
+  }
+  function update(){
+    const t = findTarget();
+    cur.sc = t && t.sc;
+    if (!t) { up.style.display = dn.style.display = 'none'; return; }
+    const r = t.box.getBoundingClientRect(), sc = t.sc;
+    const canUp = sc.scrollTop > 1, canDn = sc.scrollTop + sc.clientHeight < sc.scrollHeight - 1;
+    // keep the left gap equal to the button gutter so the modal looks balanced
+    let left = r.right + GAP;
+    if (left + W > window.innerWidth - 4) left = window.innerWidth - W - 4;
+    up.style.left = dn.style.left = left + 'px';
+    // stacked pair, centred on the modal's side (each keeps its own slot so nothing jumps)
+    const mid = Math.max(r.top, 0) + (Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0)) / 2;
+    up.style.top = Math.round(mid - W - 3) + 'px';
+    dn.style.top = Math.round(mid + 3) + 'px';
+    up.style.zIndex = dn.style.zIndex = t.z;
+    up.style.display = canUp ? 'flex' : 'none';
+    dn.style.display = canDn ? 'flex' : 'none';
+  }
+  let q=0; const sched = () => { if (q) return; q = requestAnimationFrame(() => { q=0; update(); }); };
+  document.addEventListener('scroll', sched, true);
+  window.addEventListener('resize', sched);
+  document.addEventListener('click', () => setTimeout(sched, 60), true);
+  setInterval(update, 300);
+})();
+
+/* ── Desktop: dropdown ⇄ modal (remembered) ── */
+const DD_MODAL_KEYS = {formatBlockDropdown:'fbDdModal', insertDropdown:'insDdModal'};
+function _ddPrefGet(id){
+  const k = DD_MODAL_KEYS[id];
+  try { const v = localStorage.getItem('sc-'+k); if (v !== null) return v === '1'; } catch(e) {}
+  return getCookie(k) === '1';
+}
+function _ddPrefSet(id, on){
+  const k = DD_MODAL_KEYS[id];
+  try { localStorage.setItem('sc-'+k, on ? '1' : '0'); } catch(e) {}
+  setCookie(k, on ? '1' : '0');
+}
+function _ddBackdrop(){
+  let b=document.getElementById('ddModalBackdrop');
+  if(!b){b=document.createElement('div');b.id='ddModalBackdrop';document.body.appendChild(b);}
+  return b;
+}
+function _ddSyncModal(dd){
+  const modal = dd.classList.contains('dd-modal');
+  const ic = dd.querySelector('.dd-expand-btn .material-symbols-outlined');
+  const b = dd.querySelector('.dd-expand-btn');
+  if(ic) ic.textContent = modal ? 'unfold_less' : 'unfold_more';
+  if(b) b.title = modal ? 'Collapse to dropdown' : 'Expand to modal';
+  _ddBackdrop().classList.toggle('open', modal && dd.style.display==='block');
+}
+function _ddPlaceDesktop(dd, btn){
+  const modal = _ddPrefGet(dd.id);
+  dd.classList.toggle('dd-modal', modal);
+  if(!modal){
+    const r = btn.getBoundingClientRect();
+    dd.style.left = r.left + 'px';
+    dd.style.top = (r.bottom + 4) + 'px';
+  }
+  dd.style.display = 'block';
+  _ddSyncModal(dd);
+}
+function toggleDdModal(id){
+  const dd = document.getElementById(id);
+  const btn = document.getElementById(id==='insertDropdown' ? 'insertDdBtn' : 'formatBlockBtn');
+  const toModal = !dd.classList.contains('dd-modal');
+  _ddPrefSet(id, toModal);
+  dd.classList.toggle('dd-modal', toModal);
+  if(!toModal){
+    const r = btn.getBoundingClientRect();
+    dd.style.left = r.left + 'px';
+    dd.style.top = (r.bottom + 4) + 'px';
+  }
+  _ddSyncModal(dd);
+}
+
 function toggleFormatBlockDropdown() {
   const dd = document.getElementById('formatBlockDropdown');
   const isOpen = dd.style.display === 'block';
@@ -12341,12 +12488,9 @@ function toggleFormatBlockDropdown() {
       dd.style.display = 'block';
       showMobileSheetBackdrop();
     } else {
-      // Bigger screens: slides down from the button
+      // Bigger screens: slides down from the button (or modal if the user expanded it)
       dd.classList.remove('bottom-sheet');
-      const r = btn.getBoundingClientRect();
-      dd.style.left = r.left + 'px';
-      dd.style.top = (r.bottom + 4) + 'px';
-      dd.style.display = 'block';
+      _ddPlaceDesktop(dd, btn);
     }
     setTimeout(() => {
       const close = (e) => {
@@ -12364,7 +12508,8 @@ function toggleFormatBlockDropdown() {
 function closeFormatBlockDropdown() {
   const dd = document.getElementById('formatBlockDropdown');
   dd.style.display = 'none';
-  dd.classList.remove('bottom-sheet');
+  dd.classList.remove('bottom-sheet','dd-modal');
+  _ddBackdrop().classList.remove('open');
   hideMobileSheetBackdrop();
 }
 
@@ -12526,12 +12671,9 @@ function toggleInsertDropdown() {
       dd.style.display = 'block';
       showMobileSheetBackdrop();
     } else {
-      // Bigger screens: slides down from the Insert button
+      // Bigger screens: slides down from the Insert button (or modal if the user expanded it)
       dd.classList.remove('bottom-sheet');
-      const r = btn.getBoundingClientRect();
-      dd.style.left = r.left + 'px';
-      dd.style.top = (r.bottom + 4) + 'px';
-      dd.style.display = 'block';
+      _ddPlaceDesktop(dd, btn);
     }
     setTimeout(() => {
       const close = (e) => {
@@ -12549,7 +12691,8 @@ function toggleInsertDropdown() {
 function closeInsertDropdown() {
   const dd = document.getElementById('insertDropdown');
   dd.style.display = 'none';
-  dd.classList.remove('bottom-sheet');
+  dd.classList.remove('bottom-sheet','dd-modal');
+  _ddBackdrop().classList.remove('open');
   hideMobileSheetBackdrop();
   closeFormsMenu();
 }
