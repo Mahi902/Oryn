@@ -88,6 +88,9 @@ mark{background:var(--mark);color:inherit;border-radius:3px}
 .st{padding:44px 16px;text-align:center;color:var(--text-secondary)}
 .rs{display:block;background:var(--bg-body);border-radius:12px;padding:11px 14px;margin:9px 0;color:var(--text-primary);text-decoration:none}
 .rs:active{background:var(--primary-light)}.rs b{color:var(--primary-color)}.rs p{margin:.3em 0 0;font-size:13px;color:var(--text-secondary)}
+.dw{margin:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--separator);background:var(--bg-body);flex-shrink:0}
+.dw button{width:100%;border:0;background:var(--primary-color);color:#fff;height:42px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.dw button:active{opacity:.8}.dw button[disabled]{opacity:.6;pointer-events:none}.dw .mi{font-size:20px}
 #ov{display:none}
 @media(max-width:820px){
  nav{position:absolute;z-index:20;top:0;bottom:0;left:0;width:min(88vw,340px);transform:translateX(-102%);transition:transform .28s cubic-bezier(.22,.8,.2,1);box-shadow:8px 0 28px rgba(0,0,0,.25);border-right:0}
@@ -111,6 +114,7 @@ mark{background:var(--mark);color:inherit;border-radius:3px}
    <button class="sq" id="xa" title="Show sections of every page" aria-label="Expand all"><span class="mi">unfold_more</span></button>
   </div>
   <div id="tree"></div>
+  <div class="dw"><button id="dw" disabled><span class="mi">folder_zip</span><span id="dwl">Download Wiki</span></button></div>
  </nav>
  <div id="ov"></div>
  <div id="main"><article id="card"><div id="doc" class="md"><div class="st">Loading…</div></div></article><div id="pn"></div></div>
@@ -449,7 +453,51 @@ $('card').addEventListener('click',function(e){
   var a=e.target.closest('a[data-a]');
   if(a){e.preventDefault();var el=document.getElementById(a.getAttribute('data-a'));if(el)el.scrollIntoView({block:'start'})}
 });
-fetchMd('_Sidebar').then(function(t){buildNav(parseSidebar(t))}).catch(function(){buildNav([{page:'Home',title:'Home'}])}).then(route);
+
+/* ---------- download whole wiki as .zip of .md ---------- */
+var crcT=(function(){var t=[],c,n,k;for(n=0;n<256;n++){c=n;for(k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(b){var c=0xFFFFFFFF;for(var i=0;i<b.length;i++)c=crcT[(c^b[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+function makeZip(files,d){
+  var enc=new TextEncoder(),chunks=[],cen=[],off=0;
+  var dt=((d.getFullYear()-1980)<<9|(d.getMonth()+1)<<5|d.getDate())&0xFFFF,tm=(d.getHours()<<11|d.getMinutes()<<5|(d.getSeconds()>>1))&0xFFFF;
+  files.forEach(function(f){
+    var nm=enc.encode(f.name),data=enc.encode(f.text),crc=crc32(data);
+    var lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(8,0,true);
+    lh.setUint16(10,tm,true);lh.setUint16(12,dt,true);lh.setUint32(14,crc,true);lh.setUint32(18,data.length,true);lh.setUint32(22,data.length,true);lh.setUint16(26,nm.length,true);lh.setUint16(28,0,true);
+    chunks.push(lh.buffer,nm,data);
+    var ch=new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(10,0,true);
+    ch.setUint16(12,tm,true);ch.setUint16(14,dt,true);ch.setUint32(16,crc,true);ch.setUint32(20,data.length,true);ch.setUint32(24,data.length,true);ch.setUint16(28,nm.length,true);
+    ch.setUint32(42,off,true);
+    cen.push(ch.buffer,nm);
+    off+=30+nm.length+data.length;
+  });
+  var cs=0;cen.forEach(function(x){cs+=x.byteLength||x.length});
+  var e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cs,true);e.setUint32(16,off,true);
+  return new Blob(chunks.concat(cen,[e.buffer]),{type:'application/zip'});
+}
+function p2(n){return(n<10?'0':'')+n}
+$('dw').onclick=function(){
+  var btn=this,lab=$('dwl'),now=new Date(),names=pages.slice(),failed=0;
+  ['_Sidebar','_Footer','_Header'].forEach(function(x){if(names.indexOf(x)<0)names.push(x)});
+  btn.disabled=true;lab.textContent='Preparing…';
+  var files=[],q=names.slice(),done=0;
+  function run(){
+    var n=q.shift();if(n===undefined)return Promise.resolve();
+    return fetchMd(n).then(function(t){files.push({name:n+'.md',text:t})}).catch(function(){if(n.charAt(0)!=='_')failed++}).then(function(){done++;lab.textContent='Preparing… '+done+'/'+names.length;return run()});
+  }
+  Promise.all([run(),run(),run(),run()]).then(function(){
+    files.sort(function(a,b){return names.indexOf(a.name.slice(0,-3))-names.indexOf(b.name.slice(0,-3))});
+    var stamp=now.getFullYear()+'-'+p2(now.getMonth()+1)+'-'+p2(now.getDate())+'_'+p2(now.getHours())+'-'+p2(now.getMinutes())+'-'+p2(now.getSeconds());
+    var a=document.createElement('a');a.href=URL.createObjectURL(makeZip(files,now));a.download='Oryn-Wiki-'+stamp+'.zip';
+    document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href)},10000);
+    lab.textContent=failed?'Downloaded ('+failed+' failed)':'Download Wiki';
+    if(failed)setTimeout(function(){lab.textContent='Download Wiki'},4000);
+  }).catch(function(){lab.textContent='Download failed'}).then(function(){btn.disabled=false});
+};
+fetchMd('_Sidebar').then(function(t){buildNav(parseSidebar(t))}).catch(function(){buildNav([{page:'Home',title:'Home'}])}).then(function(){$('dw').disabled=false}).then(route);
 })();
 </script>
 </body>
