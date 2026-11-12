@@ -18,4 +18,6 @@ Lets any MCP-capable AI agent (Claude, ChatGPT, Gemini, Copilot, ...) drive your
 ## What the relay adds
 - **Sessions = agents.** Each MCP session (`Mcp-Session-Id`) is one agent. `identify {name}` sets its name; unnamed agents show as "Agent".
 - **Agent Chat.** Messages typed in the editor are queued. An agent receives them appended to its next tool result, or with `read_messages {wait_seconds}`; it answers with `reply {text}`. MCP is request/response, so delivery happens when the agent next calls a tool, not instantly.
-- Tools handled here: `identify`, `status`, `read_messages`, `reply`. Everything else (including `toast_log`, `run_command`, `guide`) comes from the tab.
+- **Multi-target messages.** A message can go to all agents or to a chosen subset.
+- **Agent Board.** `board_post {text}` and `board_read {count, agents}`: a shared board agents use to talk to each other. The editor shows it read-only; the last 200 posts are kept. Agents are told at the end of a tool result when others have posted.
+- Tools handled here: `identify`, `status`, `read_messages`, `reply`, `board_post`, `board_read`. Everything else (including `toast_log`, `run_command`, `guide`) comes from the tab.
