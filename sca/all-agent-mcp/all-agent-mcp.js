@@ -5,7 +5,8 @@
    the editor's slash commands and operate the UI like a person. Each agent
    identifies itself by name; the editor shows who is working, gives each
    agent its own cursor, lets you message the agents from Agent Chat, and
-   lets agents replay the editor log as toasts (toast_log).
+   lets agents replay the editor log as toasts (toast_log). v2.0.2: live toast feed,
+   file export, Color Labs, scroll/pan/drag, image upload, right-click menus, quality.
 ═══════════════════════════════════════════════════════════════════════ */
 (function(){
   'use strict';
@@ -1137,21 +1138,39 @@
   function dropAgent(id){ const a = agents.get(id); if(a && a.cur) a.cur.remove(); agents.delete(id); renderAgentUI(); }
   const curOn = a => (a && a.ov && a.ov.agentCursors !== undefined) ? !!a.ov.agentCursors : !!cfg.agentCursors;
 
-  const logRing = []; let origToast = null;
+  const logRing = []; let origToast = null; const hostMarks = new Map();
   function pushLog(kind, type, text){
     if(!cfg.enabled) return;
     logRing.push({t: Date.now(), kind, type: type || 'info', text: clip(String(text == null ? '' : text).replace(/\s+/g, ' '), 300)});
     if(logRing.length > 300) logRing.shift();
   }
+  // Every toast the editor SHOWS is seen through the toast stack, logged, and pushed to the relay.
   function hookToasts(){
-    const f = window.showToast;
-    if(typeof f !== 'function' || f.__aam) return;
-    origToast = f;
-    const w = function(m, t, ms){ try { pushLog('toast', t, m); } catch(e){} return f.apply(this, arguments); };
-    w.__aam = true; window.showToast = w;
+    if(!origToast && typeof window.showToast === 'function') origToast = window.showToast;
+    const stack = document.getElementById('toastStack');
+    if(!stack || stack.__aamToasts) return;
+    stack.__aamToasts = true;
+    new MutationObserver(muts => {
+      muts.forEach(m => m.addedNodes.forEach(n => {
+        if(!n.classList || !n.classList.contains('toast')) return;
+        const sp = n.querySelectorAll('span');
+        const text = String(sp.length ? sp[sp.length - 1].textContent : n.textContent).replace(/\s+/g, ' ').trim();
+        if(!text) return;
+        const type = n.classList.contains('error') ? 'error' : n.classList.contains('success') ? 'success' : 'info';
+        const c = hostMarks.get(text);
+        if(c){ if(c > 1) hostMarks.set(text, c - 1); else hostMarks.delete(text); return; }
+        pushLog('toast', type, text);
+        if(cfg.enabled) bridgeSend({t: 'toast', type, text: clip(text, 300), at: Date.now()});
+      }));
+    }).observe(stack, {childList: true});
   }
   function hostToast(msg, type, ms){
-    try { (origToast || window.showToast || function(){})(msg, type || 'info', ms); } catch(e){}
+    try {
+      const f = origToast || window.showToast; if(typeof f !== 'function') return;
+      const t = String(msg == null ? '' : msg).replace(/\s+/g, ' ').trim();
+      hostMarks.set(t, (hostMarks.get(t) || 0) + 1); setTimeout(() => hostMarks.delete(t), 1500);
+      f(msg, type || 'info', ms);
+    } catch(e){}
   }
   (function hookConsole(){
     ['error', 'warn'].forEach(k => {
@@ -1536,7 +1555,7 @@
     fire(t.el, 'pointerup', t.x, t.y, up); fire(t.el, 'mouseup', t.x, t.y, up); fire(t.el, 'click', t.x, t.y, up);
     return device === 'touch' ? 'mouse press-and-hold (touch events unavailable here)' : 'mouse press-and-hold';
   }
-  async function pointerDrag(a, b, steps){
+  async function pointerDrag(a, b, steps, holdMs){
     steps = Math.min(60, Math.max(2, steps || 12));
     const dragSrc = a.el.closest('[draggable="true"]');
     pointerMoveTo(a.el, a.x, a.y, {});
@@ -1556,6 +1575,7 @@
         dragSrc.dispatchEvent(new DragEvent('dragstart', {bubbles: true, cancelable: true, clientX: a.x, clientY: a.y, dataTransfer: dt}));
       } catch(e){ dt = null; }
     }
+    if(holdMs) await sleep(holdMs);
     let last = a.el;
     for(let i = 1; i <= steps; i++){
       const x = Math.round(a.x + (b.x - a.x) * i / steps), y = Math.round(a.y + (b.y - a.y) * i / steps);
@@ -2056,6 +2076,896 @@
     }
   });
 
+  // ═══ v2.0.2 additions: toasts, export, Color Labs, scroll/pan/drag, images, right-click, quality ═══
+  const b64ToBlob = (b64, mime) => { const bin = atob(b64); const u = new Uint8Array(bin.length); for(let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], {type: mime || 'application/octet-stream'}); };
+  const blobToB64 = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.onerror = () => rej(new Error('Could not read the file.')); r.readAsDataURL(blob); });
+  const blobToDataUrl = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.onerror = () => rej(new Error('Could not read the image.')); r.readAsDataURL(blob); });
+  const hasTargetArg = a => a && (a.ref != null || a.label || typeof a.x === 'number');
+  const editorScroller = () => document.getElementById('editorAreaWrapper') || document.scrollingElement || document.documentElement;
+  const hms = t => new Date(t).toTimeString().slice(0, 8);
+
+  function toastLines(n, kind){
+    return logRing.filter(e => !kind || e.kind === kind).slice(-n).map(e => '[' + hms(e.t) + '] ' + e.kind + (e.type && e.type !== 'info' && e.type !== e.kind ? '/' + e.type : '') + ': ' + e.text);
+  }
+  reg('toasts', 'words', 'info', 'toasts [n]  the last n editor toasts (default 5, max 50), oldest first. New toasts are also attached to your tool results automatically.', n => {
+    const rows = toastLines(Math.max(1, Math.min(50, parseInt(n, 10) || 5)), 'toast');
+    return rows.length ? 'Last ' + rows.length + ' toast(s), oldest first:\n' + rows.join('\n') : 'No toasts have been shown yet.';
+  });
+
+  // ── Export: the agent receives the file; the user's browser downloads nothing
+  let dlCapture = null;
+  function hookDownloads(){
+    if(typeof window.dlBlob !== 'function' || window.dlBlob.__aam) return;
+    const o = window.dlBlob;
+    const w = function(blob, name){ if(dlCapture){ dlCapture.push({blob, name: String(name || 'file')}); return; } return o.apply(this, arguments); };
+    w.__aam = true; window.dlBlob = w;
+  }
+  function parsePageList(s, total){
+    const out = new Set();
+    String(s || '').split(/[\s,]+/).filter(Boolean).forEach(p => {
+      const m = p.match(/^(\d+)(?:-(\d+))?$/); if(!m) throw new Error('Bad page list "' + s + '". Use e.g. 1-3,5.');
+      const a = +m[1], b = m[2] ? +m[2] : a;
+      for(let i = Math.min(a, b); i <= Math.max(a, b); i++) if(i >= 1 && i <= total) out.add(i);
+    });
+    if(!out.size) throw new Error('No such pages. The document has ' + total + ' page(s).');
+    return [...out].sort((x, y) => x - y);
+  }
+  const MIME_OF = {pdf: 'application/pdf', scd: 'application/x-sugarcane-document', uscd: 'application/x-sugarcane-uscd', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', txt: 'text/plain', md: 'text/markdown', jpg: 'image/jpeg', png: 'image/png', webp: 'image/webp', zip: 'application/zip'};
+  act('export_file', {
+    ui: false, kind: 'observe', manual: false,
+    desc: 'Export the open document and receive the FILE yourself; the user\'s browser downloads nothing. format: pdf, scd, uscd, docx, txt, md, jpg, png or webp (images: one file per page, or a ZIP). pages: optional list like "1-3,5" (default all). pdf_tech: optional "scanned" (default), "native" or "structured". Text formats come back inline; every file also comes with a download link. Needs document-content access and commands turned on for you.',
+    schema: {type: 'object', properties: {format: {type: 'string', enum: ['pdf', 'scd', 'uscd', 'docx', 'txt', 'md', 'jpg', 'png', 'webp']}, pages: {type: 'string', description: 'e.g. "1-3,5". Default: all.'}, pdf_tech: {type: 'string', enum: ['scanned', 'native', 'structured']}}, required: ['format']},
+    run: async a => {
+      const fmt = String(a.format || '').toLowerCase().replace(/^\./, '');
+      if(!['pdf', 'scd', 'uscd', 'docx', 'txt', 'md', 'jpg', 'jpeg', 'png', 'webp'].includes(fmt)) throw new Error('Unknown format "' + a.format + '".');
+      if(!elAllowed('content')) throw new Error(denyMsg('document content'));
+      if(eff('commandAccess') === 'off') throw new Error('Exporting is off for you: commands are turned off in Agent Permissions.');
+      if(typeof S === 'undefined' || typeof doExportWithOpts !== 'function') throw new Error('The export engine is not ready yet.');
+      if(relayVer < 2) throw new Error('Your relay Worker is out of date, so files cannot be sent. Tell the user to re-deploy the all-agent-relay folder of their Oryn fork on Cloudflare, then try again.');
+      hookDownloads();
+      const total = document.querySelectorAll('#editorArea .page').length;
+      const prevFilter = S.exportPageFilter, prevTech = EXP.pdfTech, prevTxt = EXP.txtFmt, prevImg = EXP.jpgFmt;
+      if(a.pages) S.exportPageFilter = parsePageList(a.pages, total);
+      dlCapture = []; let files = [];
+      try {
+        if(fmt === 'pdf'){
+          if(['scanned', 'native', 'structured'].includes(a.pdf_tech)) EXP.pdfTech = a.pdf_tech;
+          S.pdfBlob = null;
+          await doExportWithOpts('pdf');
+          try { closeMdl('pdfMdl'); } catch(e){}
+          if(!S.pdfBlob) throw new Error('The PDF could not be produced. Check toasts for the reason.');
+          files.push({blob: S.pdfBlob, name: safeFile(getTitle()) + '.pdf'});
+        } else if(fmt === 'scd'){ await exportSCDWithOpts(); files = dlCapture.slice();
+        } else if(fmt === 'uscd'){ await exportUSCD(); files = dlCapture.slice();
+        } else if(fmt === 'docx'){ await exportDOCX(); files = dlCapture.slice();
+        } else if(fmt === 'txt' || fmt === 'md'){ EXP.txtFmt = fmt; await exportTXTWithOpts(); files = dlCapture.slice();
+        } else {
+          EXP.jpgFmt = fmt === 'jpeg' ? 'jpg' : fmt;
+          S.exportSilent = true; S.lastImgExport = null;
+          try { await exportImgWithOpts(); } finally { S.exportSilent = false; }
+          const r = S.lastImgExport; S.lastImgExport = null;
+          if(!r || !r.blobs || !r.blobs.length) throw new Error('No image could be produced.');
+          if(r.blobs.length > 1 && window.JSZip){
+            const zip = new JSZip(); r.blobs.forEach(x => zip.file(x.name, x.blob));
+            files.push({blob: await zip.generateAsync({type: 'blob'}), name: r.title + '_pages.zip'});
+          } else files = r.blobs.slice(0, 12);
+        }
+      } finally { dlCapture = null; S.exportPageFilter = prevFilter; EXP.pdfTech = prevTech; EXP.txtFmt = prevTxt; EXP.jpgFmt = prevImg; }
+      if(!files.length) throw new Error('Nothing was exported. Check toasts for the reason.');
+      const out = [];
+      for(const f of files){
+        if(f.blob.size > 20 * 1024 * 1024) throw new Error(f.name + ' is over 20 MB: too large to send. Export fewer pages.');
+        const ext = (f.name.split('.').pop() || '').toLowerCase();
+        out.push({name: f.name, mime: f.blob.type || MIME_OF[ext] || 'application/octet-stream', size: f.blob.size, data: await blobToB64(f.blob)});
+      }
+      return {text: 'Exported ' + out.map(f => f.name + ' (' + Math.max(1, Math.round(f.size / 1024)) + ' KB)').join(', ') + '. The user\'s browser downloaded nothing.', files: out};
+    }
+  });
+
+  // ── Color Labs
+  const ccOpen = () => { const o = document.getElementById('ccOverlay'); return !!(o && o.classList.contains('open')); };
+  function normHex(c){
+    c = String(c == null ? '' : c).trim();
+    if(!c) throw new Error('Give a colour: hex like #1a73e8, rgb(26,115,232) or a CSS name.');
+    let m = c.match(/^#?([0-9a-f]{3})$/i); if(m) return '#' + m[1].split('').map(x => x + x).join('').toLowerCase();
+    m = c.match(/^#?([0-9a-f]{6})$/i); if(m) return '#' + m[1].toLowerCase();
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.fillStyle = '#010203'; ctx.fillStyle = c; const v1 = ctx.fillStyle;
+    ctx.fillStyle = '#020304'; ctx.fillStyle = c; const v2 = ctx.fillStyle;
+    if(v1 !== v2) throw new Error('"' + c + '" is not a colour I understand.');
+    if(/^#[0-9a-f]{6}$/i.test(v1)) return v1.toLowerCase();
+    m = v1.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if(m) return '#' + [1, 2, 3].map(i => (+m[i]).toString(16).padStart(2, '0')).join('');
+    throw new Error('Could not read the colour "' + c + '".');
+  }
+  function ccCurrent(){ const f = document.getElementById('ccFrame'); try { const m = String((f && f.src) || '').match(/currentcolor=([^|&]+)/); return m ? decodeURIComponent(m[1]) : ''; } catch(e){ return ''; } }
+  act('color', {
+    help: 'color <#hex|name|cancel|status> [target]  use the Color Labs colour chooser.',
+    desc: 'Color Labs access. The editor\'s colour chooser is a separate screen you cannot see; use this instead. action "apply" with hex (or rgb()/CSS name) picks that colour in the open chooser and closes it, so the colour lands on whatever opened it (text colour, highlight, border, watermark…). If it is not open, pass a target (ref/label/x,y of the colour swatch) and it is opened first. "status" says whether it is open and its starting colour; "cancel" closes it unchanged.',
+    schema: {type: 'object', properties: Object.assign({action: {type: 'string', enum: ['apply', 'status', 'cancel']}, hex: {type: 'string', description: '#rrggbb, #rgb, rgb(r,g,b) or a CSS name.'}}, TARGET_PROPS)},
+    parse: raw => {
+      raw = String(raw || '').trim();
+      if(/^(cancel|status)$/i.test(raw)) return {action: raw.toLowerCase()};
+      const m = raw.match(/^(\S+)(?:\s+(.+))?$/);
+      return Object.assign(m && m[2] ? parseTarget(m[2]) : {}, {action: 'apply', hex: m ? m[1] : ''});
+    },
+    run: async a => {
+      const action = a.action || (a.hex ? 'apply' : 'status');
+      if(hasTargetArg(a) && !ccOpen()){ await pointerClick(resolveTarget(a), {}); for(let i = 0; i < 15 && !ccOpen(); i++) await sleep(100); }
+      if(action === 'status') return ccOpen() ? 'Color Labs is open (started from ' + (ccCurrent() || 'no colour') + ').' : 'Color Labs is closed. Click a colour swatch (or pass a target) to open it.';
+      if(!ccOpen()) throw new Error('Color Labs is not open. Click the colour swatch first (snapshot to find it), or pass a target.');
+      if(action === 'cancel'){ window.postMessage({type: 'cc-cancelled'}, '*'); await sleep(250); return 'Closed Color Labs without changing the colour.'; }
+      const hex = normHex(a.hex);
+      window.postMessage({type: 'cc-applied', color: hex}, '*');
+      await sleep(300);
+      return 'Picked ' + hex + ' in Color Labs' + (ccOpen() ? ' (the chooser is still open; check with snapshot).' : ' and closed it.') + ' ' + stateLine();
+    }
+  });
+
+  // ── Scroll, pan, drag
+  function scrollNow(c, left, top){
+    const prev = c.style.scrollBehavior; c.style.scrollBehavior = 'auto';
+    try { c.scrollTo({left, top, behavior: 'instant'}); } catch(e){ c.scrollLeft = left; c.scrollTop = top; }
+    c.style.scrollBehavior = prev;
+  }
+  function scrollNameOf(c){ return c.id ? '#' + c.id : (c === document.scrollingElement || c === document.documentElement ? 'the page' : c.tagName.toLowerCase() + (c.className ? '.' + String(c.className).split(/\s+/)[0] : '')); }
+  function pageInView(c){
+    const pages = [...document.querySelectorAll('#editorArea .page')]; if(!pages.length) return '';
+    const cr = c.getBoundingClientRect(); let best = 0, bv = -1;
+    pages.forEach((p, i) => { const r = p.getBoundingClientRect(); const v = Math.max(0, Math.min(r.bottom, cr.bottom) - Math.max(r.top, cr.top)); if(v > bv){ bv = v; best = i + 1; } });
+    return ' Page in view: ' + best + ' of ' + pages.length + '.';
+  }
+  function scrollReport(c, before){
+    const mx = Math.max(0, Math.round(c.scrollWidth - c.clientWidth)), my = Math.max(0, Math.round(c.scrollHeight - c.clientHeight));
+    const x = Math.round(c.scrollLeft), y = Math.round(c.scrollTop);
+    const edges = [y <= 0 ? 'top' : '', y >= my - 1 && my > 0 ? 'bottom' : '', x <= 0 && mx > 0 ? 'left edge' : '', x >= mx - 1 && mx > 0 ? 'right edge' : ''].filter(Boolean);
+    const moved = !before || Math.round(before.x) !== x || Math.round(before.y) !== y;
+    return (moved ? 'Scrolled ' : 'Did not move ') + scrollNameOf(c) + ' to x=' + x + '/' + mx + ', y=' + y + '/' + my + (my ? ' (' + Math.round(y / my * 100) + '%)' : '') + (edges.length ? ', at ' + edges.join(' + ') : '') + '.' + (moved ? '' : ' Already at that edge, or this area does not scroll: try another target, pan, or another direction.') + pageInView(c);
+  }
+  ACTIONS.scroll.help = 'scroll [target] up|down|left|right [px]  |  scroll top|bottom  |  scroll page <n>  |  scroll <0-100>%';
+  ACTIONS.scroll.desc = 'Scroll the area under a target (default: the main document area). Use dy/dx in px (positive = down/right), OR to: "top"|"bottom"|"left"|"right" to jump to an edge, OR page: N to bring that page to the top, OR percent: 0-100. Works on any scrollable area (document, lists, modals, panels, wide tables): pass a target inside it. Reports the position and the page in view.';
+  ACTIONS.scroll.schema = {type: 'object', properties: Object.assign({dx: {type: 'number'}, dy: {type: 'number'}, to: {type: 'string', enum: ['top', 'bottom', 'left', 'right']}, page: {type: 'integer', minimum: 1}, percent: {type: 'number', minimum: 0, maximum: 100}}, TARGET_PROPS)};
+  ACTIONS.scroll.parse = raw => {
+    raw = String(raw || '').trim(); let m;
+    if((m = raw.match(/^page\s+(\d+)$/i))) return {page: +m[1]};
+    if((m = raw.match(/^(\d+(?:\.\d+)?)\s*%$/))) return {percent: +m[1]};
+    if((m = raw.match(/^(.*?)\s*\b(top|start|bottom|end)\s*$/i))) return Object.assign(m[1] ? parseTarget(m[1]) : {}, {to: /top|start/i.test(m[2]) ? 'top' : 'bottom'});
+    m = raw.match(/^(.*?)\s*\b(up|down|left|right)\b\s*(\d+)?\s*$/i);
+    if(!m) throw new Error('Use: /scroll [target] up|down|left|right [px]  |  /scroll top|bottom  |  /scroll page N');
+    const px = m[3] ? +m[3] : 400, d = m[2].toLowerCase();
+    return Object.assign(m[1] ? parseTarget(m[1]) : {}, {dx: d === 'left' ? -px : d === 'right' ? px : 0, dy: d === 'up' ? -px : d === 'down' ? px : 0});
+  };
+  ACTIONS.scroll.run = async a => {
+    const dx = a.dx || 0, dy = a.dy || 0;
+    const el = hasTargetArg(a) ? resolveTarget(a).el : editorScroller();
+    if(a.page || a.percent != null || a.to){
+      const wantX = a.to === 'left' || a.to === 'right';
+      const c = scrollContainerFor(el, wantX ? 1 : 0, wantX ? 0 : 1), before = {x: c.scrollLeft, y: c.scrollTop};
+      const mx = Math.max(0, c.scrollWidth - c.clientWidth), my = Math.max(0, c.scrollHeight - c.clientHeight);
+      let left = c.scrollLeft, top = c.scrollTop;
+      if(a.page){
+        const pg = document.querySelectorAll('#editorArea .page')[a.page - 1];
+        if(!pg) throw new Error('There is no page ' + a.page + ' (the document has ' + document.querySelectorAll('#editorArea .page').length + ').');
+        top = c.scrollTop + (pg.getBoundingClientRect().top - c.getBoundingClientRect().top) - 8;
+      } else if(a.percent != null) top = my * Math.max(0, Math.min(100, a.percent)) / 100;
+      else if(a.to === 'top') top = 0; else if(a.to === 'bottom') top = my;
+      else if(a.to === 'left') left = 0; else left = mx;
+      scrollNow(c, Math.max(0, Math.min(mx, left)), Math.max(0, Math.min(my, top)));
+      await sleep(150);
+      return scrollReport(c, before);
+    }
+    if(!dx && !dy) throw new Error('Give dx and/or dy, or to / page / percent.');
+    const c = scrollContainerFor(el, dx, dy), before = {x: c.scrollLeft, y: c.scrollTop};
+    el.dispatchEvent(new WheelEvent('wheel', {bubbles: true, cancelable: true, deltaX: dx, deltaY: dy, view: window}));
+    if(Math.round(c.scrollLeft) === Math.round(before.x) && Math.round(c.scrollTop) === Math.round(before.y)){
+      const mx = Math.max(0, c.scrollWidth - c.clientWidth), my = Math.max(0, c.scrollHeight - c.clientHeight);
+      scrollNow(c, Math.max(0, Math.min(mx, c.scrollLeft + dx)), Math.max(0, Math.min(my, c.scrollTop + dy)));
+    }
+    await sleep(150);
+    return scrollReport(c, before);
+  };
+
+  async function touchDragPath(a, b, steps, holdMs){
+    const id = Date.now() % 100000;
+    const tch = (el, x, y) => new Touch({identifier: id, target: el, clientX: x, clientY: y, pageX: x + window.scrollX, pageY: y + window.scrollY, screenX: x, screenY: y, radiusX: 2, radiusY: 2, force: 1});
+    const mk = (type, el, x, y, live) => { const t = tch(el, x, y); return new TouchEvent(type, {bubbles: true, cancelable: true, composed: true, view: window, touches: live ? [t] : [], targetTouches: live ? [t] : [], changedTouches: [t]}); };
+    const el = a.el; el.dispatchEvent(mk('touchstart', el, a.x, a.y, true));
+    if(holdMs) await sleep(holdMs);
+    for(let i = 1; i <= steps; i++){
+      el.dispatchEvent(mk('touchmove', el, Math.round(a.x + (b.x - a.x) * i / steps), Math.round(a.y + (b.y - a.y) * i / steps), true));
+      await sleep(16);
+    }
+    el.dispatchEvent(mk('touchend', el, b.x, b.y, false));
+  }
+  const touchOK = () => typeof Touch !== 'undefined' && typeof TouchEvent !== 'undefined';
+  act('pan', {
+    help: 'pan [target] <dx> <dy> [touch|mouse]  pull the view: press on a point and drag by dx,dy.',
+    desc: 'Pull / pan the view like a finger or hand-drag: press on a point (default: middle of the document area) and drag by dx,dy CSS px. Content follows the pointer, so dy -300 moves the view DOWN by 300 px (reveals what is lower) and dx -200 reveals what is to the right. Fires real touch or mouse drag events, and if the view did not move it scrolls directly, so it always pans. Use for wide pages, tables, zoomed views and lists; use scroll for exact jumps.',
+    schema: {type: 'object', properties: Object.assign({dx: {type: 'number', description: 'Drag right (+) / left (-).'}, dy: {type: 'number', description: 'Drag down (+) / up (-).'}, device: {type: 'string', enum: ['mouse', 'touch']}, steps: {type: 'integer', minimum: 2, maximum: 60}}, TARGET_PROPS)},
+    parse: raw => {
+      let s = String(raw || ''), device; let m = s.match(/\s+(touch|mouse)\s*$/i); if(m){ device = m[1].toLowerCase(); s = s.slice(0, m.index); }
+      m = s.match(/^(.*?)\s*(-?\d+)\s+(-?\d+)\s*$/); if(!m) throw new Error('Use: /pan [target] <dx> <dy> [touch|mouse]');
+      return Object.assign(m[1] ? parseTarget(m[1]) : {}, {dx: +m[2], dy: +m[3], device});
+    },
+    run: async a => {
+      const dx = a.dx || 0, dy = a.dy || 0; if(!dx && !dy) throw new Error('Give dx and/or dy.');
+      let t;
+      if(hasTargetArg(a)) t = resolveTarget(a);
+      else { const w = editorScroller().getBoundingClientRect(); const x = Math.round(w.left + w.width / 2), y = Math.round(w.top + w.height / 2); t = {el: topElementAt(x, y) || editorScroller(), x, y}; agentCursorTo(curAgent, x, y, true); }
+      const c = scrollContainerFor(t.el, -dx, -dy), before = {x: c.scrollLeft, y: c.scrollTop};
+      const b = {x: Math.max(1, Math.min(window.innerWidth - 2, t.x + dx)), y: Math.max(1, Math.min(window.innerHeight - 2, t.y + dy))};
+      const steps = Math.min(60, Math.max(2, a.steps || 14));
+      const device = a.device || (window.matchMedia && matchMedia('(pointer: coarse)').matches ? 'touch' : 'mouse');
+      let how = 'mouse drag';
+      if(device === 'touch' && touchOK()){ await touchDragPath(t, b, steps, 0); how = 'touch drag'; }
+      else {
+        const dn = {button: 0, buttons: 1, detail: 1}, up = {button: 0, buttons: 0, detail: 1};
+        pointerMoveTo(t.el, t.x, t.y, {}); fire(t.el, 'pointerdown', t.x, t.y, dn); fire(t.el, 'mousedown', t.x, t.y, dn);
+        for(let i = 1; i <= steps; i++){ const x = Math.round(t.x + (b.x - t.x) * i / steps), y = Math.round(t.y + (b.y - t.y) * i / steps); pointerMoveTo(topElementAt(x, y) || t.el, x, y, {buttons: 1}); await sleep(14); }
+        fire(t.el, 'pointerup', b.x, b.y, up); fire(t.el, 'mouseup', b.x, b.y, up);
+      }
+      await sleep(120);
+      if(Math.round(c.scrollLeft) === Math.round(before.x) && Math.round(c.scrollTop) === Math.round(before.y)){
+        const mx = Math.max(0, c.scrollWidth - c.clientWidth), my = Math.max(0, c.scrollHeight - c.clientHeight);
+        scrollNow(c, Math.max(0, Math.min(mx, c.scrollLeft - dx)), Math.max(0, Math.min(my, c.scrollTop - dy)));
+        how += ' + direct scroll';
+      }
+      await sleep(100);
+      return 'Panned by (' + dx + ',' + dy + ') with a ' + how + '. ' + scrollReport(c, before);
+    }
+  });
+
+  ACTIONS.drag.help = 'drag <target> to <target>  |  drag <target> by <dx> <dy> [hold <ms>] [touch]';
+  ACTIONS.drag.desc = 'Press at "from", move to "to" (or by dx,dy from "from"), release. In document text this selects text. Draggable elements fire real drag-and-drop events; sliders, resize handles and movable boxes get real pointer (or touch) moves. hold_ms presses and waits before moving (long-press drags, e.g. reordering). device "touch" sends touch events (phone layouts, or when a mouse drag does nothing).';
+  ACTIONS.drag.schema = {type: 'object', properties: {from: TARGET_SCHEMA, to: TARGET_SCHEMA, by: {type: 'object', properties: {dx: {type: 'number'}, dy: {type: 'number'}}, description: 'Instead of "to": drag this many px right/down.'}, steps: {type: 'integer', minimum: 2, maximum: 60}, hold_ms: {type: 'integer', minimum: 0, maximum: 3000}, device: {type: 'string', enum: ['mouse', 'touch']}}, required: ['from']};
+  ACTIONS.drag.parse = raw => {
+    raw = String(raw || ''); let device, hold_ms, m;
+    if((m = raw.match(/\s+touch\s*$/i))){ device = 'touch'; raw = raw.slice(0, m.index); }
+    if((m = raw.match(/\s+hold\s+(\d+)\s*(?:ms)?\s*$/i))){ hold_ms = +m[1]; raw = raw.slice(0, m.index); }
+    if((m = raw.match(/^(.*?)\s+by\s+(-?\d+)\s+(-?\d+)\s*$/i))) return {from: parseTarget(m[1]), by: {dx: +m[2], dy: +m[3]}, device, hold_ms};
+    const p = raw.split(/\s+to\s+/i); if(p.length < 2) throw new Error('Use: /drag <target> to <target>  or  /drag <target> by <dx> <dy>');
+    return {from: parseTarget(p[0]), to: parseTarget(p.slice(1).join(' to ')), device, hold_ms};
+  };
+  ACTIONS.drag.run = async a => {
+    const s = resolveTarget(a.from); let e;
+    if(a.by){ const x = Math.max(1, Math.min(window.innerWidth - 2, Math.round(s.x + (a.by.dx || 0)))), y = Math.max(1, Math.min(window.innerHeight - 2, Math.round(s.y + (a.by.dy || 0)))); e = {el: topElementAt(x, y) || s.el, x, y}; }
+    else if(a.to) e = resolveTarget(a.to);
+    else throw new Error('Give "to" or "by".');
+    const steps = Math.min(60, Math.max(2, a.steps || 12)); let kind;
+    if(a.device === 'touch' && touchOK()){ await touchDragPath(s, e, steps, a.hold_ms || 0); kind = 'touch drag'; }
+    else kind = await pointerDrag(s, e, steps, a.hold_ms || 0);
+    await sleep(150);
+    return 'Dragged (' + kind + ') from ' + describeEl(s.el) + ' to ' + describeEl(e.el) + '. ' + stateLine();
+  };
+
+  // ── Images and files
+  async function readFilePayload(a){
+    let mime = a.mime || '', name = a.name || '', blob;
+    if(a.data_base64){
+      let b = String(a.data_base64).trim(); const m = b.match(/^data:([^;,]+)?(?:;base64)?,/i);
+      if(m){ if(!mime && m[1]) mime = m[1]; b = b.slice(m[0].length); }
+      b = b.replace(/\s+/g, '');
+      if(b.length > 11 * 1024 * 1024) throw new Error('Too large for a tool call (limit ~8 MB). Use a url instead.');
+      blob = b64ToBlob(b, mime || 'application/octet-stream');
+    } else if(a.url){
+      let r; try { r = await fetch(a.url, {mode: 'cors'}); } catch(e){ throw new Error('Could not fetch that url (the site blocks cross-origin requests). Send the file as data_base64 instead.'); }
+      if(!r.ok) throw new Error('The url answered ' + r.status + '.');
+      blob = await r.blob(); if(!mime) mime = blob.type || '';
+      if(!name){ try { name = decodeURIComponent(new URL(a.url).pathname.split('/').pop() || ''); } catch(e){} }
+    } else throw new Error('Give the file as data_base64 (raw base64 or a data: URL) or as a url.');
+    if(!mime) mime = blob.type || 'application/octet-stream';
+    if(blob.type !== mime) blob = new Blob([blob], {type: mime});
+    if(!name) name = 'upload.' + ((mime.split('/')[1] || 'bin').replace(/[^a-z0-9]/gi, '').slice(0, 5) || 'bin');
+    return {blob, mime, name};
+  }
+  const FILE_PROPS = {data_base64: {type: 'string', description: 'The file as base64 (or a data: URL). Up to ~8 MB.'}, url: {type: 'string', description: 'Or a direct link the editor can fetch (must allow cross-origin).'}, mime: {type: 'string', description: 'e.g. image/png (guessed if omitted).'}, name: {type: 'string', description: 'File name, e.g. logo.png.'}};
+  function chainShown(n){ for(let e = n; e && e !== document.body; e = e.parentElement){ const cs = getComputedStyle(e); if(cs.display === 'none' || cs.visibility === 'hidden') return false; } return true; }
+  function findFileInput(el, mime){
+    if(el && el.matches && el.matches('input[type="file"]')) return el;
+    const lab = el && el.closest && el.closest('label');
+    if(lab){ const i = lab.querySelector('input[type="file"]') || (lab.control && lab.control.type === 'file' ? lab.control : null); if(i) return i; }
+    const scope = (el && el.closest && el.closest('.mbox, .modal, [role="dialog"], .overlay, .popup')) || document;
+    const all = [...scope.querySelectorAll('input[type="file"]')].filter(i => !isOwnUI(i) && chainShown(i.parentElement || i));
+    const fits = i => !i.accept || !mime || i.accept.split(',').some(p => { p = p.trim().toLowerCase(); return p === '*/*' || p === mime.toLowerCase() || (p.endsWith('/*') && mime.toLowerCase().startsWith(p.slice(0, -1))) || p === '.' + (mime.split('/')[1] || ''); });
+    return all.find(fits) || all[0] || null;
+  }
+  async function putFile(target, file){
+    const dt = new DataTransfer(); dt.items.add(file);
+    const inp = findFileInput(target && target.el, file.type);
+    if(inp){ inp.files = dt.files; inp.dispatchEvent(new Event('input', {bubbles: true})); inp.dispatchEvent(new Event('change', {bubbles: true})); return 'file input ' + describeEl(inp); }
+    if(!target) throw new Error('No file input or drop zone is open. Open the screen that takes a file first (e.g. Insert → Image), or pass a target.');
+    const o = {bubbles: true, cancelable: true, composed: true, clientX: target.x, clientY: target.y, dataTransfer: dt};
+    ['dragenter', 'dragover', 'drop'].forEach(t => { try { target.el.dispatchEvent(new DragEvent(t, o)); } catch(e){} });
+    return 'drop zone ' + describeEl(target.el);
+  }
+  act('upload_file', {
+    help: 'upload_file <target>  send a file to a file box or drop zone (arguments: data_base64 or url).',
+    desc: 'Send a file you hold to a file picker or drop zone in the editor: the way to put an image into any screen that asks for one (Insert image, watermark, page background, banner, import…). Pass target (ref/label/x,y of the drop zone or its choose-file button) or leave it out to use the open screen\'s file input. Then continue in the UI (snapshot, crop, Insert). For the common cases use insert_image.',
+    manual: false,
+    schema: {type: 'object', properties: Object.assign({}, FILE_PROPS, TARGET_PROPS)},
+    run: async a => {
+      const f = await readFilePayload(a), file = new File([f.blob], f.name, {type: f.mime});
+      const how = await putFile(hasTargetArg(a) ? resolveTarget(a) : null, file);
+      await sleep(500);
+      return 'Sent ' + f.name + ' (' + Math.max(1, Math.round(f.blob.size / 1024)) + ' KB) to the ' + how + '. ' + stateLine();
+    }
+  });
+  act('insert_image', {
+    help: 'insert_image  place an image from the agent into the document, the Insert Image screen or the Stored tray.',
+    desc: 'Put an image you hold into the editor. where: "document" (default) inserts it at the caret with default image settings; "dialog" opens the Insert Image screen with your image already chosen so you can crop / set attributes / click Insert; "stored" adds it to the Stored tray (the box at the top) to be dragged onto any page later. Give the image as data_base64 (raw or a data: URL, up to ~8 MB) or a url the editor can fetch. For document, click where it should go first.',
+    manual: false,
+    schema: {type: 'object', properties: Object.assign({where: {type: 'string', enum: ['document', 'dialog', 'stored']}, alt: {type: 'string', description: 'Alt text (document).'}}, FILE_PROPS)},
+    run: async a => {
+      if(eff('commandAccess') === 'off') throw new Error('Inserting is off for you: commands are turned off in Agent Permissions.');
+      const f = await readFilePayload(a);
+      if(!/^image\//i.test(f.mime)) throw new Error('That is not an image (' + f.mime + '). Use upload_file for other files.');
+      const src = await blobToDataUrl(f.blob), where = a.where || 'document';
+      if(where === 'stored'){
+        if(!window.SCStash) throw new Error('The Stored tray is not available in this editor build.');
+        const label = (a.name || f.name || 'Image').replace(/\.[a-z0-9]+$/i, '').slice(0, 22) || 'Image';
+        const html = (typeof makeImg === 'function') ? makeImg(src).outerHTML : '<img src="' + src + '" style="max-width:320px">';
+        if(typeof window.SCStash.add !== 'function') throw new Error('This editor build cannot add to the Stored tray yet. Update the editor (sceditor.html v239).');
+        window.SCStash.add({html, icon: 'image', label, thumb: src});
+        await sleep(300);
+        return 'Added "' + label + '" to the Stored tray (' + window.SCStash.items.length + ' stored). The user can drag it onto any page.';
+      }
+      if(typeof openImageModal !== 'function' || typeof insertImage !== 'function') throw new Error('The image screen is not ready yet.');
+      if(where === 'document'){
+        const sel = window.getSelection(), n = sel && sel.rangeCount && sel.anchorNode, host = n && (n.nodeType === 1 ? n : n.parentElement);
+        if(!host || !host.closest || !host.closest('#editorArea .page-content')) throw new Error('Put the caret in the document first (click where the image should go), then call insert_image again.');
+      }
+      openImageModal(); await sleep(200);
+      S.imgData = src; try { _imgName = f.name; } catch(e){}
+      try { imgSetPreview(src); imgRenderPicked(); } catch(e){}
+      if(where === 'dialog'){
+        try { if(typeof SCFlow !== 'undefined') SCFlow.go('imageMdl', 'edit'); } catch(e){}
+        await sleep(200);
+        return 'Opened the Insert Image screen with ' + f.name + ' chosen. Adjust it, then click its Insert button (snapshot to find it). ' + stateLine();
+      }
+      const before = document.querySelectorAll('#editorArea img').length;
+      if(a.alt){ try { _imgEl('imgAltText').value = String(a.alt).slice(0, 200); } catch(e){} }
+      await insertImage(); await sleep(250);
+      return document.querySelectorAll('#editorArea img').length > before ? 'Inserted ' + f.name + ' at the caret. ' + stateLine() : 'The image was accepted but no new image appeared. Check toasts and snapshot.';
+    }
+  });
+
+  // ── Right-click menus
+  const MENU_IDS = ['textPopup', 'imgPopup', 'hrPopup', 'bannerPopup', 'tableCtxMenu', 'fieldPopup', 'tbxPop'];
+  function visibleFloaters(){
+    const set = new Set();
+    MENU_IDS.forEach(id => { const e = document.getElementById(id); if(e && isVisible(e)) set.add(e); });
+    document.querySelectorAll('body > *:not([data-aam-ui]):not(script):not(style)').forEach(e => {
+      if(!isVisible(e)) return; const cs = getComputedStyle(e);
+      if((cs.position === 'fixed' || cs.position === 'absolute') && e.getBoundingClientRect().width < window.innerWidth * 0.95) set.add(e);
+    });
+    document.querySelectorAll('[role="menu"], .context-menu, .ctx-menu, .popup-menu').forEach(e => { if(!isOwnUI(e) && isVisible(e)) set.add(e); });
+    return set;
+  }
+  function menuSnapshot(roots){
+    refMap = new Map(); const lines = []; let n = 0; const seen = new Set();
+    roots.forEach(root => {
+      root.querySelectorAll(INTERACTIVE + ', li, [data-act], [data-action], [data-cmd]').forEach(el => {
+        if(seen.has(el) || isOwnUI(el) || el.disabled || !isVisible(el)) return; seen.add(el);
+        const nm = nameOf(el); if(!nm) return;
+        const r = el.getBoundingClientRect(); if(r.width < 6 || r.height < 6 || !inViewport(r) || n >= 80) return;
+        n++; refMap.set(n, el); const c = centerOf(el);
+        lines.push('@' + n + ' ' + roleOf(el) + ' "' + nm + '"' + stateOf(el) + ' (' + c.x + ',' + c.y + ')');
+      });
+    });
+    return lines;
+  }
+  ACTIONS.rightclick.manualOnly = false;
+  ACTIONS.rightclick.help = 'rightclick <@n | "label" | x,y>  right-click and list the menu that opens.';
+  ACTIONS.rightclick.desc = 'Right-click a control or point (text, image, table cell, line, banner, text box, page…) to open the editor\'s context menu. Returns the menu\'s items as numbered @refs you can click straight away (click @n). Press Escape (key) to close it. Refs stay valid until the next snapshot.';
+  ACTIONS.rightclick.schema = {type: 'object', properties: Object.assign({}, TARGET_PROPS, MOD_PROPS)};
+  ACTIONS.rightclick.run = async a => {
+    const before = visibleFloaters(), t = resolveTarget(a);
+    await pointerClick(t, {button: 'right', shift: a.shift, ctrl: a.ctrl, alt: a.alt, meta: a.meta});
+    await sleep(300);
+    const opened = [...visibleFloaters()].filter(e => !before.has(e));
+    const roots = opened.length ? opened : [...visibleFloaters()].filter(e => MENU_IDS.includes(e.id));
+    const items = roots.length ? menuSnapshot(roots) : [];
+    const head = 'Right-clicked ' + describeEl(t.el) + ' at (' + t.x + ',' + t.y + ').';
+    if(!items.length) return head + ' No context menu appeared. Some elements have none; try text, an image, a table cell or a line, or take a snapshot. ' + stateLine();
+    return head + ' Menu with ' + items.length + ' item' + (items.length === 1 ? '' : 's') + ' (click @n to use one, Escape to close):\n' + items.join('\n') + '\n' + stateLine();
+  };
+
+  // ── Document Quality
+  const qGrade = p => p >= 90 ? 'Excellent' : p >= 75 ? 'Good' : p >= 60 ? 'Fair' : p >= 40 ? 'Needs work' : 'Poor';
+  const qPts = n => (Math.round(n * 10) / 10).toString();
+  async function runQuality(){
+    if(!window.SCQuality) throw new Error('The Quality Report is not available in this editor build.');
+    const before = window.SCQuality.last();
+    window.SCQuality.run(false);
+    for(let i = 0; i < 80; i++){ await sleep(150); const l = window.SCQuality.last(); if(l && l !== before) return l; }
+    const l = window.SCQuality.last(); if(l) return l;
+    throw new Error('The quality check did not finish (the document may be empty). Try again.');
+  }
+  function qualitySummaryText(){
+    try { window.SCQuality.openReport(); const el = document.getElementById('qrSummary'); const t = el ? el.textContent.trim() : ''; try { closeMdl('qrReportMdl'); } catch(e){} return t; } catch(e){ return ''; }
+  }
+  function qualityText(r, detail){
+    const fails = r.items.filter(i => i.state === 'fail').sort((x, y) => (y.neg ? -y.earned : y.pts) - (x.neg ? -x.earned : x.pts));
+    const L = ['Document quality: ' + r.pct + '% (' + qGrade(r.pct) + '), ' + qPts(r.total) + ' of ' + qPts(r.max) + ' points, ' + r.pages + ' page' + (r.pages === 1 ? '' : 's') + ', ' + r.words + ' words.',
+      'Checks: ' + r.counts.pass + ' passed, ' + r.counts.fail + ' failed, ' + r.counts.na + ' skipped.'];
+    const sum = qualitySummaryText(); if(sum) L.push('Summary: ' + sum);
+    L.push('Categories: ' + r.cats.filter(g => g.max || g.earned < 0).map(g => g.name + ' ' + qPts(g.earned) + (g.max ? '/' + qPts(g.max) : '')).join(' · '));
+    if(fails.length){
+      L.push('Failed checks (' + fails.length + ', biggest first):');
+      fails.slice(0, detail === 'full' ? 200 : 25).forEach(i => L.push('- [' + i.cat + '] ' + i.label + ' (' + (i.neg ? qPts(i.earned) : '+' + qPts(i.pts)) + ' pts)' + (i.detail ? ': ' + i.detail : '')));
+      if(fails.length > 25 && detail !== 'full') L.push('… ' + (fails.length - 25) + ' more; use detail "full".');
+    } else L.push('Every applicable check passed.');
+    if(detail === 'full'){
+      L.push('Passed: ' + r.items.filter(i => i.state === 'pass').map(i => i.label).join('; '));
+      const na = r.items.filter(i => i.state === 'na'); if(na.length) L.push('Skipped (' + na.length + '): ' + na.map(i => i.label).join('; '));
+    }
+    return L.join('\n');
+  }
+  act('quality', {
+    ui: false, kind: 'observe',
+    help: 'quality [full]  run the Document Quality check and show score, summary and failed checks.',
+    desc: 'Run the editor\'s built-in Document Quality check (the Quality Report: ~150 checks on titles, structure, spelling, links, tables, accessibility, privacy…) and get a clear summary: percentage and grade, the editor\'s plain-language summary, score per category, and failed checks with what is wrong, biggest losses first. detail "full" also lists passed and skipped checks. Read-only.',
+    schema: {type: 'object', properties: {detail: {type: 'string', enum: ['summary', 'full']}}},
+    parse: raw => ({detail: /full/i.test(raw || '') ? 'full' : 'summary'}),
+    run: async a => qualityText(await runQuality(), a.detail)
+  });
+
+  // ═══ v2.0.3 additions: batch, find_ui, read_page, read_selection, open_dialog, fill_form, checkpoint, revert, import_document, select_text, list_pages ═══
+  const pagesEls = () => [...document.querySelectorAll('#editorArea .page-content')];
+  const isEmptyDoc = () => {
+    const pcs = pagesEls();
+    if(pcs.length > 1) return false;
+    if(pcs.some(pc => pc.textContent.trim())) return false;
+    return !document.querySelector('#editorArea img, #editorArea table, #editorArea .tbx, #editorArea .sc-banner, #editorArea hr, #editorArea .fw-field');
+  };
+  const needContent = () => { if(!elAllowed('content')) throw new Error(denyMsg('document content')); };
+  const WORDS = t => (String(t).trim().match(/\S+/g) || []).length;
+
+  // ── batch: many actions, one call
+  const BATCH_SKIP = new Set(['batch', 'screenshot', 'ask', 'import_document']);
+  act('batch', {
+    desc: 'Run up to 25 steps in ONE call, in order, stopping at the first error. Each step is {action, args}: action is any action tool (click, type, key, scroll, pan, drag, setvalue, rightclick, hover, hold, wait, color, select_text, insert_image, find_ui…) or "run_command" with args {name, args}. Refs (@n) from your last snapshot / find_ui / rightclick / open_dialog stay valid inside the batch unless a step changes the screen; prefer labels or x,y after a step that opens something. Returns one line per step. Counts as that many UI actions against the approval budget.',
+    schema: {type: 'object', properties: {steps: {type: 'array', maxItems: 25, items: {type: 'object', properties: {action: {type: 'string'}, args: {type: 'object'}}, required: ['action']}}}, required: ['steps']},
+    manual: false,
+    run: async a => {
+      const steps = Array.isArray(a.steps) ? a.steps.slice(0, 25) : [];
+      if(!steps.length) throw new Error('Give steps: [{action, args}, …].');
+      const uiN = steps.filter(s => ACTIONS[s.action] && ACTIONS[s.action].ui).length;
+      if(!eff('allowScreenShare') && uiN > 1 && clickBudget < uiN - 1) throw new Error('This batch has ' + uiN + ' UI steps but only ' + (clickBudget + 1) + ' are approved right now. Send a smaller batch.');
+      const out = []; let failed = false;
+      for(let i = 0; i < steps.length; i++){
+        const s = steps[i], name = String(s.action || '').replace(/^\//, '');
+        if(stopRequested){ out.push((i + 1) + '. stopped by the user'); failed = true; break; }
+        let line;
+        try {
+          if(name === 'run_command'){
+            const t = runRegistryCommand((s.args || {}).name, (s.args || {}).args, false);
+            if(/^(Error|Unknown command|Permission denied)/.test(t)) throw new Error(t);
+            line = '/' + (s.args || {}).name + ' → ' + clip(t, 300);
+          } else {
+            const A = ACTIONS[name];
+            if(!A || !A.schema || A.manualOnly || BATCH_SKIP.has(name)) throw new Error('"' + name + '" cannot be used in a batch.');
+            if(A.ui && !eff('allowScreenShare') && !eff('allowClicks')) throw new Error('UI control is off for you.');
+            const r = await A.run(s.args || {});
+            line = name + ' → ' + clip(typeof r === 'string' ? r : (r && r.text) || 'done', 300);
+          }
+          out.push((i + 1) + '. ' + line);
+        } catch(e){ out.push((i + 1) + '. ' + name + ' FAILED: ' + e.message); failed = true; break; }
+        await sleep(60);
+      }
+      if(uiN > 1 && !eff('allowScreenShare') && eff('allowClicks')) clickBudget = Math.max(0, clickBudget - (uiN - 1));
+      const r = {text: out.join('\n') + '\n' + (failed ? 'Stopped early.' : 'All ' + steps.length + ' steps done.') + ' ' + stateLine()};
+      if(failed) r.error = true;
+      return r;
+    }
+  });
+
+  // ── find_ui: search every control, even hidden ones
+  const fuLabel = el => {
+    let n = nameOf(el) || (el.textContent || '').replace(/\s+/g, ' ').trim();
+    return clip(n, 60);
+  };
+  function containerHint(el){
+    const hints = [];
+    for(let n = el.parentElement; n && n !== document.body; n = n.parentElement){
+      const cs = getComputedStyle(n);
+      const hidden = cs.display === 'none' || cs.visibility === 'hidden';
+      const isMdl = n.classList && n.classList.contains('modal');
+      if(isMdl){ const t = n.querySelector('.mtitle, h2, h3'); hints.push('dialog "' + (t ? t.textContent.replace(/\s+/g, ' ').trim() : n.id) + '" (#' + n.id + ')' + (n.classList.contains('open') ? '' : ' [closed]')); break; }
+      if(hidden && n.id) hints.push('hidden panel #' + n.id);
+      else if(n.id && /menu|dropdown|popup|panel|sidebar|tray|bar/i.test(n.id)) hints.push('#' + n.id);
+    }
+    return hints;
+  }
+  function openerFor(el){
+    const cont = el.closest('.modal');
+    const id = cont ? cont.id : (el.closest('[id]') || {}).id;
+    if(!id) return null;
+    const cands = [...document.querySelectorAll('[onclick]')].filter(b => !isOwnUI(b) && isVisible(b) && b.getAttribute('onclick').indexOf(id) > -1 && !b.closest('#' + CSS.escape(id)));
+    return cands[0] || null;
+  }
+  act('find_ui', {
+    ui: false, kind: 'observe', manual: false,
+    desc: 'Search the WHOLE editor for a control by words in its name, title, label or text: toolbar buttons, menu items, dialog fields, switches, even ones that are hidden inside closed menus or dialogs. Visible matches come back with an @ref you can click now. Hidden ones come back with where they live (dialog / panel) and, if found, the visible button that opens it (as @ref). Set open:true to click that opener for the first hidden match. Refs stay valid until the next snapshot.',
+    schema: {type: 'object', properties: {query: {type: 'string'}, limit: {type: 'integer', minimum: 1, maximum: 40}, open: {type: 'boolean', description: 'Click the opener of the first hidden match.'}}, required: ['query']},
+    run: async a => {
+      const q = String(a.query || '').trim().toLowerCase(); if(!q) throw new Error('Give a query.');
+      const lim = Math.min(40, Math.max(1, a.limit || 15));
+      const all = [...document.querySelectorAll(INTERACTIVE + ', [title], [data-tip], .exp-chip, .insert-box, .split-tab')].filter(el => !isOwnUI(el));
+      const seen = new Set(), hits = [];
+      all.forEach(el => {
+        if(seen.has(el) || el.disabled) return; seen.add(el);
+        const hay = [el.getAttribute('aria-label'), el.getAttribute('title'), el.getAttribute('data-tip'), el.getAttribute('placeholder'), el.id, (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80)].filter(Boolean).join(' | ').toLowerCase();
+        if(hay.indexOf(q) === -1) return;
+        const lab = fuLabel(el); if(!lab) return;
+        const exact = lab.toLowerCase() === q ? 0 : lab.toLowerCase().indexOf(q) === 0 ? 1 : 2;
+        hits.push({el, lab, exact, vis: isVisible(el)});
+      });
+      hits.sort((x, y) => (y.vis - x.vis) || (x.exact - y.exact));
+      if(!hits.length) return 'Nothing matches "' + a.query + '". Try fewer or different words (e.g. the button\'s tooltip).';
+      refMap = new Map(); let n = 0; const lines = []; let firstOpener = null;
+      for(const h of hits.slice(0, lim)){
+        const el = h.el;
+        if(h.vis && !isOwnUI(el)){
+          const r = el.getBoundingClientRect();
+          if(inViewport(r) && topmostOK(el, r)){ n++; refMap.set(n, el); const c = centerOf(el); lines.push('@' + n + ' ' + roleOf(el) + ' "' + h.lab + '"' + stateOf(el) + ' (' + c.x + ',' + c.y + ') [visible]'); continue; }
+          lines.push(roleOf(el) + ' "' + h.lab + '" [on the page but off-screen or covered: scroll to it or close what covers it]'); continue;
+        }
+        const hint = containerHint(el), op = openerFor(el);
+        let opTxt = '';
+        if(op){ n++; refMap.set(n, op); const c = centerOf(op); opTxt = ' → open with @' + n + ' "' + fuLabel(op) + '" (' + c.x + ',' + c.y + ')'; if(!firstOpener) firstOpener = op; }
+        lines.push(roleOf(el) + ' "' + h.lab + '" [hidden' + (hint.length ? ' in ' + hint.join(' › ') : '') + ']' + opTxt);
+      }
+      let extra = '';
+      if(a.open && firstOpener){ await pointerClick(resolveTarget({ref: [...refMap.entries()].find(e => e[1] === firstOpener)[0]}), {}); await sleep(300); extra = '\nClicked its opener "' + fuLabel(firstOpener) + '". Take a snapshot to continue.'; }
+      return hits.length + ' match' + (hits.length === 1 ? '' : 'es') + (hits.length > lim ? ' (showing ' + lim + ')' : '') + ':\n' + lines.join('\n') + extra;
+    }
+  });
+
+  // ── read_page / read_selection / list_pages
+  function blockKind(el){
+    const t = el.tagName;
+    if(/^H[1-6]$/.test(t)) return 'heading' + t[1];
+    if(t === 'P' || t === 'DIV' && !el.children.length) return 'paragraph';
+    if(t === 'UL' || t === 'OL') return t === 'UL' ? 'bullet-list' : 'numbered-list';
+    if(t === 'TABLE') return 'table';
+    if(t === 'IMG') return 'image';
+    if(t === 'HR') return 'line';
+    if(el.matches && el.matches('.tbx')) return 'text-box';
+    if(el.matches && el.matches('.sc-banner, .sc-banner-shield')) return 'banner';
+    if(el.querySelector && el.querySelector('img') && !(el.textContent || '').trim()) return 'image-group';
+    if(el.matches && el.matches('.fw-field')) return 'form-field';
+    return (t || 'node').toLowerCase();
+  }
+  function tableGrid(tb, maxR, maxC){
+    return [...tb.rows].slice(0, maxR).map(r => [...r.cells].slice(0, maxC).map(c => clip(c.textContent.replace(/\s+/g, ' ').trim(), 40)));
+  }
+  function imgInfo(img){
+    const r = img.getBoundingClientRect(), cs = img.style;
+    return 'alt="' + clip(img.alt || '', 40) + '" ' + Math.round(r.width) + 'x' + Math.round(r.height) + 'px' + (cs.position === 'absolute' ? ' abs@' + (cs.left || '?') + ',' + (cs.top || '?') : '') + (img.dataset.solid === '1' ? ' solid' : '') + (img.dataset.imgLink ? ' link=' + clip(img.dataset.imgLink, 40) : '') + ' ' + (String(img.src).startsWith('data:') ? 'embedded' : clip(img.src, 60));
+  }
+  act('read_page', {
+    ui: false, kind: 'observe', manual: false,
+    desc: 'Read a page as STRUCTURED blocks instead of flat text: each block is numbered "page.block" (e.g. 2.5) with its kind (heading1-6, paragraph, bullet/numbered-list, table, image, line, text-box, banner…), key formatting (alignment, bold/italic, font size, colour), its screen position and its text. Tables show their cells, images their size, alt text and position. pages: "1-3,5" (default: page 1; "all" for everything, capped). block: "2.5" returns the full detail of that one block (full text, whole table up to 30x12, inline style, HTML snippet). Respects the page scope and content permission.',
+    schema: {type: 'object', properties: {pages: {type: 'string', description: '"2", "1-3,5" or "all". Default 1.'}, block: {type: 'string', description: 'e.g. "2.5": full detail of that block.'}, max_blocks: {type: 'integer', minimum: 1, maximum: 300}}},
+    run: async a => {
+      needContent();
+      const pcs = pagesEls(); if(!pcs.length) return 'The document has no pages.';
+      const total = pcs.length;
+      if(a.block){
+        const m = String(a.block).match(/^(\d+)\.(\d+)$/); if(!m) throw new Error('block must look like "2.5" (page.block).');
+        const pn = +m[1], bi = +m[2];
+        if(pn < 1 || pn > total) throw new Error('No page ' + pn + '.');
+        if(!pageAllowed(pn)) throw new Error('Page ' + pn + ' is outside the pages you may access.');
+        const el = pcs[pn - 1].children[bi - 1]; if(!el) throw new Error('Page ' + pn + ' has only ' + pcs[pn - 1].children.length + ' blocks.');
+        el.scrollIntoView({block: 'center'});
+        const r = el.getBoundingClientRect(), cs = getComputedStyle(el), k = blockKind(el);
+        const L = ['Block ' + a.block + ' — ' + k + ' at (' + Math.round(r.left + r.width / 2) + ',' + Math.round(r.top + r.height / 2) + ') ' + Math.round(r.width) + 'x' + Math.round(r.height) + 'px', 'style: align ' + cs.textAlign + ', font ' + cs.fontSize + ' ' + clip(cs.fontFamily, 40) + ', weight ' + cs.fontWeight + ', colour ' + cs.color + (cs.backgroundColor !== 'rgba(0, 0, 0, 0)' ? ', bg ' + cs.backgroundColor : '')];
+        if(el.tagName === 'TABLE'){ if(!elAllowed('tables')) throw new Error(denyMsg('tables')); L.push('table ' + el.rows.length + ' rows:'); tableGrid(el, 30, 12).forEach((row, i) => L.push((i + 1) + ': ' + row.join(' | '))); }
+        else if(el.tagName === 'IMG') L.push(imgInfo(el));
+        else { L.push('text: ' + clip(el.textContent.replace(/\s+/g, ' ').trim(), 3000)); el.querySelectorAll('img').forEach(i => L.push('image: ' + imgInfo(i))); }
+        L.push('html: ' + clip(el.outerHTML.replace(/\s+/g, ' '), 800));
+        return L.join('\n');
+      }
+      let want;
+      const sp = String(a.pages || '1').trim().toLowerCase();
+      if(sp === 'all') want = pcs.map((_, i) => i + 1); else want = parsePageList(sp, total);
+      const cap = Math.min(300, a.max_blocks || 120); let used = 0; const L = ['Document: ' + total + ' page' + (total === 1 ? '' : 's') + '.'];
+      for(const pn of want){
+        if(!pageAllowed(pn)){ L.push('--- Page ' + pn + ': outside your page scope ---'); continue; }
+        const pc = pcs[pn - 1], kids = [...pc.children];
+        L.push('--- Page ' + pn + ' (' + kids.length + ' blocks) ---');
+        for(let i = 0; i < kids.length; i++){
+          if(used >= cap){ L.push('… block limit reached; use pages/max_blocks to read more.'); return L.join('\n'); }
+          used++;
+          const el = kids[i], k = blockKind(el), r = el.getBoundingClientRect(), cs = getComputedStyle(el);
+          let body;
+          if(el.tagName === 'TABLE'){ if(!elAllowed('tables')){ body = '(tables are off for you)'; } else { const g = tableGrid(el, 4, 6); body = el.rows.length + 'x' + (el.rows[0] ? el.rows[0].cells.length : 0) + ' ' + g.map(row => row.join(' | ')).join(' // ') + (el.rows.length > 4 ? ' …' : ''); } }
+          else if(el.tagName === 'IMG') body = imgInfo(el);
+          else { body = '"' + clip(el.textContent.replace(/\s+/g, ' ').trim(), 160) + '"'; const im = el.querySelectorAll('img').length; if(im) body += ' +' + im + ' image' + (im > 1 ? 's' : ''); }
+          const fmt = [cs.textAlign !== 'start' && cs.textAlign !== 'left' ? cs.textAlign : '', +cs.fontWeight >= 600 ? 'bold' : '', cs.fontStyle === 'italic' ? 'italic' : '', cs.fontSize].filter(Boolean).join(',');
+          L.push(pn + '.' + (i + 1) + ' ' + k + ' [' + fmt + '] @(' + Math.round(r.left + r.width / 2) + ',' + Math.round(r.top + r.height / 2) + ') ' + body);
+        }
+      }
+      return L.join('\n');
+    }
+  });
+  act('read_selection', {
+    ui: false, kind: 'observe', manual: false,
+    desc: 'Describe the current selection or caret: the selected text, its page and block (e.g. 2.5), and the formatting there (heading level, font, size, colour, bold/italic/underline, alignment, link, table cell, list, image). Use it to verify what a format command will hit.',
+    schema: {type: 'object', properties: {}},
+    run: async () => {
+      if(!elAllowed('selection')) throw new Error(denyMsg('selection'));
+      const sel = window.getSelection(); if(!sel || !sel.rangeCount) return 'Nothing is selected and there is no caret.';
+      const n = sel.anchorNode, el = n && (n.nodeType === 1 ? n : n.parentElement);
+      if(!el || isOwnUI(el)) return 'Nothing is selected in the document.';
+      const pc = el.closest('#editorArea .page-content');
+      const pn = pc ? pagesEls().indexOf(pc) + 1 : 0;
+      if(pn && !pageAllowed(pn)) throw new Error('The selection is on page ' + pn + ', outside your page scope.');
+      let blk = el; while(blk && blk.parentElement && blk.parentElement !== pc) blk = blk.parentElement;
+      const bi = pc && blk ? [...pc.children].indexOf(blk) + 1 : 0;
+      const cs = getComputedStyle(el), tx = sel.toString();
+      const q = s => el.closest(s);
+      const bits = [];
+      const hd = q('h1,h2,h3,h4,h5,h6'); if(hd) bits.push(hd.tagName.toLowerCase());
+      if(q('a[href]')) bits.push('link → ' + clip(q('a[href]').getAttribute('href'), 60));
+      if(q('td,th')) bits.push('table cell');
+      if(q('li')) bits.push(q('ol') ? 'numbered list item' : 'bullet list item');
+      if(el.tagName === 'IMG') bits.push('image');
+      const dec = cs.textDecorationLine || '';
+      return (tx ? 'Selected ' + tx.length + ' chars: "' + clip(tx.replace(/\s+/g, ' '), 300) + '"' : 'Caret (nothing selected)') + (pn ? ' on page ' + pn + (bi ? ', block ' + pn + '.' + bi : '') : ' (outside the pages)') + '.\nFormat: font ' + clip(cs.fontFamily, 40) + ' ' + cs.fontSize + ', ' + (+cs.fontWeight >= 600 ? 'bold' : 'regular') + (cs.fontStyle === 'italic' ? ', italic' : '') + (/underline/.test(dec) ? ', underline' : '') + (/line-through/.test(dec) ? ', strikethrough' : '') + ', colour ' + cs.color + ', align ' + cs.textAlign + (bits.length ? '. In: ' + bits.join(', ') : '') + '.';
+    }
+  });
+  act('list_pages', {
+    ui: false, kind: 'observe', manual: false,
+    desc: 'Compact overview of every page: word count, headings, images, tables, other objects, how full the page is (fill %), and a warning when a page is at or over its limit (the cause of "Page limit exceeded"). Use before adding content so you do not overflow a page.',
+    schema: {type: 'object', properties: {}},
+    run: async () => {
+      const pcs = pagesEls(); if(!pcs.length) return 'The document has no pages.';
+      const L = []; let tw = 0, warn = 0;
+      pcs.forEach((pc, i) => {
+        const pn = i + 1;
+        if(!pageAllowed(pn)){ L.push(pn + ': outside your page scope'); return; }
+        const text = pc.textContent.trim(), w = elAllowed('content') || elAllowed('counts') ? WORDS(text) : 0; tw += w;
+        const hs = [...pc.querySelectorAll('h1,h2,h3')].slice(0, 3).map(h => clip(h.textContent.trim(), 30)).filter(Boolean);
+        const im = pc.querySelectorAll('img').length, tb = pc.querySelectorAll('table').length, ob = pc.querySelectorAll('.tbx, .sc-banner, .fw-field, hr').length;
+        const pr = pc.getBoundingClientRect(), sc = pc.offsetHeight ? pr.height / pc.offsetHeight : 1;
+        const last = pc.lastElementChild;
+        const used = last ? (last.getBoundingClientRect().bottom - pr.top) / (sc || 1) : 0;
+        const cap = pc.clientHeight || 1, fill = Math.round(used / cap * 100);
+        const over = pc.scrollHeight > pc.clientHeight + 6;
+        if(over || fill >= 95) warn++;
+        L.push(pn + ': ' + w + ' words, ' + im + ' img, ' + tb + ' table' + (tb === 1 ? '' : 's') + (ob ? ', ' + ob + ' objects' : '') + ', ~' + Math.min(fill, 999) + '% full' + (over ? ' ⚠ OVER THE PAGE LIMIT' : fill >= 95 ? ' ⚠ almost full' : '') + (hs.length ? ' | ' + hs.join(' / ') : '') + (text ? '' : ' | empty'));
+      });
+      return pcs.length + ' page' + (pcs.length === 1 ? '' : 's') + ', ~' + tw + ' words' + (warn ? ', ' + warn + ' page(s) full or over' : '') + ':\n' + L.join('\n');
+    }
+  });
+
+  // ── select_text
+  act('select_text', {
+    ui: false, manual: false,
+    desc: 'Select text by its CONTENT, not by clicking. text: what to find; occurrence: which match (default 1); page: only look on that page; match_case / whole_word options. The match is selected and focused in the document so formatting commands apply to it, scrolled into view, and its page, block and screen position are returned. all:true only counts matches and lists where they are (first 20).',
+    schema: {type: 'object', properties: {text: {type: 'string'}, occurrence: {type: 'integer', minimum: 1}, page: {type: 'integer', minimum: 1}, match_case: {type: 'boolean'}, whole_word: {type: 'boolean'}, all: {type: 'boolean'}}, required: ['text']},
+    parse: raw => ({text: String(raw || '')}),
+    help: 'select_text <text>  select the first occurrence of the text.',
+    run: async a => {
+      needContent(); if(!elAllowed('selection')) throw new Error(denyMsg('selection'));
+      const needle = String(a.text == null ? '' : a.text); if(!needle) throw new Error('Give the text to find.');
+      const hit = [], pcs = pagesEls();
+      pcs.forEach((pc, pi) => {
+        const pn = pi + 1; if(a.page && a.page !== pn) return; if(!pageAllowed(pn)) return;
+        const walker = document.createTreeWalker(pc, NodeFilter.SHOW_TEXT, {acceptNode: n => n.nodeValue && !(n.parentElement && n.parentElement.closest('script,style')) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT});
+        const nodes = []; let full = '', node;
+        while((node = walker.nextNode())){ nodes.push({node, start: full.length}); full += node.nodeValue; }
+        const hay = a.match_case ? full : full.toLowerCase(), nd = a.match_case ? needle : needle.toLowerCase();
+        let from = 0, idx;
+        while((idx = hay.indexOf(nd, from)) !== -1){
+          from = idx + Math.max(1, nd.length);
+          if(a.whole_word){ const b = full[idx - 1], c = full[idx + nd.length]; if((b && /[\p{L}\p{N}_]/u.test(b)) || (c && /[\p{L}\p{N}_]/u.test(c))) continue; }
+          hit.push({pn, pc, idx, end: idx + nd.length, nodes, full});
+          if(hit.length > 500) break;
+        }
+      });
+      if(!hit.length) return 'No match for "' + clip(needle, 60) + '"' + (a.page ? ' on page ' + a.page : '') + '. Matching ' + (a.match_case ? 'is' : 'is not') + ' case-sensitive. Use read_page to check the actual text.';
+      const ctx = h => '…' + clip(h.full.slice(Math.max(0, h.idx - 25), h.idx), 25) + '[' + h.full.slice(h.idx, h.end) + ']' + h.full.slice(h.end, h.end + 25) + '…';
+      if(a.all) return hit.length + ' match' + (hit.length === 1 ? '' : 'es') + ':\n' + hit.slice(0, 20).map((h, i) => (i + 1) + '. page ' + h.pn + ' ' + ctx(h)).join('\n');
+      const k = Math.max(1, a.occurrence || 1); if(k > hit.length) throw new Error('Only ' + hit.length + ' match' + (hit.length === 1 ? '' : 'es') + ', so there is no occurrence ' + k + '.');
+      const h = hit[k - 1];
+      const loc = off => { for(let i = h.nodes.length - 1; i >= 0; i--) if(h.nodes[i].start <= off) return {n: h.nodes[i].node, o: Math.min(off - h.nodes[i].start, h.nodes[i].node.nodeValue.length)}; return null; };
+      const s = loc(h.idx), e = loc(h.end - 0.0001 < h.idx ? h.idx : h.end);
+      const eo = loc(h.end - 1); const rng = document.createRange();
+      rng.setStart(s.n, s.o); rng.setEnd(eo.n, Math.min(eo.o + 1, eo.n.nodeValue.length));
+      const host = editableHost(s.n.parentElement); if(host){ try { host.focus({preventScroll: true}); } catch(e2){} }
+      const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(rng);
+      const rr = rng.getBoundingClientRect(); const sp = s.n.parentElement; if(sp && sp.scrollIntoView) sp.scrollIntoView({block: 'center'});
+      await sleep(120);
+      const r2 = rng.getBoundingClientRect();
+      return 'Selected match ' + k + ' of ' + hit.length + ' on page ' + h.pn + ': ' + ctx(h) + ' at (' + Math.round(r2.left + r2.width / 2) + ',' + Math.round(r2.top + r2.height / 2) + '). Now apply a format command or key.';
+    }
+  });
+
+  // ── open_dialog + fill_form
+  const DIALOGS = {
+    export: () => openExportModal(), import: () => openImportModal(), image: () => openImageModal(), table: () => openTableModal(),
+    link: () => openLinkModal(), find: () => openFindModal(), replace: () => openFindReplaceModal(), header: () => openHeaderModal(false), footer: () => openFooterModal(false),
+    datetime: () => openDateTimeModal(), icon: () => openIconModal(), latex: () => openLatexModal(), translate: () => openTranslateModal(), shape: () => openShapeModal(),
+    banner: () => openBannerModal(), warp_title: () => openWarpTitleModal(), warp_page: () => openWarpPageModal(),
+    quality_settings: () => window.SCQuality.openSettings(),
+    quality_report: () => { if(!window.SCQuality || !window.SCQuality.last()) throw new Error('The quality report only opens after a check has run: call the quality tool first.'); window.SCQuality.openReport(); }
+  };
+  const BLOCKED_DIALOGS = {confirm: 1, confirmation: 1, ask: 1, progress: 1, pdf: 1, crop: 1, delete: 1, discard: 1, ai: 1};
+  const topOpenModal = () => [...document.querySelectorAll('.modal.open')].pop() || null;
+  function mdlFields(root){
+    const out = [], seen = new Set();
+    const lab = el => {
+      let n = (el.getAttribute('aria-label') || el.getAttribute('title') || '').trim();
+      if(!n){ const l = el.closest('label'); if(l) n = (l.textContent || '').replace(/\s+/g, ' ').trim(); }
+      if(!n && el.id){ const l = root.querySelector('label[for="' + CSS.escape(el.id) + '"]'); if(l) n = l.textContent.replace(/\s+/g, ' ').trim(); }
+      if(!n){ const p = el.closest('.scf-row, .exp-opt, .row, .field, .form-group, .ow-row, div'); const l = p && p.querySelector('label, .scf-label, .exp-opt-lab, .lbl, b, strong, small'); if(l && !l.contains(el)) n = l.textContent.replace(/\s+/g, ' ').trim(); }
+      if(!n) n = el.getAttribute('placeholder') || el.name || el.id || '';
+      return clip(n, 50);
+    };
+    root.querySelectorAll('input, select, textarea, label.toggle-switch').forEach(el => {
+      if(seen.has(el) || isOwnUI(el)) return; seen.add(el);
+      const f = el.matches('label.toggle-switch') ? el.querySelector('input') || el : el;
+      if(f.type === 'hidden') return;
+      const vis = isVisible(el.matches('label.toggle-switch') ? el : f) || (f.type === 'file');
+      if(!vis) return;
+      let kind = f.tagName === 'SELECT' ? 'select' : f.tagName === 'TEXTAREA' ? 'textarea' : (f.type || 'text');
+      let val = f.tagName === 'SELECT' ? (f.options[f.selectedIndex] || {}).text : (f.type === 'checkbox' || f.type === 'radio') ? (f.checked ? 'on' : 'off') : f.value;
+      out.push({el, label: lab(el.matches('label.toggle-switch') ? f : f) || kind, kind, value: clip(String(val == null ? '' : val).trim(), 50), options: f.tagName === 'SELECT' ? [...f.options].map(o => o.text.trim()).slice(0, 15) : null});
+    });
+    root.querySelectorAll('button, [role="button"], .exp-chip, .insert-box').forEach(el => {
+      if(seen.has(el) || isOwnUI(el) || el.disabled || !isVisible(el)) return; seen.add(el);
+      const t = (el.textContent || '').replace(/\s+/g, ' ').trim() || el.getAttribute('title') || ''; if(!t) return;
+      out.push({el, label: clip(t, 40), kind: 'button', value: el.classList.contains('active') ? 'selected' : '', options: null});
+    });
+    return out;
+  }
+  act('open_dialog', {
+    ui: true, manual: false,
+    desc: 'Open an editor dialog directly and get its fields back as labelled controls with @refs (inputs, selects, switches, buttons). name: export, import, image, table, link, find, replace, header, footer, datetime, icon, latex, translate, shape, banner, warp_title, warp_page, quality_settings, quality_report (only after quality has run). Confirmation, progress and crop screens cannot be opened this way: they only appear as the result of an action. Then use fill_form or click/setvalue with the refs. Put the caret where an inserted item should go first.',
+    schema: {type: 'object', properties: {name: {type: 'string', enum: Object.keys(DIALOGS)}}, required: ['name']},
+    run: async a => {
+      const nm = String(a.name || '').toLowerCase().replace(/[\s-]+/g, '_');
+      if(BLOCKED_DIALOGS[nm]) throw new Error('"' + nm + '" is a confirmation / progress screen. It cannot be opened on its own: perform the action that triggers it (the screen then appears) and answer it with click.');
+      if(!DIALOGS[nm]) throw new Error('Unknown dialog "' + a.name + '". Options: ' + Object.keys(DIALOGS).join(', '));
+      if(eff('commandAccess') === 'off') throw new Error('Dialogs are off for you: commands are turned off in Agent Permissions.');
+      try { DIALOGS[nm](); } catch(e){ throw new Error('Could not open it: ' + e.message); }
+      await sleep(450);
+      const m = topOpenModal(); if(!m) throw new Error('The dialog did not open. Check the toasts and snapshot.');
+      return describeModal(m);
+    }
+  });
+  function describeModal(m){
+    const f = mdlFields(m); refMap = new Map(); const L = [];
+    const t = m.querySelector('.mtitle, h2, h3');
+    f.slice(0, 70).forEach((x, i) => { refMap.set(i + 1, x.el); const c = centerOf(x.el); L.push('@' + (i + 1) + ' ' + x.kind + ' "' + x.label + '"' + (x.value ? ' = ' + x.value : '') + (x.options ? ' [' + x.options.join(' | ') + ']' : '') + ' (' + c.x + ',' + c.y + ')'); });
+    return 'Dialog "' + (t ? t.textContent.replace(/\s+/g, ' ').trim() : m.id) + '" (#' + m.id + ') is open with ' + f.length + ' control' + (f.length === 1 ? '' : 's') + (f.length > 70 ? ' (first 70)' : '') + '. Refs valid until the next snapshot:\n' + L.join('\n');
+  }
+  act('fill_form', {
+    ui: true, manual: false,
+    desc: 'Set several fields of the open dialog at once by their label. fields is an object: {"Alt text": "Logo", "Opacity": "80", "Show border": true, "Format": "Native PDF"}. Text/number/range/colour inputs and textareas take text, <select>s take an option\'s text or value, switches/checkboxes take true/false; if no field has that label, a button/chip with that text is clicked. Does NOT click the final confirm button: do that yourself. Reports each field set or not found.',
+    schema: {type: 'object', properties: {fields: {type: 'object', additionalProperties: true}, dialog: {type: 'string', description: 'Optional dialog id; default the top open one.'}}, required: ['fields']},
+    run: async a => {
+      const m = a.dialog ? document.getElementById(String(a.dialog).replace(/^#/, '')) : topOpenModal();
+      if(!m || !m.classList.contains('open')) throw new Error('No dialog is open. Call open_dialog first.');
+      const entries = Object.entries(a.fields || {}); if(!entries.length) throw new Error('Give fields: {label: value}.');
+      const norm = s => String(s).toLowerCase().replace(/\s+/g, ' ').trim();
+      const out = []; let bad = 0;
+      for(const [k, v] of entries){
+        const f = mdlFields(m), want = norm(k);
+        let t = f.find(x => x.kind !== 'button' && norm(x.label) === want) || f.find(x => x.kind !== 'button' && norm(x.label).indexOf(want) > -1);
+        try {
+          if(t){
+            refMap = new Map([[1, t.el]]);
+            const val = typeof v === 'boolean' ? (v ? 'true' : 'false') : String(v);
+            if(t.kind === 'file') throw new Error('is a file box: use upload_file');
+            await ACTIONS.setvalue.run({ref: 1, value: val});
+            out.push('✓ ' + k + ' = ' + clip(val, 40));
+          } else {
+            const b = f.find(x => x.kind === 'button' && (norm(x.label) === norm(v) || norm(x.label) === want));
+            if(!b) throw new Error('no field or button with that label');
+            await pointerClick(resolveTarget({x: centerOf(b.el).x, y: centerOf(b.el).y}), {});
+            out.push('✓ ' + k + ' → clicked "' + b.label + '"');
+          }
+        } catch(e){ bad++; out.push('✗ ' + k + ': ' + e.message); }
+        await sleep(80);
+      }
+      return out.join('\n') + '\n' + (bad ? bad + ' not set. ' : 'All set. ') + 'Check with open_dialog or snapshot, then click the dialog\'s confirm button.';
+    }
+  });
+
+  // ── checkpoints: save / list / diff / delete, and revert
+  const CKPTS = []; const CK_MAX = 6;
+  function docBlocks(pages){
+    const out = [];
+    pages.forEach((html, i) => { const d = document.createElement('div'); d.innerHTML = html; [...d.children].forEach(c => { const t = (c.textContent || '').replace(/\s+/g, ' ').trim(); const imgs = c.querySelectorAll('img').length + (c.tagName === 'IMG' ? 1 : 0); const tag = c.tagName === 'TABLE' ? '[table] ' : ''; const s = tag + t + (imgs ? ' [' + imgs + ' img]' : ''); if(s) out.push({p: i + 1, s: clip(s, 200)}); }); if(!d.children.length && d.textContent.trim()) out.push({p: i + 1, s: clip(d.textContent.replace(/\s+/g, ' ').trim(), 200)}); });
+    return out;
+  }
+  function takeSnap(){
+    try { lazyHydrateAll(false); } catch(e){}
+    const data = collectData(), json = JSON.stringify(data);
+    return {json, title: data.title, pages: (data.pages || []).length, blocks: docBlocks(data.pages || []), words: WORDS((data.pages || []).map(h => { const d = document.createElement('div'); d.innerHTML = h; return d.textContent; }).join(' ')), at: Date.now()};
+  }
+  function diffBlocks(A, B){
+    const n = A.length, m = B.length, out = [];
+    if(n * m > 4000000){ const sa = new Set(A.map(x => x.s)), sb = new Set(B.map(x => x.s)); A.forEach(x => { if(!sb.has(x.s)) out.push('- (p' + x.p + ') ' + x.s); }); B.forEach(x => { if(!sa.has(x.s)) out.push('+ (p' + x.p + ') ' + x.s); }); return out; }
+    const L = Array.from({length: n + 1}, () => new Uint16Array(m + 1));
+    for(let i = n - 1; i >= 0; i--) for(let j = m - 1; j >= 0; j--) L[i][j] = A[i].s === B[j].s ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    let i = 0, j = 0;
+    while(i < n && j < m){ if(A[i].s === B[j].s){ i++; j++; } else if(L[i + 1][j] >= L[i][j + 1]){ out.push('- (p' + A[i].p + ') ' + A[i].s); i++; } else { out.push('+ (p' + B[j].p + ') ' + B[j].s); j++; } }
+    while(i < n){ out.push('- (p' + A[i].p + ') ' + A[i].s); i++; } while(j < m){ out.push('+ (p' + B[j].p + ') ' + B[j].s); j++; }
+    return out;
+  }
+  const ckFind = name => { if(!CKPTS.length) throw new Error('There are no checkpoints. Save one with checkpoint action "save".'); const c = name ? CKPTS.find(x => x.name === name) : CKPTS[CKPTS.length - 1]; if(!c) throw new Error('No checkpoint named "' + name + '". Have: ' + CKPTS.map(x => x.name).join(', ')); return c; };
+  act('checkpoint', {
+    ui: false, kind: 'observe', manual: false,
+    desc: 'Document checkpoints (kept in memory for this session, max 6). action "save" (name optional) snapshots the whole document before a risky change; "list" shows them; "diff" shows what changed between a checkpoint (default the latest) and the document now, or against name2: removed (-) and added (+) blocks by page, plus page/word counts; "delete" drops one. To roll back use the revert tool. Needs document-content access.',
+    schema: {type: 'object', properties: {action: {type: 'string', enum: ['save', 'list', 'diff', 'delete']}, name: {type: 'string'}, name2: {type: 'string', description: 'diff only: compare with this checkpoint instead of the live document.'}}, required: ['action']},
+    run: async a => {
+      needContent();
+      if(typeof collectData !== 'function') throw new Error('The document engine is not ready yet.');
+      const act2 = a.action;
+      if(act2 === 'list') return CKPTS.length ? CKPTS.map(c => '"' + c.name + '" at ' + hms(c.at) + ': ' + c.pages + ' page(s), ' + c.words + ' words, ' + Math.round(c.json.length / 1024) + ' KB').join('\n') : 'No checkpoints yet.';
+      if(act2 === 'save'){
+        const s = takeSnap(); s.name = String(a.name || ('cp' + (CKPTS.length + 1))).slice(0, 40);
+        const i = CKPTS.findIndex(x => x.name === s.name); if(i > -1) CKPTS.splice(i, 1);
+        CKPTS.push(s); while(CKPTS.length > CK_MAX) CKPTS.shift();
+        let tot = CKPTS.reduce((t, c) => t + c.json.length, 0); while(tot > 60 * 1024 * 1024 && CKPTS.length > 1){ tot -= CKPTS.shift().json.length; }
+        return 'Saved checkpoint "' + s.name + '" (' + s.pages + ' page(s), ' + s.words + ' words). ' + CKPTS.length + ' kept. Roll back with revert.';
+      }
+      if(act2 === 'delete'){ const c = ckFind(a.name); CKPTS.splice(CKPTS.indexOf(c), 1); return 'Deleted checkpoint "' + c.name + '".'; }
+      if(act2 === 'diff'){
+        const c = ckFind(a.name), other = a.name2 ? ckFind(a.name2) : takeSnap(), label = a.name2 ? '"' + a.name2 + '"' : 'the document now';
+        const d = diffBlocks(c.blocks, other.blocks);
+        const head = 'Changes from "' + c.name + '" to ' + label + ': pages ' + c.pages + ' → ' + other.pages + ', words ' + c.words + ' → ' + other.words + (c.title !== other.title ? ', title "' + c.title + '" → "' + other.title + '"' : '') + '.';
+        if(!d.length) return head + ' The text and block structure are identical' + (c.json === other.json ? ' (and so is everything else).' : ' (formatting or settings may still differ).');
+        return head + ' ' + d.length + ' block change' + (d.length === 1 ? '' : 's') + (d.length > 40 ? ' (first 40)' : '') + ':\n' + d.slice(0, 40).join('\n');
+      }
+      throw new Error('Unknown action.');
+    }
+  });
+  act('revert', {
+    ui: true, manual: false,
+    desc: 'Roll the whole document back to a checkpoint (default the latest): text, formatting and settings are restored to how they were when you saved it. Everything done since is lost, so use checkpoint action "diff" first if unsure. The user is asked for approval like any UI action. Needs document-content access.',
+    schema: {type: 'object', properties: {name: {type: 'string'}}},
+    run: async a => {
+      needContent();
+      if(eff('commandAccess') === 'off') throw new Error('Reverting is off for you: commands are turned off in Agent Permissions.');
+      if(typeof loadData !== 'function') throw new Error('The document engine is not ready yet.');
+      const c = ckFind(a.name);
+      loadData(JSON.parse(c.json));
+      await sleep(600);
+      hostToast('Restored checkpoint "' + c.name + '"', 'success');
+      return 'Reverted to checkpoint "' + c.name + '" (' + document.querySelectorAll('#editorArea .page').length + ' page(s) now). ' + stateLine();
+    }
+  });
+
+  // ── import_document: only into an empty document
+  act('import_document', {
+    ui: true, manual: false,
+    desc: 'Load a .scd or .uscd document into the editor from data_base64 (or a data: URL) or a url. ONLY works when the current document is completely empty (one blank page, no objects); otherwise it returns an error and changes nothing. name should end in .scd or .uscd. Use after export_file to round-trip a document, or to open a document you hold.',
+    schema: {type: 'object', properties: Object.assign({}, FILE_PROPS)},
+    run: async a => {
+      needContent();
+      if(eff('commandAccess') === 'off') throw new Error('Importing is off for you: commands are turned off in Agent Permissions.');
+      if(!isEmptyDoc()) throw new Error('The document is not empty. import_document only works on an empty document; nothing was changed. Ask the user to clear the document or open a new one.');
+      if(typeof handleImport !== 'function') throw new Error('The import engine is not ready yet.');
+      const f = await readFilePayload(a);
+      let nm = f.name; if(!/\.u?scd$/i.test(nm)){ const head = await f.blob.slice(0, 20).text(); nm = (/^\s*[{\[]/.test(head) ? 'import.scd' : 'import.uscd'); }
+      const file = new File([f.blob], nm, {type: f.mime});
+      handleImport(file);
+      let t0 = Date.now(); await sleep(500);
+      while(Date.now() - t0 < 40000 && (DOC.opening || (isEmptyDoc() && !(typeof _pendingImport !== 'undefined' && _pendingImport)))) await sleep(300);
+      if(typeof _pendingImport !== 'undefined' && _pendingImport) return 'The file is in an older format and the import screen is asking how to bring it in. Take a snapshot and answer it.';
+      try { closeMdl('importMdl'); } catch(e){}
+      await sleep(300);
+      if(isEmptyDoc()) throw new Error('The import did not produce any content. Check the toasts (they say why).');
+      return 'Imported ' + nm + ': ' + document.querySelectorAll('#editorArea .page').length + ' page(s), ~' + WORDS(pagesEls().map(p => p.textContent).join(' ')) + ' words. ' + stateLine();
+    }
+  });
+
   // ── Registry command runner (run_command tool + manual commands) ─────
   let manualMode = false; // while true, the user's own scope/element switches don't block their own commands
   function runRegistryCommand(name, rawArgs, manual){
@@ -2160,7 +3070,15 @@
       '- To put text into the document use run_command inserttext / insertmarkdown (markdown becomes real formatting). Use type for dialog fields or when keystroke behaviour matters. To change one word, /lookup it, then /select, then format.',
       '- To select text with the pointer: double-click = word, triple-click = paragraph, or drag from start to end.',
       '- You have no knowledge of the document until you look (snapshot scope "doc", pagetext). Do not guess values.',
-      '- toast_log replays the last N editor log entries (toasts, errors, agent actions) as toasts for the user and returns them to you as text. Use it to see what just happened or why something failed.',
+      '- Every toast the editor shows (saved, page limit exceeded, errors…) is attached to your next tool result as [Editor toasts]. To look back: the toasts tool, toast_log, or run_command toasts <n>.',
+      '- export_file returns the document as a file to YOU (pdf, scd, uscd, docx, txt, md, jpg, png, webp); the user\'s browser downloads nothing.',
+      '- The colour chooser (Color Labs) is a separate screen: click a colour swatch to open it, then call color with hex.',
+      '- Moving around: scroll (dx/dy, to top/bottom/left/right, page N, percent), pan (pull the view) and drag (to / by, hold_ms, touch). Wide pages and tables scroll sideways with scroll dx or pan dx.',
+      '- Images: insert_image puts an image you hold into the document at the caret, the Insert Image screen (where "dialog") or the Stored tray (where "stored"). upload_file sends any file to any file box or drop zone.',
+      '- rightclick opens a context menu and lists its items as @refs you can click. quality runs Document Quality and returns a clear summary with the failed checks.',
+      '- Work fast: batch runs up to 25 steps in one call; find_ui finds any control (even hidden ones) and how to reach it; open_dialog + fill_form open a dialog and set its fields by label (then click its confirm button).',
+      '- Read structure, not pixels: read_page (blocks like 2.5 with kind, format, position), read_selection, list_pages (fill % and page-limit warnings). select_text selects text by content so format commands hit the right words.',
+      '- Safety net: checkpoint save before risky changes, checkpoint diff to see what changed, revert to roll back. import_document loads a .scd/.uscd but only into an empty document.',
       '- Your agent ID is the 5-digit number identify returns (#12345): it tells you apart from other agents of the same product. The user may have to approve you before you can work, and can mute or remove you.',
       '- The Agent Board is shared by all connected agents and the user can read it but cannot edit it (only wipe it). Be honest there. Use board_post to tell the other agents something (plans, what you changed, what you need) and board_read (optionally with count, or agents: [names]) to catch up. Read it before starting if other agents are around; new posts are also flagged at the end of your tool results.',
       '- The user can write to you from Agent Chat. Messages arrive appended to your next tool result, or call read_messages (optionally with wait_seconds) to check. Answer with reply. After finishing a task, call read_messages once to catch follow-ups.',
@@ -3212,7 +4130,9 @@
         '<li>The <b>Master switch</b> at the top of the Agents card stops or restarts everything at once.</li>' +
         '<li>In Agent Chat, tap one or several agent names under <b>To</b> to message just them; with none picked it goes to all. The <b>Agent Board</b> tab is read-only for you: agents post there to talk to each other (<code>board_post</code>) and read it with <code>board_read</code>.</li>' +
         '<li>Open <b>Agent Chat</b> to message the agents. They read your message with their next action, or when they check in.</li>' +
-        '<li>Agents can replay the last editor messages as toasts with <code>toast_log</code>. You can run <code>/toast_log 10</code> yourself too.</li>' +
+        '<li>Every toast the editor shows reaches your agents right away (attached to their next result). They can look back with <code>toasts</code> or <code>toast_log</code>; you can run <code>/toast_log 10</code> yourself.</li>' +
+        '<li>Agents also have <code>batch</code>, <code>find_ui</code>, <code>read_page</code>, <code>read_selection</code>, <code>list_pages</code>, <code>select_text</code>, <code>open_dialog</code> / <code>fill_form</code>, <code>checkpoint</code> / <code>revert</code> and <code>import_document</code> (empty documents only).</li>' +
+        '<li>Agents can export the document as a file (<code>export_file</code>), pick colours in Color Labs (<code>color</code>), scroll, pan and drag, send images and files (<code>insert_image</code>, <code>upload_file</code>), use right-click menus (<code>rightclick</code>) and run the Document Quality check (<code>quality</code>).</li>' +
       '</ol>' +
       '<h4>If something goes wrong</h4>' +
       '<ul>' +
@@ -3229,7 +4149,7 @@
   function openGuide(){
     if(!guideEl){
       guideEl = document.createElement('div');
-      guideEl.className = 'aam-guide-modal';
+      guideEl.className = 'aam-guide-modal aam-root';
       guideEl.setAttribute('data-aam-ui', '1'); guideEl.dataset.sugarcaneAddon = 'all-agent-mcp';
       guideEl.innerHTML = '<div class="aam-guide-card" role="dialog" aria-label="All Agent MCP guide">' +
         '<div class="aam-guide-top"><b>All Agent MCP &middot; setup guide</b><button type="button" class="aam-guide-x" aria-label="Close">&times;</button></div>' +
@@ -3374,6 +4294,7 @@
       if(out.image) content.push({type: 'image', source: {type: 'base64', media_type: out.image.media_type, data: out.image.data}});
       const block = {type: 'tool_result', tool_use_id: tu.id, content};
       if(out.error) block.is_error = true;
+      if(out.files && out.files.length) Object.defineProperty(block, '__files', {value: out.files, enumerable: false});
       results.push(block);
       const A = ACTIONS[tu.name];
       fillRow(box, i, out.image ? out.text + ' (image sent to the agent)' : (out.text || '(done)'), out.error);
@@ -3388,7 +4309,7 @@
 
   // ── Bridge mode (MCP agents) ───────────────────────────────────
   let bridgeWS = null, bridgeBeat = null, bridgeRetryT = null, bridgeTries = 0;
-  let bridgeStatus = 'off', bridgeQueue = Promise.resolve(), bridgeCalls = 0;
+  let bridgeStatus = 'off', bridgeQueue = Promise.resolve(), bridgeCalls = 0, relayVer = 1;
 
   function bridgeBase(){ return String(cfg.bridgeUrl || '').trim().replace(/\/+$/, ''); }
   function bridgeValidBase(){ return /^https?:\/\/[^\s/]+/i.test(bridgeBase()); }
@@ -3481,6 +4402,7 @@
       let m; try { m = JSON.parse(ev.data); } catch(e){ return; }
       if(m.t === 'call') bridgeQueue = bridgeQueue.then(() => bridgeHandleCall(m)).catch(() => {});
       else if(m.t === 'agents' || m.t === 'agent' || m.t === 'delivered' || m.t === 'say' || m.t === 'board' || m.t === 'boardlist') onRelayEvent(m);
+      else if(m.t === 'relay'){ relayVer = parseInt(m.v, 10) || 1; }
       else if(m.t === 'cancel'){ if(pendingStop){ const f = pendingStop; pendingStop = null; f(); } }
     };
     ws.onclose = () => { if(bridgeWS !== ws) return; bridgeWS = null; clearInterval(bridgeBeat); bridgeBeat = null; clearAgents(); setBridgeStatus('retry'); bridgeSchedule(); };
@@ -3494,7 +4416,7 @@
   }
   async function bridgeHandleCall(m){
     bridgeCalls++; setBridgeStatus(bridgeStatus);
-    const done = (text, error, image) => bridgeSend({t: 'result', id: m.id, text: String(text == null ? '' : text), error: !!error, image: image || null});
+    const done = (text, error, image, files) => bridgeSend({t: 'result', id: m.id, text: String(text == null ? '' : text), error: !!error, image: image || null, files: files || null});
     const ag = upsertAgent((m.agent && m.agent.id) || 'default', m.agent && m.agent.name, {code: m.agent && m.agent.code, status: 'active'});
     curAgent = ag; ag.calls++; cursorMoved = false;
     try {
@@ -3509,7 +4431,16 @@
       const text = (res.content.find(b => b.type === 'text') || {}).text || '(done)';
       const img = res.content.find(b => b.type === 'image');
       agentCursorAtCaret(ag);
-      done(text, res.is_error, img ? {mime: img.source.media_type, data: img.source.data} : null);
+      const meta = [];
+      for(const f of (res.__files || [])){
+        const fid = 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), CH = 600000, n = Math.max(1, Math.ceil(f.data.length / CH));
+        for(let i = 0; i < n; i++){
+          while(bridgeWS && bridgeWS.bufferedAmount > 2000000) await sleep(40);
+          bridgeSend({t: 'file_part', fid, name: f.name, mime: f.mime, size: f.size, idx: i, n, data: f.data.slice(i * CH, (i + 1) * CH)});
+        }
+        meta.push({fid, name: f.name, mime: f.mime, size: f.size});
+      }
+      done(text, res.is_error, img ? {mime: img.source.media_type, data: img.source.data} : null, meta.length ? meta : null);
     } catch(e){
       done('Error: ' + (e && e.message ? e.message : e), true);
     } finally { curAgent = null; }

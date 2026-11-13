@@ -4299,7 +4299,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v238…</p>
+    <p class="loading-text">Loading Sugarcane v239…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -9275,7 +9275,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 238; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 239; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -43799,7 +43799,7 @@ function openRad(x,y){
     return _sw.apply(this,arguments);
   };
 })();
-window.SCStash={begin,get items(){return items},openRadial:openRad,closeRadial:closeRad};
+window.SCStash={begin,get items(){return items},add(rec){const r=clean(Object.assign({id:uid++,icon:'image',label:'Image'},rec));items.push(r);mode='open';apply();return r.id},openRadial:openRad,closeRadial:closeRad};
 apply();
 setInterval(authTick,1000);authTick();
 })();
