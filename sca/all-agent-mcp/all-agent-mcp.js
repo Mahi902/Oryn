@@ -1164,6 +1164,51 @@
       }));
     }).observe(stack, {childList: true});
   }
+  // The editor also shows messages that do NOT go through showToast (the red
+  // "Content exceeds page" banner, translation notice, converter toasts, other
+  // transient banners). Each is logged and sent exactly like a normal toast.
+  const noticeSeen = new Map();
+  function noticeOut(text, type){
+    text = String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
+    if(!text) return;
+    const now = Date.now(), last = noticeSeen.get(text);
+    if(last && now - last < 1500) return;
+    noticeSeen.set(text, now);
+    if(noticeSeen.size > 80) noticeSeen.delete(noticeSeen.keys().next().value);
+    pushLog('toast', type || 'info', text);
+    if(cfg.enabled) bridgeSend({t: 'toast', type: type || 'info', text: clip(text, 300), at: now});
+  }
+  function hookVisualNotices(){
+    const shown = el => !!el && getComputedStyle(el).display !== 'none' && getComputedStyle(el).visibility !== 'hidden';
+    const oa = document.getElementById('overflowAlert');
+    if(oa && !oa.__aamN){
+      oa.__aamN = true; let was = shown(oa);
+      if(was) noticeOut(oa.textContent, 'error');
+      new MutationObserver(() => { const now = shown(oa); if(now && !was) noticeOut(oa.textContent, 'error'); was = now; }).observe(oa, {attributes: true, attributeFilter: ['style', 'class']});
+    }
+    const tn = document.getElementById('translateBgNotice');
+    if(tn && !tn.__aamN){
+      tn.__aamN = true; let was = tn.classList.contains('show');
+      const txt = () => { const t = document.getElementById('translateBgNoticeText'); return t ? t.textContent : 'Translating…'; };
+      new MutationObserver(() => { const now = tn.classList.contains('show'); if(now && !was) noticeOut(txt(), 'info'); was = now; }).observe(tn, {attributes: true, attributeFilter: ['class']});
+    }
+    const cc = document.getElementById('conv-toast-container');
+    if(cc && !cc.__aamN){
+      cc.__aamN = true;
+      new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if(n.nodeType === 1) noticeOut(n.textContent, 'info'); }))).observe(cc, {childList: true});
+    }
+    if(!document.body.__aamN){
+      document.body.__aamN = true;
+      // any other transient toast / notice / snackbar / alert element added straight to the page
+      new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => {
+        if(n.nodeType !== 1 || (n.hasAttribute && n.hasAttribute('data-aam-ui')) || n.id === 'toastStack') return;
+        const sig = (n.id || '') + ' ' + (typeof n.className === 'string' ? n.className : '');
+        if(!/toast|notice|snack|alert|banner/i.test(sig) || /aam-|modal|overlay/i.test(sig)) return;
+        setTimeout(() => { if(n.isConnected && shown(n)){ const t = (n.textContent || '').replace(/\s+/g, ' ').trim(); if(t && t.length < 240) noticeOut(t, /error|fail|exceed|limit/i.test(t) ? 'error' : 'info'); } }, 150);
+      }))).observe(document.body, {childList: true});
+    }
+  }
+  function hookAllNotices(){ hookToasts(); hookVisualNotices(); }
   function hostToast(msg, type, ms){
     try {
       const f = origToast || window.showToast; if(typeof f !== 'function') return;
@@ -4585,7 +4630,7 @@
   }
 
   function init(){
-    hookToasts(); setTimeout(hookToasts, 1500); setTimeout(hookToasts, 5000);
+    hookAllNotices(); setTimeout(hookAllNotices, 1500); setTimeout(hookAllNotices, 5000);
     buildModals();
     ensureWorkEl();
     buildSidebarSection();
