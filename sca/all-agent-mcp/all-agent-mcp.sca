@@ -1,6 +1,6 @@
 name: All Agent MCP
 icon: https://mahi902.github.io/Oryn/sca/all-agent-mcp/icon.svg
-version: 2.0.3
+version: 2.0.4
 creator: Mohtadi Azad Mahi
 description: Lets any MCP-capable AI agent (Claude, ChatGPT, Gemini, Copilot and more) drive the editor through a free self-hosted relay Worker. Version 2 adds a dedicated Agents card with five windows: Agent List (named agents with brand icons, 5-digit IDs, approve / kick), Agent Chat (chat, Agent Board and a Manage tab to mute agents and wipe chat or board; chat and board can float), Agent History, Agent Permissions (per agent) and Agent Configurations. New agents can be set to need your approval, fake agents from probes no longer appear, and every window follows light and dark mode. The top banner disappears when the master switch is off. Version 2.0.2: every editor toast reaches agents as it is shown (plus toasts / toast_log to look back), agents can export the document as a file (pdf, scd, uscd, docx, txt, md, jpg, png, webp), use Color Labs (color), scroll / pan / drag, send images and files (insert_image, upload_file), right-click and use context menus, run Document Quality (quality), and the Help Guide now opens as a proper modal. Version 2.0.3 adds batch, find_ui, read_page, read_selection, list_pages, select_text, open_dialog, fill_form, checkpoint, revert and import_document (empty documents only). Re-deploy your relay Worker for toasts and files. Open the built-in guide with /guide.
 p/html:
