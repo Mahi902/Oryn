@@ -1,0 +1,3214 @@
+ability_skill/talent_inability/incapacity
+able_capable/skilled_unable/incapable
+about_around/approximately_exactly/precisely
+above_over/higher than_below/beneath
+abroad_overseas/overseas_at home/domestic
+absent_missing/away_present
+academic_scholarly/educational_non-academic/practical
+acceptance_approval/acknowledgement_rejection/refusal
+access_entry/admission_denial/exclusion
+accident_mishap/misfortune_intention/design
+acclaim_praise/applause_criticism/disapproval
+accompany_escort/go with_leave/desert
+according_as per/in line with_contrary/opposed
+account_report/description_none
+accurately_precisely/exactly_inaccurately/wrongly
+ace_expert/champion_beginner/novice
+achieve_accomplish/attain_fail
+acknowledge_admit/recognise_deny/ignore
+acknowledgement_recognition/thanks_denial/neglect
+acne_pimples/spots_none
+across_over/crosswise_along/beside
+act_do/perform_rest/idle
+action_deed/act_inaction/rest
+activism_campaigning/protest_inaction/apathy
+activity_action/movement_inactivity/rest
+actual_real/genuine_imaginary/false
+actuality_reality/fact_fiction/fantasy
+actually_really/truly_falsely/apparently
+adapt_adjust/modify_resist/keep
+adapted_adjusted/modified_unsuited/unchanged
+add_join/total_subtract/remove
+addition_extra/increase_subtraction/removal
+additional_extra/more_basic/original
+address_speech/location_none
+adequate_enough/sufficient_inadequate/insufficient
+adhere_stick/cling_detach/separate
+adjacent_neighbouring/next_distant/remote
+adjust_alter/adapt_disarrange/keep
+admiration_respect/esteem_contempt/scorn
+admire_respect/praise_despise/scorn
+admired_respected/esteemed_despised/disliked
+adopt_take up/accept_reject/abandon
+adult_grown-up/mature_child/minor
+advancement_progress/promotion_decline/setback
+advantage_benefit/edge_disadvantage/drawback
+advertised_promoted/publicised_hidden/concealed
+advertisement_notice/promotion_secrecy/concealment
+advertiser_promoter/marketer_none
+advice_guidance/counsel_misguidance/silence
+advise_counsel/guide_mislead/misguide
+aesthetic_artistic/tasteful_ugly/unattractive
+affairs_matters/business_none
+affected_influenced/moved_unaffected/unmoved
+affectionately_lovingly/warmly_coldly/harshly
+afraid_scared/frightened_brave/fearless
+after_following/behind_before/prior to
+afternoon_midday/post-noon_morning/night
+afterwards_later/subsequently_beforehand/earlier
+again_once more/anew_never/once
+against_opposed to/versus_for/with
+age_period/era_youth/childhood
+aged_old/elderly_young/youthful
+agency_bureau/office_none
+ago_before/earlier_later/hence
+agree_concur/consent_disagree/differ
+agreed_settled/consented_disagreed/refused
+agriculture_farming/cultivation_none
+ahead_forward/in front_behind/back
+aim_goal/target_wander/drift
+air_atmosphere/breeze_none
+aircraft_plane/aeroplane_none
+airplane_aeroplane/plane_none
+airport_airfield/terminal_none
+airway_air route/passage_none
+alarm_alert/frighten_calm/soothe
+alarming_frightening/disturbing_reassuring/comforting
+album_collection/book_none
+alien_foreign/strange_native/local
+alive_living/breathing_dead/lifeless
+all_every/entire_none/nothing
+allow_permit/let_forbid/prohibit
+almighty_all-powerful/supreme_powerless/weak
+almost_nearly/about_completely/fully
+alone_solitary/lonely_together/accompanied
+along_beside/by_apart/against
+aloud_audibly/loudly_silently/quietly
+alphabet_letters/characters_none
+alphabetical_in order/sequential_random/jumbled
+already_previously/before_not yet/later
+also_too/as well_none
+alternative_option/choice_main/primary
+altitude_height/elevation_depth/depression
+always_forever/constantly_never
+amazed_astonished/surprised_unimpressed/unmoved
+amazing_astonishing/wonderful_ordinary/dull
+amber_yellow/golden_none
+amount_quantity/total_none
+analyse_examine/study_ignore/overlook
+analyze_examine/study_ignore/overlook
+ancestor_forefather/forebear_descendant/heir
+ancient_old/antique_modern/new
+anew_again/afresh_never/once
+anger_rage/fury_calm/joy
+angry_furious/mad_calm/pleased
+animal_creature/beast_human/plant
+announce_declare/proclaim_hide/conceal
+announcement_notice/declaration_secret/silence
+annoy_irritate/bother_please/soothe
+annoyance_irritation/nuisance_pleasure/delight
+annoyed_irritated/vexed_pleased/delighted
+annually_yearly/each year_rarely/never
+another_one more/different_none
+answer_reply/respond_question/ask
+answering_replying/responding_asking/questioning
+ant_insect/worker insect_none
+anti_against/opposed_pro/for
+antonym_opposite/reverse_synonym
+any_some/whichever_none
+anyway_anyhow/regardless_none
+anywhere_wherever/any place_nowhere
+apart_separate/aside_together/united
+apartment_flat/home_house
+appear_emerge/show_disappear/vanish
+appearance_look/looks_disappearance/absence
+appearing_seeming/emerging_vanishing/disappearing
+appetite_hunger/craving_dislike/disgust
+appetizing_tasty/delicious_unappetising/disgusting
+apple_fruit/pome_none
+application_request/use_none
+apply_use/employ_neglect/ignore
+appreciate_value/admire_disregard/ignore
+appreciated_valued/praised_unappreciated/ignored
+approach_near/advance_retreat/withdraw
+approaching_nearing/coming_leaving/receding
+appropriate_suitable/fitting_inappropriate/unsuitable
+approximately_about/roughly_exactly/precisely
+aptitude_talent/skill_inability/incompetence
+archive_record/store_none
+area_region/zone_none
+argue_quarrel/debate_agree/concur
+argument_dispute/quarrel_agreement/harmony
+arise_emerge/occur_vanish/disappear
+armrest_arm support/chair part_none
+army_troops/soldiers_none
+around_about/near_far/away
+arrange_organise/order_disarrange/scatter
+arranged_ordered/organised_disordered/scattered
+arrest_capture/seize_release/free
+arrival_coming/advent_departure/exit
+arrive_reach/come_depart/leave
+art_skill/craft_none
+article_item/essay_none
+artificiality_falseness/unnaturalness_naturalness/sincerity
+artistic_creative/skilful_inartistic/dull
+ash_cinders/embers_none
+ashamed_embarrassed/guilty_proud/unashamed
+ask_enquire/question_answer/reply
+asking_enquiring/questioning_answering/replying
+asleep_sleeping/dozing_awake/alert
+aspect_feature/side_none
+assemble_gather/build_disassemble/scatter
+assessment_evaluation/judgement_none
+assign_allot/give_withhold/keep
+assigned_given/allotted_withheld/refused
+assignment_task/duty_none
+assist_help/aid_hinder/obstruct
+assistance_help/aid_hindrance/obstruction
+associate_link/connect_dissociate/separate
+association_group/society_separation/dissociation
+assume_suppose/guess_know/prove
+assumption_belief/guess_fact/proof
+astonished_amazed/stunned_unmoved/unsurprised
+ate_consumed/had_fasted/starved
+athletic_sporty/fit_unfit/weak
+atmosphere_air/mood_none
+attach_fasten/join_detach/separate
+attached_joined/fixed_detached/separate
+attack_assault/charge_defend/protect
+attain_achieve/reach_miss/fail
+attention_notice/care_neglect/inattention
+attest_confirm/prove_deny/disprove
+attire_clothes/dress_nakedness
+attraction_appeal/charm_repulsion/dislike
+attractive_appealing/charming_repulsive/unattractive
+audience_spectators/listeners_performers
+august_dignified/noble_ordinary/humble
+aunt_relative/auntie_uncle
+aurora_dawn/polar light_dusk
+authenticity_genuineness/truth_falseness/fakeness
+authorities_government/officials_none
+autocracy_dictatorship/tyranny_democracy
+autocratic_dictatorial/tyrannical_democratic/liberal
+automatically_mechanically/unthinkingly_deliberately/manually
+available_accessible/free_unavailable/busy
+aviation_flying/flight_none
+avoid_evade/dodge_face/confront
+awakening_waking/rousing_sleeping/dozing
+award_prize/reward_penalty/punishment
+aware_conscious/mindful_unaware/ignorant
+away_off/absent_here/near
+axis_pivot/line_none
+baby_infant/newborn_adult/elder
+back_rear/behind_front
+backbone_courage/spine_weakness/cowardice
+background_setting/rear_foreground/front
+bacteria_germs/microbes_none
+bad_poor/terrible_good/fine
+badly_poorly/wrongly_well/skillfully
+bag_sack/pouch_none
+baggage_luggage/bags_none
+baker_bread-maker/pastry-maker_none
+balanced_steady/even_unbalanced/unsteady
+bamboo_cane/grass_none
+ban_forbid/prohibit_allow/permit
+banana_fruit/plantain_none
+band_group/strip_none
+bang_boom/blast_whisper/hush
+bangle_bracelet/ornament_none
+bank_shore/lender_none
+bard_poet/singer_none
+bargain_deal/agreement_none
+bark_yap/woof_none
+baron_noble/lord_commoner/peasant
+barred_blocked/banned_allowed/permitted
+barren_infertile/empty_fertile/fruitful
+base_foundation/bottom_top/peak
+based_founded/rooted_none
+basis_foundation/ground_none
+bat_club/racket_none
+bath_wash/soak_none
+battle_fight/combat_peace/truce
+battlefield_battleground/war zone_none
+bay_gulf/cove_none
+beach_shore/seaside_none
+beacon_signal/light_none
+beak_bill/nib_none
+beam_ray/smile_frown
+bear_carry/endure_drop/avoid
+bearer_carrier/holder_none
+beat_hit/defeat_lose/yield
+beating_hitting/defeating_losing/yielding
+beautiful_lovely/pretty_ugly/plain
+beauty_loveliness/charm_ugliness/plainness
+because_since/as_despite/although
+become_turn into/grow_stay/remain
+bed_cot/bunk_none
+bedroom_sleeping room/chamber_none
+beetle_insect/bug_none
+before_earlier than/prior to_after/following
+beg_plead/implore_give/offer
+begin_start/commence_end/finish
+beginning_start/opening_end/ending
+behalf_interest/sake_none
+behaviour_conduct/manner_none
+behind_after/following_ahead/before
+belief_faith/trust_doubt/disbelief
+believe_trust/accept_doubt/disbelieve
+belong_fit/be owned_none
+beloved_dear/cherished_hated/despised
+below_beneath/under_above/over
+belt_strap/band_none
+beneath_under/below_above/over
+benefit_advantage/gain_harm/loss
+bereaved_grieving/mourning_joyful/comforted
+berry_fruit/small fruit_none
+besides_also/moreover_except/apart from
+best_finest/greatest_worst
+better_superior/finer_worse/inferior
+between_among/in the middle of_outside/apart from
+bias_prejudice/partiality_fairness/impartiality
+big_large/huge_small/little
+bigger_larger/greater_smaller/lesser
+bight_bay/curve_none
+bin_container/basket_none
+biological_living/natural_non-living
+bird_fowl/winged creature_none
+birth_beginning/delivery_death/end
+birthday_anniversary/date of birth_none
+bit_piece/part_whole/all
+bite_nip/chew_release/let go
+bitter_sour/harsh_sweet/pleasant
+black_dark/ebony_white
+blame_accuse/fault_praise/excuse
+blank_empty/bare_full/filled
+bleat_cry/call_none
+blind_sightless/unseeing_sighted
+block_obstruct/stop_allow/clear
+blockade_barrier/obstruction_opening/clearance
+blocked_obstructed/stopped_open/clear
+blood_life fluid/gore_none
+blossom_flower/bloom_wither/fade
+blowing_puffing/gusting_none
+blown_puffed/gusted_calm/still
+board_plank/panel_none
+boat_vessel/ship_none
+boatman_ferryman/rower_none
+body_form/figure_mind/soul
+boil_bubble/simmer_freeze/cool
+boiling_bubbling/very hot_freezing/cold
+bomb_explosive/shell_none
+bone_skeleton part/rib_none
+book_volume/text_none
+booth_stall/stand_none
+boring_dull/tedious_interesting/exciting
+born_delivered/created_died/dead
+borrow_take/obtain_lend/return
+borrowing_taking/loan_lending/giving
+both_the two/each_neither
+bottle_flask/jar_none
+bottom_base/foot_top/peak
+bound_tied/obliged_free/loose
+bounded_limited/restricted_boundless/free
+bowl_dish/basin_none
+box_case/carton_none
+boy_lad/youth_girl
+boyhood_youth/childhood_adulthood/manhood
+bracing_refreshing/invigorating_tiring/exhausting
+bracket_support/holder_none
+brave_courageous/bold_cowardly/timid
+bread_loaf/food_none
+break_smash/shatter_mend/repair
+breakfast_morning meal/first meal_supper/dinner
+breaking_smashing/cracking_mending/repairing
+breast_chest/bosom_none
+breath_air/respiration_none
+breathe_inhale/respire_choke/suffocate
+breathing_inhaling/respiring_choking/suffocating
+breeze_light wind/gentle wind_gale/storm
+brick_block/building block_none
+bridal_wedding/marital_none
+bride_newlywed/wife-to-be_groom/bridegroom
+bridegroom_newlywed/husband-to-be_bride
+bright_shining/brilliant_dim/dull
+brilliant_dazzling/clever_dull/stupid
+brim_edge/rim_centre/middle
+bring_carry/fetch_take away/remove
+bringing_carrying/fetching_taking away/removing
+broad_wide/extensive_narrow/thin
+broadcast_transmit/air_receive/withhold
+broke_penniless/bankrupt_rich/wealthy
+bronze_metal/alloy_none
+brother_sibling/male relative_sister
+brotherhood_fellowship/unity_enmity/hostility
+brown_tan/chestnut_none
+brush_sweep/groom_none
+bud_shoot/sprout_bloom/flower
+build_construct/make_destroy/demolish
+building_structure/construction_demolition
+built_made/constructed_destroyed/demolished
+bullet_shot/pellet_none
+bump_knock/collide_smoothness
+bundle_bunch/pack_scatter/separate
+bunk_bed/berth_none
+burden_load/weight_relief/aid
+burial_interment/funeral_digging up/exhumation
+buried_covered/hidden_dug up/exposed
+burnt_scorched/charred_unburnt/intact
+burst_explode/break_hold/mend
+bury_inter/hide_dig up/uncover
+bus_coach/vehicle_none
+bush_shrub/plant_tree
+business_trade/commerce_hobby/pleasure
+bustling_busy/lively_quiet/calm
+busy_occupied/active_idle/free
+butter_spread/fat_none
+butterfly_insect/moth_none
+button_fastener/knob_none
+buy_purchase/acquire_sell
+buyer_purchaser/customer_seller
+buying_purchasing/acquiring_selling
+cabin_hut/shed_none
+cage_enclosure/coop_freedom
+cake_pastry/sweet_none
+calcium_mineral/element_none
+calculation_counting/reckoning_guess/estimate
+call_shout/phone_whisper/ignore
+calligraphy_beautiful writing/penmanship_scribble
+calling_vocation/profession_none
+camel_desert animal/beast of burden_none
+camera_photo device/recorder_none
+camp_tents/base_none
+can_be able to/may_cannot/unable
+canal_waterway/channel_none
+cancer_disease/tumour_cure
+candidate_applicant/contestant_voter
+canvas_cloth/sail_none
+capacity_volume/ability_incapacity/inability
+captain_leader/commander_crew/subordinate
+captivate_charm/fascinate_repel/bore
+capture_catch/seize_release/free
+car_automobile/vehicle_none
+carbohydrate_starch/sugar_none
+card_paper/ticket_none
+care_concern/attention_neglect/carelessness
+career_profession/job_hobby
+careful_cautious/watchful_careless/reckless
+carefully_cautiously/attentively_carelessly/recklessly
+cargo_load/freight_none
+carp_complain/fish_praise/compliment
+carpenter_woodworker/joiner_none
+carpet_rug/mat_none
+carriage_vehicle/coach_none
+carry_bear/transport_drop/put down
+cart_wagon/trolley_none
+cartoon_comic/animation_none
+case_instance/example_none
+casual_relaxed/informal_formal/careful
+cat_feline/pet_none
+catch_capture/grab_release/drop
+catching_grabbing/trapping_releasing/dropping
+categorise_classify/sort_mix/jumble
+category_class/group_none
+cater_provide/supply_deprive/neglect
+catfish_fish/whiskered fish_none
+cause_reason/source_effect/result
+causing_producing/making_preventing/stopping
+caution_care/warning_carelessness/recklessness
+celebrate_honour/commemorate_mourn/ignore
+celebrated_famous/renowned_unknown/obscure
+celebration_party/festival_mourning
+celsius_centigrade/degree scale_none
+center_middle/core_edge/outskirts
+central_middle/main_outer/peripheral
+centre_middle/core_edge/outskirts
+century_hundred years/period_none
+certain_sure/definite_uncertain/doubtful
+certainly_surely/definitely_doubtfully/uncertainly
+certificate_document/proof_none
+chain_series/links_none
+chair_seat/stool_none
+chairman_head/president_member/subordinate
+chalk_crayon/limestone_none
+challenge_dare/test_accept/agree
+chance_opportunity/luck_certainty/design
+change_alter/modify_keep/maintain
+changed_altered/different_unchanged/same
+changing_altering/varying_staying/fixed
+channel_route/passage_none
+chant_sing/recite_none
+chaos_disorder/confusion_order/calm
+chaotic_disorderly/confused_orderly/organized
+chapter_section/part_none
+character_nature/personality_none
+characteristic_feature/trait_none
+charge_fee/price_free of charge
+chariot_cart/carriage_none
+charity_generosity/kindness_selfishness/greed
+charm_attraction/appeal_repulsion/ugliness
+charmer_enchanter/attractive person_bore
+charming_delightful/lovely_repulsive/unpleasant
+chart_graph/diagram_none
+chat_talk/converse_listen/silence
+check_examine/test_ignore/neglect
+cheerful_happy/joyful_gloomy/sad
+chest_box/trunk_none
+chief_main/principal_minor/subordinate
+child_kid/youngster_adult/parent
+childhood_youth/boyhood_adulthood/old age
+chink_crack/gap_seal/closure
+choice_selection/option_compulsion
+choose_select/pick_reject/refuse
+chosen_selected/picked_rejected/refused
+church_place of worship/chapel_none
+cigarette_smoke/tobacco roll_none
+circle_ring/round_none
+circular_round/ring-shaped_square/straight
+circus_show/performance_none
+cistern_tank/reservoir_none
+city_town/metropolis_village/countryside
+civil_public/polite_military/rude
+civilian_non-soldier/citizen_soldier
+civilisation_culture/society_savagery/barbarism
+civilization_culture/society_savagery/barbarism
+claim_demand/assert_deny/give up
+clanking_clanging/clinking_silent/quiet
+clarion_loud/clear_soft/faint
+class_group/grade_none
+classical_traditional/ancient_modern/contemporary
+classified_sorted/secret_public/open
+classmate_schoolmate/fellow pupil_none
+classroom_schoolroom/lecture room_none
+clatter_rattle/racket_silence/hush
+clean_spotless/pure_dirty/filthy
+cleaner_purer/tidier_dirtier/filthier
+cleaning_washing/wiping_dirtying/soiling
+cleanliness_purity/hygiene_dirtiness/filth
+cleanly_neatly/purely_dirtily/untidily
+clear_obvious/plain_unclear/vague
+clearly_plainly/obviously_vaguely/unclearly
+clever_smart/intelligent_stupid/foolish
+click_tap/snap_none
+climate_weather pattern/temperature_none
+climb_ascend/mount_descend/fall
+cling_stick/hold_let go/release
+clinic_health centre/surgery_none
+clip_fasten/trim_unfasten/release
+clock_timepiece/watch_none
+close_shut/seal_open
+closed_shut/sealed_open
+closely_nearly/tightly_loosely/distantly
+cloth_fabric/material_none
+clothes_garments/dress_nakedness
+cloud_vapour/mist_clear sky
+club_society/stick_none
+clue_hint/sign_none
+coast_shore/seaside_inland
+coconut_nut/palm fruit_none
+cod_fish/sea fish_none
+coffee_drink/brew_none
+cohesive_united/bonded_disunited/loose
+coin_money/piece_none
+cold_chilly/cool_hot/warm
+collage_collection/montage_none
+collect_gather/assemble_scatter/spread
+collected_gathered/calm_scattered/agitated
+collection_set/group_none
+college_school/institute_none
+colonial_imperial/overseas_independent/native
+color_shade/hue_colourlessness
+colour_shade/tint_colourlessness
+coloured_tinted/painted_colourless/plain
+colourful_bright/vivid_colourless/dull
+column_pillar/line_none
+come_arrive/approach_go/leave
+comfort_console/soothe_distress/trouble
+coming_arriving/approaching_going/leaving
+comment_remark/note_silence
+commercial_trade/business_non-profit
+commercially_for profit/in trade_non-commercially/freely
+commitment_dedication/promise_neglect/disloyalty
+committee_board/panel_none
+common_ordinary/usual_rare/unusual
+communicate_convey/talk_conceal/withhold
+communication_message/contact_silence
+communicative_talkative/open_uncommunicative/reserved
+community_society/public_individual
+company_firm/business_solitude
+compare_contrast/match_confuse/ignore
+compartment_section/part_whole
+competence_skill/ability_incompetence/inability
+competition_contest/rivalry_cooperation
+complete_whole/entire_incomplete/partial
+completed_finished/done_unfinished/incomplete
+completely_totally/fully_partially/partly
+complication_difficulty/problem_simplicity/ease
+compose_write/create_destroy/disorder
+composed_calm/relaxed_agitated/nervous
+composite_compound/mixed_simple/single
+composition_structure/essay_none
+comprehensive_complete/thorough_partial/limited
+computer_machine/processor_none
+concentrate_focus/centre_scatter/disperse
+concisely_briefly/shortly_wordily/at length
+concluding_final/closing_opening/introductory
+concrete_solid/real_abstract/vague
+condition_state/situation_none
+conducive_helpful/favourable_unhelpful/harmful
+confined_restricted/enclosed_free/unrestricted
+confused_puzzled/baffled_clear/certain
+confusion_disorder/mix-up_clarity/order
+connect_join/link_disconnect/separate
+connected_linked/joined_disconnected/unrelated
+connection_link/bond_disconnection/separation
+conquer_defeat/overcome_surrender/yield
+consequence_result/outcome_cause/origin
+consequently_therefore/thus_none
+consider_think/ponder_ignore/neglect
+considered_thought/deliberate_hasty/unthinking
+consist_be made of/include_none
+constraint_limit/restriction_freedom/liberty
+construction_building/structure_demolition/destruction
+contagious_infectious/catching_non-infectious/harmless
+contain_hold/include_release/exclude
+container_holder/vessel_none
+contemplation_thought/reflection_action/neglect
+contemporary_modern/current_ancient/old-fashioned
+content_satisfied/happy_dissatisfied/unhappy
+contented_satisfied/happy_discontented/restless
+contents_items/things inside_none
+context_background/setting_none
+continue_proceed/carry on_stop/cease
+continued_carried on/kept_stopped/ended
+continuous_constant/unbroken_broken/intermittent
+contrast_difference/opposite_similarity/likeness
+contribute_give/donate_withhold/take
+contribution_gift/donation_withdrawal
+control_command/manage_obey/lose
+conventional_traditional/usual_unconventional/unusual
+conversation_talk/chat_silence
+convey_carry/transport_withhold/keep
+conveyor_carrier/belt_none
+cook_prepare food/make_none
+cooking_preparing food/baking_none
+cool_chilly/fresh_warm/hot
+copy_duplicate/imitate_original
+copyright_ownership/right_none
+cord_rope/string_none
+corner_angle/bend_none
+correct_right/accurate_incorrect/wrong
+corresponding_matching/equivalent_different/opposite
+cosmetic_decorative/superficial_functional/essential
+cost_price/charge_free/gift
+cotton_fabric/fibre_none
+cough_hack/splutter_none
+could_might/was able to_couldn't/unable
+counter_oppose/answer_agree/support
+country_nation/land_city/town
+couple_pair/two_single
+courage_bravery/boldness_cowardice/fear
+course_route/path_none
+cousin_relative/kin_stranger
+cove_bay/inlet_none
+cover_conceal/hide_uncover/reveal
+coverage_reporting/inclusion_exclusion
+covered_hidden/wrapped_uncovered/exposed
+covering_wrapping/layer_none
+cow_cattle/ox_none
+craft_skill/art_clumsiness
+crane_lift/hoist_none
+crash_collide/smash_none
+crater_hollow/pit_peak
+cream_lotion/top of milk_none
+create_make/produce_destroy/ruin
+creative_imaginative/inventive_unimaginative/dull
+creativity_imagination/originality_dullness
+creature_animal/being_none
+credible_believable/reliable_unbelievable/doubtful
+creek_stream/brook_none
+creep_crawl/sneak_dash/rush
+cress_salad plant/leaf_none
+crew_team/staff_none
+cricket_game/insect_none
+crime_offence/wrongdoing_law/virtue
+critic_judge/reviewer_admirer/supporter
+critically_seriously/harshly_favourably/kindly
+crooked_bent/twisted_straight
+crop_harvest/produce_none
+crossed_angry/irritated_calm/pleased
+crow_bird/call_none
+crowd_mob/throng_individual/handful
+crowded_packed/full_empty/deserted
+cruise_sail/voyage_none
+crushed_squashed/pressed_released/intact
+cry_weep/sob_laugh/smile
+crying_weeping/sobbing_laughing/smiling
+cub_young animal/pup_none
+cue_signal/hint_none
+cuisine_cooking/food_none
+cultivate_grow/farm_neglect/destroy
+cultivated_farmed/refined_uncultivated/wild
+cultural_social/artistic_uncultured/uncivilised
+culture_civilisation/customs_none
+cup_mug/goblet_none
+cure_heal/remedy_disease/harm
+curiosity_interest/inquisitiveness_indifference/apathy
+curious_inquisitive/interested_indifferent/uninterested
+curled_coiled/twisted_straight/uncurled
+current_present/flow_past/former
+currently_now/presently_formerly/previously
+curriculum_syllabus/course_none
+curry_spicy dish/stew_none
+custard_dessert/sweet cream_none
+custom_tradition/habit_novelty/exception
+customer_buyer/client_seller/supplier
+customs_traditions/habits_none
+cut_slice/chop_join/mend
+cyanide_poison/toxin_antidote
+cycle_circle/ride_none
+dad_father/papa_mum
+daily_everyday/each day_rare/weekly
+dam_barrier/wall_none
+damage_harm/injure_repair/mend
+damp_moist/humid_dry/arid
+dance_skip/move to music_none
+dancing_moving to music/prancing_none
+danger_risk/peril_safety/security
+dangling_hanging/swinging_standing/fixed
+dappled_spotted/mottled_plain/uniform
+dark_dim/gloomy_bright/light
+darkness_gloom/shade_light/brightness
+darling_dear/beloved_enemy/foe
+data_facts/information_none
+date_day/time_none
+daughter_female child/girl_son
+dawn_sunrise/daybreak_dusk/sunset
+day_daytime/daylight_night
+daylight_sunshine/light_darkness
+days_periods/times_nights
+dead_lifeless/deceased_alive/living
+deadly_fatal/lethal_harmless/safe
+dear_beloved/precious_hated/cheap
+death_demise/end_birth/life
+deceit_trickery/dishonesty_honesty/truthfulness
+decide_resolve/determine_hesitate/waver
+decided_settled/determined_undecided/unsure
+decision_choice/verdict_indecision/hesitation
+declaration_announcement/statement_denial/concealment
+decline_decrease/fall_increase/rise
+dedicated_devoted/committed_disloyal/careless
+deed_act/action_inaction
+deep_profound/bottomless_shallow/superficial
+deeply_profoundly/greatly_slightly/shallowly
+defense_protection/guard_attack/offense
+defiance_resistance/disobedience_obedience/submission
+defiant_rebellious/disobedient_obedient/submissive
+defining_describing/explaining_none
+definitely_surely/certainly_doubtfully/perhaps
+defy_resist/disobey_obey/comply
+degree_level/grade_none
+delay_postpone/hold up_hurry/hasten
+delicate_fragile/frail_strong/sturdy
+delicious_tasty/yummy_awful/disgusting
+delight_joy/pleasure_sorrow/displeasure
+delighted_pleased/overjoyed_upset/disappointed
+deliver_bring/hand over_collect/receive
+delivery_distribution/dispatch_collection/receipt
+demand_require/insist_offer/give
+demise_death/end_birth/start
+demonstrate_show/prove_hide/conceal
+demonstration_display/show_concealment
+den_lair/hole_none
+densely_thickly/closely_thinly/sparsely
+departure_leaving/exit_arrival/return
+depend_rely/count_doubt/distrust
+depth_deepness/profundity_height/shallowness
+derive_obtain/get_give/lose
+descend_go down/drop_ascend/climb
+descendants_offspring/heirs_ancestors
+describe_explain/portray_confuse/hide
+description_account/portrayal_none
+deserve_merit/earn_forfeit/lose
+design_plan/pattern_none
+designer_planner/creator_none
+desire_wish/longing_dislike/disgust
+desk_table/bureau_none
+despite_in spite of/regardless of_because of
+destination_goal/target_origin/start
+destress_relax/unwind_stress/strain
+detach_separate/disconnect_attach/fasten
+determine_decide/settle_hesitate/waver
+determined_resolved/firm_undecided/hesitant
+develop_grow/expand_decline/shrink
+developed_advanced/grown_undeveloped/backward
+developing_growing/advancing_declining/shrinking
+development_growth/progress_decline/decay
+devices_gadgets/tools_none
+devoted_loyal/faithful_disloyal/unfaithful
+devotion_loyalty/dedication_disloyalty/indifference
+diabetes_sugar disease/illness_health
+diagnose_identify/detect_overlook/miss
+dialogue_conversation/talk_monologue/silence
+dictator_tyrant/autocrat_democrat/leader
+dictionary_wordbook/lexicon_none
+die_pass away/perish_live/survive
+diet_food/nutrition_fasting/starving
+difference_variation/contrast_similarity/sameness
+different_unlike/distinct_same/similar
+differently_otherwise/unlike_similarly/alike
+difficult_hard/tough_easy/simple
+difficulty_problem/trouble_ease/simplicity
+digital_electronic/numerical_analogue/manual
+dilapidated_run-down/ruined_well-kept/restored
+dim_faint/dark_bright/brilliant
+dining_eating/feasting_fasting/starving
+dinner_evening meal/supper_breakfast
+directed_guided/aimed_misdirected/followed
+direction_way/course_none
+dirt_filth/mud_cleanliness/purity
+dirty_filthy/unclean_clean/spotless
+disappear_vanish/fade_appear/emerge
+disappearance_vanishing/loss_appearance/arrival
+disaster_catastrophe/calamity_blessing/success
+disband_break up/dissolve_unite/gather
+discipline_order/control_disorder/disobedience
+discover_find/uncover_hide/conceal
+discovered_found/uncovered_hidden/lost
+discovery_finding/revelation_loss/concealment
+discrimination_prejudice/bias_fairness/equality
+discuss_talk about/debate_ignore/avoid
+discussion_talk/debate_silence
+disease_illness/sickness_health/wellness
+dish_plate/bowl_none
+dishonor_shame/disgrace_honour/respect
+disinterest_indifference/apathy_interest/concern
+dismay_alarm/distress_courage/delight
+disobey_defy/disregard_obey/follow
+display_show/exhibit_hide/conceal
+disregard_ignore/neglect_regard/heed
+disrepair_ruin/decay_repair/good condition
+disrespect_rudeness/contempt_respect/courtesy
+dissolve_melt/disperse_solidify/thicken
+distance_gap/space_closeness/nearness
+distant_far/remote_near/close
+distinct_separate/different_same/identical
+distinguished_famous/eminent_ordinary/unknown
+distraction_diversion/interruption_focus/attention
+distress_suffering/worry_comfort/ease
+distribute_share/divide_collect/gather
+distribution_sharing/spread_collection/gathering
+district_area/region_none
+disturb_trouble/interrupt_calm/soothe
+dive_plunge/jump_rise/surface
+divers_various/several_few/one
+diverse_varied/different_similar/uniform
+diversified_varied/mixed_uniform/same
+diversity_variety/difference_uniformity/sameness
+divide_split/separate_unite/join
+divided_split/separated_united/joined
+diving_plunging/jumping_surfacing/rising
+doctor_physician/medic_patient
+document_record/paper_none
+doddering_shaky/frail_steady/strong
+dog_hound/canine_none
+dolphin_sea mammal/porpoise_none
+domestic_home/household_foreign/wild
+done_finished/complete_unfinished/begun
+door_entrance/gate_wall
+doorstep_threshold/entrance_none
+dormitory_hostel/sleeping hall_none
+dot_spot/point_none
+down_below/lower_up/above
+dozen_twelve/set of twelve_none
+drain_empty/use up_fill/refill
+drained_emptied/exhausted_filled/refreshed
+draw_sketch/attract_repel/erase
+dread_fear/terror_courage/calm
+dream_vision/fantasy_reality/fact
+dress_clothe/gown_undress
+dressed_clothed/clad_undressed/naked
+drew_sketched/pulled_pushed/erased
+dried_dry/dehydrated_wet/soaked
+drink_sip/swallow_eat/starve
+drinking_sipping/swallowing_eating
+dripping_trickling/leaking_dry
+driven_forced/pushed_voluntary/free
+driver_motorist/chauffeur_passenger
+drizzle_light rain/spray_downpour/deluge
+drone_hum/buzz_silence
+drop_fall/decrease_rise/lift
+drove_steered/guided_walked
+drown_sink/submerge_survive/float
+dry_arid/parched_wet/damp
+due_owed/expected_paid/settled
+dull_boring/blunt_sharp/interesting
+during_throughout/while_none
+dust_dirt/powder_none
+dwelling_home/house_none
+dyed_coloured/tinted_bleached/faded
+dyeing_colouring/tinting_bleaching/fading
+dying_fading/expiring_living/reviving
+each_every/per_none/neither
+eager_keen/enthusiastic_reluctant/unwilling
+eagle_bird of prey/raptor_none
+ear_hearing organ/lug_none
+earlier_before/previously_later/after
+earliest_first/soonest_latest/last
+early_prompt/premature_late/delayed
+earn_gain/make_spend/lose
+earth_world/globe_sky/heaven
+ease_comfort/simplicity_difficulty/hardship
+easily_effortlessly/simply_with difficulty/hardly
+east_orient/sunrise_west
+eastern_oriental/eastward_western
+eastwards_towards the east/east-bound_westwards
+easy_simple/effortless_difficult/hard
+eat_consume/devour_fast/starve
+eating_consuming/devouring_fasting/starving
+echo_repeat/reverberate_silence
+economic_financial/commercial_none
+edge_border/rim_centre/middle
+edit_revise/correct_ruin/spoil
+edited_corrected/revised_unedited/raw
+edition_version/issue_none
+editor_reviser/corrector_writer
+editorial_leading article/opinion piece_none
+educate_teach/instruct_neglect/mislead
+education_schooling/teaching_ignorance/illiteracy
+educational_instructive/teaching_uneducational/uninformative
+educative_instructive/informative_uninstructive/useless
+effect_result/outcome_cause/reason
+effort_attempt/try_laziness/idleness
+egg_ovum/spawn_none
+eight_8/number_none
+either_one or the other/any one_neither
+elastic_stretchy/flexible_rigid/stiff
+elbow_joint/bend_none
+elder_senior/older_younger/junior
+elderly_old/aged_young/youthful
+electric_powered/charged_none
+electronic_digital/computerised_manual/mechanical
+element_part/component_whole
+elementary_basic/simple_advanced/complex
+elevator_lift/hoist_none
+eleven_11/number_none
+elsewhere_somewhere else/in another place_here
+elusive_hard to catch/slippery_obvious/catchable
+embark_board/set out_disembark/land
+embassy_consulate/legation_none
+embody_represent/express_none
+embroider_stitch/decorate_none
+emergency_crisis/danger_calm/safety
+emotion_feeling/passion_reason/calm
+emotional_moved/sensitive_unemotional/cold
+emphasize_stress/highlight_understate/ignore
+empire_kingdom/domain_colony
+employ_hire/use_dismiss/fire
+employee_worker/staff_employer/boss
+employer_boss/manager_employee/worker
+empty_vacant/hollow_full/filled
+enable_allow/permit_prevent/disable
+enabling_allowing/permitting_preventing/disabling
+enclosed_shut in/surrounded_open/exposed
+encounter_meet/face_avoid/miss
+encyclopedia_reference book/knowledge book_none
+end_finish/conclude_begin/start
+endanger_risk/threaten_protect/save
+endangered_threatened/at risk_safe/protected
+endeavor_attempt/effort_idleness/laziness
+endless_infinite/limitless_finite/limited
+enduring_lasting/permanent_temporary/brief
+enemy_foe/opponent_friend/ally
+energy_power/vigour_weakness/laziness
+enfold_wrap/embrace_unwrap/release
+enforce_impose/apply_ignore/relax
+engaged_busy/occupied_free/idle
+engine_motor/machine_none
+engineer_designer/builder_none
+engraved_carved/etched_plain/smooth
+enhance_improve/boost_reduce/spoil
+enhanced_improved/boosted_reduced/weakened
+enjoy_like/relish_dislike/hate
+enjoyable_pleasant/delightful_unpleasant/boring
+enough_sufficient/adequate_insufficient/lacking
+enrich_improve/enhance_impoverish/weaken
+ensure_make sure/guarantee_risk/neglect
+enter_go in/access_exit/leave
+entertain_amuse/delight_bore/tire
+entertainment_amusement/fun_boredom
+enthusiasm_eagerness/zeal_apathy/indifference
+enthusiastically_eagerly/keenly_apathetically/unwillingly
+entire_whole/complete_partial/part
+entry_entrance/admission_exit/departure
+environment_surroundings/setting_none
+eon_age/era_moment/instant
+equally_evenly/alike_unequally/unevenly
+equipment_gear/tools_none
+era_age/period_moment
+erect_upright/build_collapsed/lowered
+error_mistake/fault_accuracy/correctness
+escalator_moving stairs/lift_stairs
+escape_flee/get away_capture/stay
+especially_particularly/mainly_generally/ordinarily
+essence_core/heart_exterior/surface
+essential_necessary/vital_unnecessary/optional
+established_set up/founded_unestablished/unsettled
+estate_property/land_none
+esteem_respect/regard_contempt/disrespect
+etched_engraved/carved_smooth/plain
+ethics_morals/principles_none
+ethnic_racial/cultural_none
+even_flat/level_uneven/rough
+evening_dusk/twilight_morning/dawn
+event_happening/occasion_none
+eventually_finally/ultimately_immediately/never
+ever_always/at any time_never
+every_each/all_none
+everyday_daily/ordinary_unusual/special
+everywhere_all over/throughout_nowhere
+evidence_proof/sign_doubt/rumour
+evil_wicked/bad_good/virtuous
+evolution_development/growth_stagnation/decline
+evolve_develop/advance_regress/stagnate
+exactly_precisely/just_roughly/approximately
+examination_test/inspection_none
+examine_inspect/study_ignore/overlook
+example_instance/sample_none
+excellent_superb/outstanding_poor/terrible
+except_apart from/besides_including
+excerpt_extract/passage_whole
+exchange_swap/trade_keep/retain
+exchanged_swapped/traded_kept/retained
+excited_thrilled/eager_bored/calm
+excitedly_eagerly/wildly_calmly/boredly
+excuse_pardon/forgive_blame/accuse
+exercise_workout/practice_rest/idleness
+exist_live/be_vanish/cease
+existence_being/life_non-existence/death
+exit_departure/way out_entrance/entry
+expand_enlarge/grow_shrink/contract
+expect_anticipate/await_doubt
+expectation_hope/anticipation_surprise/disappointment
+expected_awaited/anticipated_unexpected/surprising
+expense_cost/charge_saving/income
+expensive_costly/pricey_cheap/inexpensive
+experience_knowledge/skill_inexperience/ignorance
+experienced_skilled/expert_inexperienced/novice
+experiment_test/trial_none
+expert_specialist/master_amateur/beginner
+expire_end/run out_begin/start
+expiry_end/finish_start/beginning
+explain_clarify/describe_confuse/obscure
+explanation_reason/clarification_confusion
+explicit_clear/plain_vague/implicit
+explosion_blast/burst_implosion
+exposed_uncovered/open_hidden/covered
+express_state/say_suppress/hide
+expressed_stated/voiced_suppressed/hidden
+expression_look/phrase_none
+extension_expansion/addition_reduction/shortening
+extent_range/size_none
+extremely_very/highly_slightly/mildly
+eyelash_hair on lid/lash_none
+eyes_sight/vision_none
+eyeshot_sight/view_none
+fable_tale/legend_fact/truth
+face_confront/meet_avoid/turn away
+faced_confronted/met_avoided
+facility_ease/amenity_difficulty/hardship
+facing_confronting/opposite_avoiding/behind
+fact_truth/reality_fiction/lie
+factor_element/cause_none
+factory_plant/mill_none
+fade_dim/weaken_brighten/strengthen
+fading_dimming/weakening_brightening/growing
+fair_just/honest_unfair/biased
+faith_trust/belief_doubt/distrust
+fake_false/artificial_genuine/real
+falcon_hawk/bird of prey_none
+fall_drop/tumble_rise/climb
+fallen_dropped/collapsed_risen/standing
+false_untrue/wrong_true/correct
+falsely_wrongly/untruthfully_truly/honestly
+familiar_known/common_unfamiliar/strange
+family_household/relatives_stranger
+famous_renowned/well-known_unknown/obscure
+famously_notably/well-known_obscurely
+fan_admirer/follower_critic/opponent
+fantastic_wonderful/amazing_ordinary/terrible
+far_distant/remote_near/close
+farm_agricultural land/ranch_none
+farmer_grower/cultivator_none
+farmhouse_rural home/farm dwelling_none
+farming_agriculture/cultivation_none
+farthest_most distant/furthest_nearest/closest
+fascinate_charm/captivate_bore/repel
+fast_quick/rapid_slow
+fasten_tie/fix_unfasten/loosen
+faster_quicker/swifter_slower
+fastest_quickest/swiftest_slowest
+fat_plump/stout_thin/slim
+fatal_deadly/lethal_harmless/curable
+fate_destiny/fortune_choice/free will
+father_dad/parent_mother
+favorite_preferred/best-loved_disliked/hated
+favour_support/approve_oppose/disapprove
+favourite_preferred/best-loved_hated/disliked
+fear_dread/fright_courage/bravery
+feast_banquet/meal_famine/fast
+feather_plume/quill_none
+feature_trait/quality_none
+featured_starred/displayed_hidden/unseen
+fed_nourished/given food_starved/hungry
+feed_nourish/supply_starve/deprive
+feel_touch/sense_ignore/numb
+feeling_emotion/sense_numbness/unfeeling
+feelings_emotions/sentiments_none
+fell_dropped/tumbled_rose/climbed
+felt_sensed/touched_ignored/unaware
+female_woman/feminine_male
+fern_plant/frond_none
+fertilizer_manure/plant food_none
+festival_celebration/fair_none
+few_some/scarce_many/numerous
+fewer_less/not as many_more/greater
+fibre_thread/strand_none
+fiction_story/fantasy_fact/truth
+field_meadow/pasture_none
+fiercely_violently/intensely_gently/mildly
+fifteen_xv/number_none
+fight_battle/struggle_peace/truce
+fighter_warrior/soldier_peacemaker
+fighting_battling/combat_peace/truce
+figure_number/shape_none
+fill_stuff/load_empty/drain
+filled_full/packed_empty/vacant
+filling_stuffing/packing_emptying/draining
+film_movie/picture_none
+filter_strain/purify_none
+final_last/ultimate_first/initial
+finally_at last/eventually_firstly/initially
+financial_money-related/fiscal_none
+find_discover/locate_lose/miss
+finding_discovery/result_none
+findings_results/discoveries_none
+finish_complete/end_start/begin
+finished_completed/ended_unfinished/begun
+finishing_completing/ending_starting/beginning
+fire_flames/blaze_water/ice
+fired_sacked/dismissed_hired/employed
+firm_hard/solid_soft/loose
+firmly_tightly/strongly_loosely/weakly
+first_initial/earliest_last/final
+fish_swimmer/catch_none
+fishing_angling/catching fish_none
+fist_clenched hand/knuckles_none
+fit_healthy/suitable_unfit/unsuitable
+fitful_irregular/spasmodic_steady/regular
+fitfully_unevenly/irregularly_steadily/regularly
+fitness_health/strength_unfitness/weakness
+fitted_equipped/suited_unsuited
+fitting_suitable/proper_unsuitable/improper
+five_number/fifth_none
+fix_repair/mend_break/damage
+fixed_set/firm_loose/movable
+flapping_waving/fluttering_still/steady
+flat_level/even_uneven/steep
+flattery_praise/compliments_honesty/criticism
+flawless_perfect/faultless_flawed/faulty
+fleet_swift/fast_slow/sluggish
+flight_flying/escape_staying/landing
+float_drift/hover_sink/dive
+flock_herd/group_individual
+floor_ground/storey_ceiling/roof
+flour_ground grain/meal_none
+flourish_thrive/prosper_decline/wither
+flow_stream/run_stop/halt
+flower_blossom/bloom_weed
+flowing_streaming/running_still/stagnant
+fly_soar/flutter_land/walk
+flying_soaring/fluttering_landing
+focus_concentrate/centre_scatter/ignore
+foggy_misty/cloudy_clear/bright
+fold_bend/crease_unfold/straighten
+folk_people/folks_none
+follow_pursue/trail_lead/precede
+following_next/ensuing_previous/preceding
+fond_loving/affectionate_cold/indifferent
+food_meal/nourishment_hunger
+fool_idiot/clown_genius/sage
+foot_paw/base_head/top
+force_power/compel_weakness/allow
+forced_compelled/made_voluntary/willing
+forefather_ancestor/forebear_descendant
+forefront_front/lead_rear/back
+forego_give up/go without_have/keep
+foreign_alien/overseas_native/domestic
+forest_woods/jungle_desert
+forever_always/eternally_briefly/never
+forge_make/shape_destroy/break
+forget_overlook/neglect_remember/recall
+forgiveness_pardon/mercy_revenge/blame
+forgotten_unremembered/lost_remembered/recalled
+form_shape/create_destroy/ruin
+formal_official/proper_informal/casual
+formalities_rules/procedures_informality
+formality_ceremony/convention_informality
+formed_made/shaped_destroyed/broken
+fortnightly_every two weeks/biweekly_none
+forum_meeting/discussion_none
+forward_ahead/onward_backward/back
+found_discovered/located_lost/missed
+fountain_spring/jet_none
+four_number/fourth_none
+fourth_quarter/number four_none
+fourthly_in the fourth place/lastly_none
+frame_border/structure_none
+free_liberated/loose_captive/bound
+freedom_liberty/independence_slavery/captivity
+freehand_without a guide/by hand_ruled/traced
+frequently_often/regularly_rarely/seldom
+fresh_new/crisp_stale/old
+freshen_refresh/revive_stale/tire
+freshly_newly/recently_long ago/stale
+fried_cooked in oil/sauteed_raw
+friend_pal/companion_enemy/foe
+friendly_kind/amiable_unfriendly/hostile
+frightened_scared/afraid_calm/brave
+front_fore/face_back/rear
+frost_ice/freeze_heat/thaw
+fruit_produce/yield_none
+full_filled/packed_empty/vacant
+fun_enjoyment/amusement_boredom/misery
+furniture_fittings/chairs and tables_none
+furrow_groove/trench_ridge
+further_more/additional_nearer/closer
+furthermore_moreover/besides_however
+gain_obtain/win_lose/forfeit
+gap_space/opening_overlap/joining
+garden_yard/plot_none
+garment_clothing/dress_none
+gas_vapour/fumes_liquid/solid
+gasp_pant/choke_breathe easily
+gate_door/entrance_wall
+gather_collect/assemble_scatter/disperse
+gathered_collected/assembled_scattered/dispersed
+gathering_meeting/crowd_dispersal/scattering
+gaze_stare/look_glance/ignore
+gazette_newspaper/journal_none
+gear_equipment/tackle_none
+gel_jelly/paste_liquid
+gem_jewel/precious stone_rubbish/junk
+general_common/broad_specific/particular
+generally_usually/mostly_rarely/specifically
+generation_age group/era_none
+generosity_kindness/giving_selfishness/greed
+generous_giving/charitable_selfish/stingy
+genre_kind/category_none
+gentle_mild/soft_rough/harsh
+gentleman_polite man/noble_ruffian/lady
+germ_microbe/bug_none
+get_obtain/receive_give/lose
+getting_obtaining/receiving_giving/losing
+gift_present/donation_loss/taking
+gigantic_huge/enormous_tiny/small
+girl_lass/maiden_boy
+give_donate/offer_take/receive
+given_donated/granted_taken/withheld
+giving_donating/offering_taking/receiving
+glacier_ice river/ice mass_none
+gladly_willingly/happily_unwillingly/reluctantly
+glass_tumbler/pane_none
+glassy_shiny/smooth_dull/rough
+glimpse_glance/peek_stare/gaze
+global_worldwide/universal_local/regional
+globalization_worldwide spread/internationalisation_localisation
+glorious_magnificent/splendid_dreadful/dull
+gloss_shine/lustre_dullness
+glow_shine/gleam_fade/dim
+gnarled_twisted/knotty_smooth/straight
+goal_aim/target_none
+goat_farm animal/kid_none
+god_deity/lord_devil
+godliness_holiness/piety_ungodliness/wickedness
+going_leaving/departing_coming/arriving
+gold_precious metal/bullion_none
+golden_gilded/yellow_none
+good_fine/pleasant_bad/evil
+goodness_virtue/kindness_badness/evil
+goose_waterbird/gander_none
+government_administration/rule_opposition/anarchy
+grace_elegance/charm_clumsiness/awkwardness
+gracious_polite/kind_rude/unkind
+grade_level/rank_none
+gradually_slowly/steadily_suddenly/abruptly
+grain_cereal/seed_none
+grand_magnificent/splendid_humble/modest
+grandfather_granddad/grandpa_grandmother
+grandmother_granny/grandma_grandfather
+grandparent_elder relative/forebear_grandchild
+graph_chart/diagram_none
+graphic_vivid/clear_vague/unclear
+graphics_images/pictures_none
+grass_lawn/turf_none
+grassy_green/lush_bare/barren
+grateful_thankful/appreciative_ungrateful
+gratitude_thankfulness/appreciation_ingratitude
+grave_serious/solemn_cheerful/light
+gravel_stones/pebbles_none
+grazing_feeding/pasture_none
+great_grand/excellent_small/poor
+greatest_largest/best_smallest/least
+greedily_hungrily/selfishly_generously/unselfishly
+green_emerald/leafy_ripe
+greenhouse_glasshouse/hothouse_none
+grey_ashen/silvery_none
+grid_network/mesh_none
+grief_sorrow/sadness_joy/happiness
+ground_earth/soil_sky/air
+group_set/band_individual
+grow_develop/increase_shrink/shrivel
+grown_matured/developed_young/immature
+growth_increase/development_decline/shrinkage
+grumpy_bad-tempered/cranky_cheerful/pleasant
+guardian_protector/keeper_ward
+guess_estimate/suppose_know/calculate
+guide_lead/direct_mislead/follow
+guileless_innocent/honest_cunning/deceitful
+gypsy_wanderer/nomad_settler/resident
+habit_custom/routine_none
+haggle_bargain/negotiate_agree/accept
+hail_greet/salute_ignore/snub
+hair_locks/fur_none
+half_part/portion_whole/full
+hamlet_small village/settlement_city
+hamper_hinder/obstruct_help/assist
+hand_palm/give_foot/take
+handed_given/passed_taken/kept
+handicraft_craft/handiwork_none
+handle_manage/control_mishandle/neglect
+handled_managed/touched_neglected/mishandled
+handmade_homemade/crafted_machine-made/factory-made
+handset_receiver/phone_none
+handwritten_written by hand/penned_typed/printed
+hanging_dangling/suspended_standing/supported
+happen_occur/take place_fail/cease
+happening_event/incident_none
+happily_gladly/cheerfully_sadly/unhappily
+happiness_joy/delight_sadness/sorrow
+happy_glad/cheerful_sad/unhappy
+hard_firm/solid_soft/easy
+hardly_barely/scarcely_easily/fully
+hardy_tough/strong_delicate/fragile
+hare_rabbit-like animal/leveret_none
+harm_hurt/injure_help/heal
+harmful_damaging/dangerous_harmless/beneficial
+harmony_agreement/peace_discord/conflict
+harsh_rough/severe_gentle/mild
+hat_cap/headgear_none
+haystack_hay pile/stack_none
+hazardous_dangerous/risky_safe/harmless
+head_leader/top_foot/tail
+headed_led/directed_followed
+headline_title/heading_none
+headmaster_principal/school head_pupil
+headquarters_main office/base_none
+heal_cure/mend_hurt/injure
+healing_curing/recovery_harming/worsening
+health_fitness/wellbeing_illness/disease
+healthy_fit/well_sick/ill
+hear_listen/catch_ignore/tune out
+heard_listened/caught_ignored
+hearing_listening/audition_deafness
+heart_core/centre_edge/outside
+heartless_cruel/unkind_kind/compassionate
+heartlessness_cruelty/coldness_kindness/compassion
+heat_warmth/hotness_cold/chill
+heaven_paradise/bliss_hell
+heavily_weightily/densely_lightly/slightly
+heaving_lifting/rising_dropping/sinking
+heavy_weighty/hefty_light
+hedge_fence/barrier_none
+held_gripped/kept_released/freed
+hello_greeting/hi_goodbye/farewell
+help_assist/aid_hinder/harm
+helping_aiding/assisting_hindering/harming
+hen_chicken/fowl_cock
+hence_therefore/thus_none
+herald_announce/signal_conceal
+herb_plant/seasoning_none
+herbal_plant-based/natural_synthetic/chemical
+herd_flock/group_individual
+here_at this place/present_there
+heritage_legacy/inheritance_none
+hesitate_pause/delay_proceed/hurry
+hesitation_pause/doubt_readiness/eagerness
+hide_conceal/cover_show/reveal
+hiding_concealing/covering_showing/revealing
+hierarchy_ranking/order_equality
+high_tall/lofty_low/short
+higher_taller/loftier_lower/shorter
+highlight_emphasise/stress_hide/ignore
+highly_very/extremely_slightly/lowly
+hike_trek/walk_ride
+hill_mound/slope_valley/hollow
+hind_back/rear_front/fore
+hint_clue/suggestion_statement
+hippopotamus_river horse/large mammal_none
+hired_employed/rented_fired/dismissed
+hiss_whistle/sizzle_none
+historical_past/ancient_modern/present
+history_past/record_future
+hit_strike/knock_miss/stroke
+hobby_pastime/interest_work/job
+hoe_garden tool/dig_none
+hold_grasp/grip_release/drop
+hole_gap/pit_lump/bump
+holiday_vacation/break_workday
+hollow_empty/vacant_solid/full
+home_house/residence_away/abroad
+homeland_motherland/native land_foreign land
+hone_sharpen/polish_blunt/dull
+honesty_truthfulness/integrity_dishonesty/deceit
+hood_cover/cowl_none
+hope_wish/expect_despair/doubt
+horn_trumpet/antler_none
+horror_terror/dread_delight/pleasure
+horse_steed/stallion_none
+hospitality_welcome/kindness_hostility/unfriendliness
+host_entertainer/presenter_guest
+hot_boiling/warm_cold/cool
+hotbed_breeding ground/nursery_none
+hotel_inn/lodge_none
+hour_sixty minutes/time_none
+hours_time periods/sixty-minute spans_none
+house_home/dwelling_none
+housing_homes/lodging_none
+how_in what way/by what means_none
+however_but/yet_therefore
+hub_centre/core_edge/rim
+hue_colour/tint_none
+huge_enormous/giant_tiny/small
+human_person/mortal_animal/beast
+humming_buzzing/droning_silent/quiet
+hundred_100/century_none
+hungry_starving/famished_full/satisfied
+hunt_chase/search_flee/escape
+hunter_stalker/chaser_prey/victim
+hunting_chasing/tracking_fleeing
+hurdles_barriers/obstacles_help/aid
+hurried_rushed/hasty_slow/leisurely
+hurry_rush/hasten_dawdle/delay
+hurt_injure/harm_heal/soothe
+hush_quiet/silence_noise/din
+hyacinth_flower/bulb plant_none
+hygiene_cleanliness/sanitation_dirtiness/filth
+ice_frozen water/frost_steam/water
+icon_symbol/image_none
+idea_thought/notion_none
+ideal_perfect/model_flawed/imperfect
+identify_recognise/name_confuse/overlook
+identity_individuality/self_anonymity
+idle_inactive/lazy_busy/active
+illustrate_show/explain_hide/confuse
+illustration_picture/example_none
+image_picture/figure_none
+imaginary_unreal/fictional_real/actual
+imagination_creativity/fancy_reality/fact
+imagine_picture/dream_know/recall
+immediate_instant/prompt_delayed/later
+immediately_at once/instantly_later/eventually
+immigration_settling/arrival_emigration
+impact_effect/force_none
+impart_give/pass on_withhold/keep
+impatient_restless/eager_patient/calm
+impeccable_perfect/faultless_flawed/faulty
+implement_carry out/apply_neglect/ignore
+importance_value/significance_unimportance/triviality
+important_significant/vital_unimportant/trivial
+improve_better/enhance_worsen/decline
+improved_better/enhanced_worsened/worse
+improvement_progress/advance_decline/deterioration
+incident_event/occurrence_none
+include_contain/involve_exclude/omit
+incognito_disguised/hidden_known/identified
+income_earnings/pay_expense/spending
+inconvenience_trouble/bother_convenience/comfort
+incorrect_wrong/false_correct/right
+increase_grow/rise_decrease/reduce
+increased_raised/grew_decreased/reduced
+increasing_growing/rising_decreasing/falling
+incredible_unbelievable/amazing_credible/believable
+incredibly_unbelievably/amazingly_credibly/believably
+indeed_truly/really_none
+independence_freedom/liberty_dependence/slavery
+independent_free/self-reliant_dependent/reliant
+indifference_unconcern/apathy_interest/concern
+indifferent_unconcerned/uninterested_concerned/interested
+indigenous_native/local_foreign/alien
+indigo_deep blue/violet-blue_none
+individual_single/person_group/collective
+individually_separately/singly_together/collectively
+indoor_inside/interior_outdoor
+indoors_inside/within_outdoors/outside
+infer_deduce/conclude_assume/guess
+infinite_endless/boundless_finite/limited
+inflate_expand/swell_deflate/shrink
+influence_effect/power_none
+informal_casual/relaxed_formal/official
+information_facts/knowledge_ignorance/misinformation
+informative_instructive/educational_uninformative/unhelpful
+ingredient_component/element_none
+ingress_entrance/entry_egress/exit
+inherit_receive/be left_bequeath/give
+inheritance_legacy/bequest_none
+initial_first/opening_final/last
+initiative_enterprise/drive_laziness/passivity
+injured_hurt/wounded_unhurt/healthy
+innocence_purity/blamelessness_guilt/experience
+innocent_blameless/guiltless_guilty/culpable
+innovative_new/original_traditional/old-fashioned
+inquisitiveness_curiosity/interest_indifference/apathy
+insect_bug/creepy-crawly_none
+inside_within/interior_outside/outside
+insincere_false/fake_sincere/genuine
+inspire_motivate/encourage_discourage/dishearten
+inspired_motivated/encouraged_discouraged/disheartened
+instantly_immediately/at once_gradually/later
+instead_in place/rather_none
+instinct_intuition/impulse_reason/thought
+instruct_teach/direct_obey/follow
+instructor_teacher/trainer_student/learner
+instrument_tool/device_none
+integral_essential/necessary_unnecessary/optional
+integrated_combined/united_separated/divided
+intellectual_clever/mental_foolish/unintelligent
+intelligent_clever/bright_stupid/dull
+interaction_communication/contact_isolation/separation
+interest_curiosity/attention_boredom/indifference
+interested_curious/keen_bored/uninterested
+interesting_fascinating/engaging_boring/dull
+international_worldwide/global_national/local
+internet_web/network_none
+interpersonal_social/personal_individual/private
+interval_gap/break_continuity
+interview_meeting/talk_none
+interviewee_person questioned/candidate_interviewer
+intonation_tone/pitch_monotone
+introduce_present/begin_conclude/end
+introduction_beginning/preface_conclusion/ending
+introductory_opening/first_concluding/final
+invent_create/devise_copy/imitate
+invention_creation/discovery_copy
+investigate_examine/probe_ignore/neglect
+invite_ask/welcome_reject/exclude
+involved_engaged/included_uninvolved/detached
+island_isle/islet_mainland
+isolated_alone/separate_connected/together
+issue_matter/topic_none
+item_thing/article_none
+jacket_coat/blazer_none
+jaguar_big cat/wild cat_none
+jam_preserve/crush_none
+jerkily_suddenly/abruptly_smoothly/steadily
+jest_joke/fun_seriousness
+jewel_gem/treasure_trash
+job_work/task_hobby/leisure
+jogging_slow running/trotting_walking/standing
+join_connect/unite_separate/split
+joined_connected/united_separated/split
+joint_shared/common_separate/individual
+joke_jest/gag_seriousness
+journal_diary/magazine_none
+journalism_news writing/reporting_none
+journalist_reporter/writer_none
+journey_trip/travel_none
+joy_delight/happiness_sorrow/misery
+joyful_cheerful/merry_sorrowful/sad
+judge_justice/umpire_defendant
+jug_pitcher/container_none
+juggler_entertainer/performer_none
+jumbled_mixed/muddled_orderly/tidy
+jump_leap/spring_crawl/stay
+jungle_forest/wilderness_none
+just_fair/honest_unjust/unfair
+justice_fairness/equity_injustice/unfairness
+justify_defend/explain_condemn/blame
+juvenile_young/youthful_adult/mature
+juxtapose_place side by side/compare_separate/divide
+keep_retain/hold_lose/give away
+keeping_holding/retaining_losing/giving
+kept_held/saved_lost/gave
+kettle_pot/boiler_none
+key_important/main_minor/unimportant
+kill_slay/murder_save/spare
+kind_gentle/caring_cruel/unkind
+kindly_gently/warmly_cruelly/harshly
+kindness_goodness/gentleness_cruelty/unkindness
+king_monarch/ruler_queen
+kitchen_cookroom/galley_none
+kiwi_bird/fruit_none
+knight_horseman/noble_none
+knock_tap/hit_none
+know_understand/recognise_ignore/misunderstand
+knowing_aware/clever_unaware/ignorant
+knowledge_learning/wisdom_ignorance/illiteracy
+known_familiar/famous_unknown/strange
+labour_work/toil_leisure/rest
+lack_shortage/need_abundance/plenty
+laden_loaded/burdened_empty/unloaded
+lady_woman/noblewoman_gentleman
+lag_delay/fall behind_lead/advance
+lake_pond/water body_none
+lakeside_shore/edge of a lake_none
+land_ground/earth_sea/water
+landed_arrived/touched down_took off/departed
+landscape_scenery/view_none
+lane_path/track_none
+language_speech/tongue_none
+laptop_portable computer/notebook_none
+large_big/huge_small/tiny
+last_final/ultimate_first/initial
+late_delayed/tardy_early/prompt
+later_afterwards/subsequently_earlier/before
+latter_second/last_former/first
+laugh_giggle/chuckle_cry/weep
+laughing_giggling/chuckling_crying/weeping
+laughter_giggles/mirth_tears/crying
+launch_start/begin_end/cancel
+lavatory_toilet/restroom_none
+lay_put/place_lift/raise
+lead_guide/direct_follow
+leader_chief/head_follower/subordinate
+leadership_command/guidance_following
+leading_main/guiding_following/trailing
+leaf_foliage/frond_none
+lean_slope/bend_straighten/stand upright
+learn_study/master_teach/forget
+learned_scholarly/educated_ignorant/uneducated
+learner_student/pupil_teacher
+learning_studying/knowledge_teaching/ignorance
+least_smallest/lowest_most/greatest
+leathery_tough/hard_soft/tender
+leave_depart/go_arrive/stay
+leaving_departing/going_arriving/coming
+led_guided/directed_followed
+ledge_shelf/edge_none
+left_remaining/port_right
+legacy_inheritance/heritage_none
+legged_having legs/walking_none
+legitimacy_lawfulness/validity_illegitimacy/illegality
+leisurely_slow/relaxed_hurried/rushed
+lend_loan/give_borrow/take
+length_extent/distance_width/breadth
+lentil_pulse/legume_none
+less_fewer/smaller_more/greater
+lesson_class/teaching_none
+letter_note/character_none
+level_flat/even_uneven/sloping
+liberation_freedom/release_captivity/bondage
+lie_falsehood/fib_truth/fact
+life_existence/being_death
+lifestyle_way of life/living_none
+lift_raise/hoist_lower/drop
+lifted_raised/hoisted_dropped/lowered
+light_bright/pale_dark/heavy
+like_enjoy/love_dislike/hate
+likely_probable/expected_unlikely/improbable
+liking_fondness/affection_dislike/hatred
+limit_boundary/restrict_free/extend
+limited_restricted/finite_unlimited/endless
+line_row/stripe_none
+lip_edge/rim_none
+liquid_fluid/watery_solid/gas
+list_catalogue/record_none
+listen_hear/attend_ignore/tune out
+listening_hearing/attending_ignoring
+literary_bookish/scholarly_illiterate/unlettered
+literate_educated/learned_illiterate/uneducated
+literature_writing/books_none
+litre_unit of liquid/measure_none
+litter_rubbish/trash_tidiness/order
+little_small/tiny_big/large
+live_exist/dwell_die/perish
+livelihood_living/income_none
+livelong_whole/entire_partial/brief
+living_alive/existing_dead/lifeless
+loan_advance/lend_repayment/borrowing
+local_nearby/regional_distant/foreign
+locality_area/place_none
+locate_find/discover_lose/miss
+located_situated/found_unplaced/lost
+location_place/site_none
+lock_fasten/bolt_unlock/open
+long_lengthy/extended_short/brief
+look_see/watch_ignore/overlook
+looking_seeing/watching_ignoring
+lose_misplace/forfeit_find/win
+loss_defeat/failure_gain/profit
+lost_missing/gone_found/won
+lot_much/plenty_little/few
+lotion_cream/ointment_none
+lotus_water lily/flower_none
+loud_noisy/deafening_quiet/soft
+lounge_relax/laze_work/exert
+louse_insect/pest_none
+love_adore/cherish_hate/detest
+loved_adored/cherished_hated/despised
+low_short/small_high/tall
+luck_fortune/chance_misfortune/bad luck
+luggage_baggage/bags_none
+lung_breathing organ/air bag_none
+lustre_shine/gloss_dullness
+lying_resting/reclining_standing/sitting
+lyric_poetic/songlike_prosaic/dull
+machine_device/engine_none
+mad_insane/crazy_sane/sensible
+magazine_periodical/journal_none
+magic_sorcery/wizardry_reality/science
+magical_enchanted/mysterious_ordinary/real
+magnetic_attractive/charming_repulsive/unattractive
+maimed_crippled/injured_healthy/whole
+main_chief/principal_minor/secondary
+mainland_continent/land_island
+mainly_mostly/chiefly_slightly/rarely
+mainstream_usual/normal_fringe/unconventional
+maintain_keep/preserve_abandon/neglect
+major_main/chief_minor/lesser
+make_create/build_destroy/break
+making_creating/producing_breaking/destroying
+male_man/masculine_female
+man_male/gentleman_woman
+manage_run/control_fail/mismanage
+management_control/administration_staff/workers
+manager_boss/director_employee/worker
+mankind_humanity/people_none
+manuscript_text/document_print
+many_numerous/several_few/little
+map_chart/plan_none
+march_walk/parade_halt/stop
+marked_noticeable/stained_unmarked/plain
+marker_sign/pointer_none
+market_bazaar/mart_none
+marks_scores/grades_none
+marriage_wedding/union_divorce/separation
+marsh_swamp/bog_dry land
+mask_cover/disguise_reveal/expose
+mass_bulk/heap_none
+master_expert/teacher_servant/pupil
+match_equal/pair_differ/clash
+mated_paired/coupled_separated/single
+material_matter/cloth_spiritual/mental
+maternal_motherly/of a mother_paternal
+math_numbers/arithmetic_none
+mattress_bed pad/bedding_none
+maul_injure/attack_heal/help
+maximum_greatest/highest_minimum/least
+may_might/can_cannot
+maybe_perhaps/possibly_definitely/certainly
+meal_food/repast_fast
+mean_unkind/stingy_kind/generous
+meaning_sense/significance_nonsense
+meaningful_significant/important_meaningless/pointless
+means_methods/ways_none
+meat_flesh/food_vegetables
+mechanical_automatic/machine-driven_manual/natural
+medicine_drug/remedy_poison
+meditation_contemplation/thought_action
+mediterranean_of the sea region/southern European_none
+medium_average/middle_extreme
+melt_dissolve/thaw_freeze/solidify
+melting_dissolving/thawing_freezing/solidifying
+member_associate/part_outsider/stranger
+memory_recall/remembrance_forgetfulness/amnesia
+men_males/gentlemen_women
+mental_intellectual/psychological_physical/bodily
+mentally_intellectually/inwardly_physically/bodily
+mention_say/refer to_omit/ignore
+merit_worth/value_fault/demerit
+message_note/communication_none
+messy_untidy/cluttered_tidy/neat
+metal_iron/ore_none
+meteorite_space rock/fallen star_none
+meter_gauge/measure_none
+method_way/system_chaos/disorder
+meticulous_careful/thorough_careless/sloppy
+meticulously_carefully/thoroughly_carelessly/sloppily
+metre_unit of length/measure_none
+microphone_mic/sound pickup_none
+middle_centre/central_edge/end
+might_power/strength_weakness/frailty
+mighty_powerful/strong_weak/feeble
+migrate_move/relocate_stay/settle
+migration_movement/relocation_staying/settling
+mile_distance unit/measure_none
+military_army/armed_civilian
+milk_dairy drink/cream_none
+million_1,000,000/many_none
+mills_factories/grinders_none
+mind_brain/intellect_body/matter
+mine_dig/excavate_bury/fill
+mineral_ore/rock_none
+mingling_mixing/blending_separating/dividing
+minor_small/lesser_major/important
+minority_smaller group/few_majority/most
+minute_tiny/small_huge/large
+minutes_records/notes_none
+mirror_looking glass/reflect_none
+mirth_joy/laughter_sorrow/gloom
+misfortune_bad luck/trouble_fortune/luck
+misinformation_false news/lies_truth/fact
+mislead_deceive/misguide_guide/inform
+misleading_deceptive/false_honest/truthful
+miss_lack/skip_hit/catch
+missing_lost/absent_present/found
+missionary_preacher/evangelist_none
+mist_fog/haze_clearness
+mistake_error/blunder_accuracy/correctness
+misused_abused/wasted_properly used/respected
+mix_blend/combine_separate/divide
+mixed_blended/combined_pure/separate
+mixture_blend/combination_separation
+mobile_movable/portable_fixed/stationary
+mobility_movement/motion_immobility/stillness
+model_example/pattern_copy
+modern_new/current_ancient/old
+modernisation_updating/renewal_ageing/outdating
+modernize_update/renew_age/outdate
+molasses_syrup/treacle_none
+moment_instant/second_age/eon
+money_cash/currency_none
+monitor_watch/observe_ignore/neglect
+monsoon_rainy season/heavy rain_drought
+month_four weeks/period_none
+monthly_every month/each month_none
+moon_satellite/lunar body_sun
+moonlight_lunar light/night glow_sunlight
+moonlit_lit by the moon/bright at night_dark/unlit
+moral_ethical/good_immoral/unethical
+more_extra/additional_less/fewer
+moreover_besides/furthermore_however
+morning_dawn/forenoon_evening/night
+mortally_fatally/deadly_slightly
+mosque_Muslim place of worship/masjid_none
+mosquito_biting insect/gnat_none
+most_greatest part/majority_least/fewest
+mostly_mainly/largely_rarely/hardly
+mother_mum/parent_father
+motherland_homeland/native country_foreign land
+motion_movement/action_stillness/rest
+motivate_inspire/encourage_discourage/demotivate
+mountain_peak/hill_valley
+mouth_opening/lips_none
+move_shift/stir_stay/stop
+moved_shifted/touched_stayed/stopped
+movement_motion/action_stillness/rest
+movie_film/picture_none
+moving_shifting/touching_stationary/still
+much_a lot/plenty_little/few
+multiplied_increased/grown_reduced/divided
+murderer_killer/slayer_victim
+museum_gallery/collection_none
+music_melody/tune_noise
+musical_tuneful/melodic_discordant/unmusical
+musician_player/performer_none
+must_have to/ought to_may/need not
+mustard_condiment/spice_none
+mutual_shared/common_one-sided/separate
+mystic_spiritual/mysterious_ordinary/plain
+mythology_legends/folklore_fact/history
+nail_fastener/pin_none
+name_title/label_none
+narrate_tell/relate_conceal/withhold
+narrative_story/account_none
+narrow_thin/slim_wide/broad
+nation_country/state_none
+national_countrywide/public_international/local
+nationality_citizenship/national status_none
+nationwide_countrywide/national_local/regional
+native_local/indigenous_foreign/alien
+natural_normal/organic_artificial/unnatural
+naturally_of course/normally_artificially/unnaturally
+nature_world/environment_civilisation
+near_close/nearby_far/distant
+nearby_close/adjacent_distant/far
+nearest_closest/next_farthest/furthest
+nearly_almost/about_completely/fully
+neatly_tidily/smartly_untidily/messily
+necessary_essential/needed_unnecessary/optional
+necessity_need/requirement_luxury/option
+neck_throat/nape_none
+necklace_chain/beads_none
+necktie_tie/cravat_none
+need_require/want_have/own
+needed_required/wanted_unnecessary/unwanted
+negative_adverse/bad_positive/favourable
+neglect_ignore/overlook_care/attend
+negotiable_open to discussion/flexible_fixed/final
+neither_not either/nor_both
+nest_home/shelter_none
+net_mesh/web_none
+network_system/web_none
+never_not ever/at no time_always/ever
+new_fresh/modern_old/ancient
+news_report/information_none
+newspaper_daily/paper_none
+next_following/coming_previous/last
+nice_pleasant/kind_nasty/unpleasant
+nicely_pleasantly/kindly_badly/rudely
+nicotine_tobacco drug/stimulant_none
+night_darkness/evening_day/daylight
+nightingale_songbird/bird_none
+nightly_every night/nocturnal_daily
+nine_9/number_none
+noble_honourable/lofty_ignoble/base
+nobody_no one/none_everybody/anyone
+nocturnal_night-time/active at night_diurnal/daily
+nomadic_wandering/roaming_settled/fixed
+noodle_pasta strand/spaghetti_none
+noon_midday/twelve o'clock_midnight
+normal_usual/ordinary_abnormal/unusual
+normally_usually/generally_rarely/unusually
+north_northward_south
+northern_arctic/polar_southern
+nose_snout/smell organ_none
+not_never/no_yes
+note_record/jot_none
+notebook_exercise book/pad_none
+nothing_zero/nil_everything/something
+notice_see/spot_ignore/overlook
+noticed_saw/spotted_ignored/overlooked
+noun_naming word/person-place-thing word_verb
+nourishment_food/nutrition_hunger/starvation
+novel_new/original_old/familiar
+novelist_fiction writer/storyteller_none
+now_at present/currently_then/later
+nowadays_these days/currently_formerly/in the past
+nuisance_pest/bother_pleasure/help
+number_figure/digit_none
+nutrition_nourishment/food_hunger/starvation
+nutritious_healthy/nourishing_unhealthy/harmful
+nuts_kernels/seeds_none
+obey_follow/comply_disobey/defy
+object_thing/item_subject
+objective_aim/goal_subjective/biased
+observe_watch/notice_ignore/overlook
+observed_watched/noticed_ignored/overlooked
+obsession_fixation/mania_indifference
+obtain_get/gain_lose/give up
+occasion_event/time_none
+occupation_job/profession_leisure/hobby
+ocean_sea/deep_land
+ode_poem/lyric_none
+off_away/disconnected_on/connected
+offer_give/propose_refuse/withdraw
+offering_gift/present_none
+officer_official/policeman_none
+official_formal/authorised_unofficial/informal
+often_frequently/regularly_rarely/seldom
+oil_lubricant/grease_none
+old_aged/ancient_young/new
+older_elder/senior_younger/junior
+olive_fruit/greenish colour_none
+once_formerly/one time_always/never
+one_single/unit_many/several
+onion_bulb/vegetable_none
+online_connected/on the internet_offline/disconnected
+only_just/merely_many/several
+onward_forward/ahead_backward/back
+open_unlocked/ajar_closed/shut
+opened_unlocked/revealed_closed/shut
+opening_gap/start_closing/end
+operate_work/run_stop/fail
+operation_action/procedure_none
+operations_actions/workings_none
+operator_user/driver_none
+opinion_view/belief_fact/certainty
+opportunity_chance/opening_obstacle/difficulty
+opposite_contrary/reverse_same/similar
+oppression_cruelty/tyranny_freedom/liberty
+oral_spoken/verbal_written
+orally_verbally/by mouth_in writing
+orange_citrus fruit/colour_none
+orchard_fruit garden/plantation_none
+order_command/arrangement_chaos/disorder
+ordinal_ranking/sequential_cardinal
+ordinary_usual/common_unusual/special
+organisation_group/institution_none
+organize_arrange/plan_disorganise/scatter
+organized_orderly/arranged_disorganised/messy
+origin_source/beginning_end/result
+original_first/initial_copied/imitated
+originally_at first/initially_finally/lastly
+other_different/another_same/identical
+out_outside/away_in/inside
+outcome_result/effect_cause/start
+outdoor_outside/open-air_indoor
+outdoors_outside/open air_indoors
+outside_exterior/outdoors_inside/interior
+over_above/across_under/below
+overall_total/general_partial/specific
+overhead_above/aloft_underfoot/below
+overlooked_missed/neglected_noticed/seen
+overnight_during the night/sudden_gradual
+overweight_fat/heavy_underweight/thin
+owing_due/unpaid_paid/settled
+owl_night bird/bird of prey_none
+own_possess/personal_lack/lose
+ownership_possession/title_none
+oxen_cattle/bullocks_none
+oxygen_gas/air_none
+oyster_shellfish/mollusc_none
+packed_crowded/full_empty/unpacked
+packet_parcel/box_none
+pad_cushion/notebook_none
+page_leaf/sheet_none
+paid_settled/earned_unpaid/owed
+pain_ache/hurt_pleasure/comfort
+paint_colour/coat_remove/strip
+painted_coloured/decorated_unpainted/plain
+painting_picture/artwork_none
+pair_couple/two_single
+pale_light/pallid_dark/ruddy
+palm_hand surface/tree_none
+pan_pot/vessel_none
+pancake_flat cake/hotcake_none
+pane_window glass/panel_none
+pant_gasp/puff_breathe easily
+papaya_fruit/pawpaw_none
+paper_sheet/document_none
+parade_march/procession_none
+paragraph_passage/section_none
+parallel_alongside/matching_perpendicular/different
+parcel_package/packet_none
+pare_trim/peel_add/leave
+parent_mother/father_child/offspring
+park_garden/green space_none
+parking_leaving a car/stopping_none
+part_piece/portion_whole/entire
+participate_take part/join_withdraw/abstain
+participle_verb form/word form_none
+particular_specific/special_general/common
+particularly_especially/specifically_generally
+partner_associate/colleague_rival/opponent
+parts_pieces/portions_whole
+pass_go by/overtake_fail/stop
+passage_corridor/extract_none
+passenger_traveller/rider_driver/crew
+passing_going by/fleeting_staying/lasting
+passion_enthusiasm/feeling_indifference/apathy
+passive_inactive/submissive_active/assertive
+passport_travel document/permit_none
+past_former/bygone_future/present
+pastel_pale/soft_bright/dark
+pastime_hobby/leisure activity_work/duty
+patch_mend/spot_tear/rip
+paternal_fatherly/of a father_maternal
+patient_calm/tolerant_impatient/restless
+patriotism_love of country/loyalty_disloyalty/treason
+pattern_design/model_chaos
+pause_stop/break_continue/resume
+paved_surfaced/covered_unpaved/rough
+paw_foot/claw_none
+pay_wage/settle_owe/charge
+pea_seed/legume_none
+peace_calm/harmony_war/conflict
+peaceful_calm/quiet_violent/noisy
+peacefully_calmly/quietly_violently/noisily
+peak_top/summit_bottom/base
+peanut_nut/groundnut_none
+pear_fruit/pome_none
+pearl_gem/bead_none
+pebble_stone/rock_boulder
+peel_skin/rind_none
+peep_peek/glance_stare
+pen_writing tool/cage_none
+pencil_writing tool/graphite stick_none
+pendant_hanging ornament/locket_none
+penetrate_pierce/enter_withdraw/retreat
+people_persons/folk_none
+percent_part of hundred/proportion_none
+perch_sit/rest_fly/leave
+perfect_flawless/ideal_flawed/imperfect
+perform_do/carry out_fail/neglect
+performance_show/act_none
+period_time/era_none
+permanent_lasting/enduring_temporary/brief
+permanently_forever/for good_temporarily/briefly
+permission_consent/approval_refusal/prohibition
+persecute_torment/oppress_protect/help
+persecution_oppression/ill-treatment_protection/kindness
+persimmon_fruit/sharon fruit_none
+persistently_continually/steadily_rarely/briefly
+person_individual/human_none
+personal_private/own_public/general
+personality_character/nature_none
+perspiration_sweat/moisture_none
+pet_tame animal/favourite_wild animal
+petty_trivial/small_important/major
+phase_stage/step_none
+phenomenon_event/occurrence_none
+philosopher_thinker/sage_none
+philosophical_thoughtful/wise_unreflective/impractical
+phone_telephone/call_none
+photo_picture/snap_none
+photograph_picture/shot_none
+phrase_expression/saying_none
+physical_bodily/material_mental/spiritual
+physically_bodily/materially_mentally
+pick_choose/select_reject/leave
+picking_choosing/selecting_rejecting/leaving
+pickle_preserve/relish_none
+picnic_outdoor meal/outing_none
+picture_image/painting_none
+pie_pastry/tart_none
+piece_bit/part_whole
+pilgrimage_holy journey/trip to shrine_none
+pill_tablet/capsule_none
+pine_tree/long_none
+pink_rosy/pale red_none
+pioneer_founder/leader_follower/settler
+pipe_tube/duct_none
+pique_irritate/annoy_please/soothe
+pita_flat bread/pocket bread_none
+pitching_throwing/setting up_none
+place_put/spot_remove/take
+placed_put/set_removed/taken away
+plain_simple/ordinary_fancy/decorated
+plan_scheme/design_chaos
+plane_aeroplane/level_uneven/rough
+planet_world/heavenly body_star
+plank_board/timber_none
+planned_intended/designed_unplanned/spontaneous
+planning_arranging/designing_improvising
+plant_flora/seedling_animal
+planted_sowed/seeded_uprooted/removed
+planting_sowing/seeding_uprooting/removing
+plastic_flexible/synthetic_rigid/natural
+plate_dish/platter_none
+platter_dish/plate_none
+play_game/act_work/labour
+played_acted/performed_worked/laboured
+pleasant_nice/agreeable_unpleasant/nasty
+please_delight/satisfy_annoy/upset
+pleased_happy/glad_displeased/annoyed
+pledge_promise/vow_break/betray
+plenty_abundance/lots_scarcity/shortage
+plight_trouble/predicament_comfort/ease
+plop_splash/drop_none
+plot_scheme/story_none
+ploughing_tilling/farming_none
+plunk_drop/plonk_none
+pocket_pouch/small bag_none
+poem_verse/rhyme_prose
+poet_versifier/bard_none
+point_tip/spot_none
+poisonous_toxic/deadly_harmless/safe
+polar_icy/arctic_tropical/temperate
+pole_post/rod_none
+police_law officers/constabulary_criminals
+policy_plan/rule_none
+polite_courteous/respectful_rude/impolite
+politely_courteously/respectfully_rudely/impolitely
+political_governmental/civic_none
+politics_government/statecraft_none
+pond_small lake/pool_none
+pool_pond/puddle_none
+poor_needy/penniless_rich/wealthy
+pop_burst/bang_none
+popular_liked/well-liked_unpopular/disliked
+populated_inhabited/settled_uninhabited/empty
+population_inhabitants/residents_none
+pose_posture/position_none
+position_place/post_none
+positive_certain/optimistic_negative/pessimistic
+possess_own/have_lack/lose
+possession_ownership/property_loss/lack
+possibility_chance/likelihood_impossibility/certainty
+possible_feasible/achievable_impossible/unachievable
+possibly_perhaps/maybe_certainly/definitely
+post_mail/pole_none
+poster_notice/placard_none
+pot_pan/vessel_none
+potato_vegetable/tuber_none
+pouch_bag/sack_none
+pound_hit/unit of weight_none
+pour_flow/stream_hold/stop
+poverty_need/hardship_wealth/riches
+powder_dust/grit_liquid
+power_strength/force_weakness/helplessness
+powerful_strong/mighty_weak/powerless
+powerless_helpless/weak_powerful/strong
+practice_exercise/training_theory/idea
+practise_rehearse/train_neglect/ignore
+praise_applaud/compliment_criticise/blame
+prawn_shrimp/shellfish_none
+pray_worship/plead_curse
+prayer_devotion/worship_none
+precious_valuable/priceless_worthless/cheap
+predecessor_forerunner/ancestor_successor/follower
+predominantly_mainly/mostly_slightly/rarely
+preface_introduction/prologue_epilogue/conclusion
+preference_choice/liking_dislike/aversion
+prefix_beginning/addition_suffix
+preparation_readiness/getting ready_neglect
+prepare_get ready/arrange_neglect/spoil
+prepared_ready/set_unprepared/unready
+prescribe_order/advise_forbid
+presence_attendance/being there_absence
+present_current/existing_past/absent
+presentation_display/talk_none
+presenter_host/announcer_none
+preservation_protection/conservation_destruction/damage
+preserve_protect/keep_destroy/spoil
+pressed_squeezed/crushed_released/loosened
+pressure_force/stress_ease/relief
+prevent_stop/hinder_allow/permit
+previous_earlier/former_next/following
+price_cost/charge_none
+pride_dignity/self-respect_shame/humility
+primary_main/chief_secondary/minor
+prime_main/chief_minor/secondary
+print_publish/type_none
+printing_publishing/typing_none
+prize_award/reward_penalty/punishment
+probably_likely/presumably_unlikely/improbably
+problem_difficulty/trouble_solution/answer
+process_procedure/method_none
+produce_make/create_consume/use
+product_goods/item_none
+production_making/output_consumption/use
+profession_career/occupation_hobby
+professor_teacher/lecturer_student
+profile_outline/side view_none
+profit_gain/benefit_loss/damage
+program_plan/software_none
+programme_plan/schedule_none
+progress_advance/improvement_decline/regress
+progressive_advancing/modern_conservative/backward
+prohibit_ban/forbid_allow/permit
+prohibited_forbidden/banned_allowed/permitted
+project_scheme/task_none
+prominent_important/famous_unknown/hidden
+promise_vow/pledge_break/betray
+promote_advance/support_demote/discourage
+promotion_advancement/rise_demotion/setback
+prompt_quick/immediate_slow/late
+pronounce_say/speak_mispronounce/mumble
+pronounced_noticeable/marked_slight/faint
+pronunciation_speech/accent_none
+proof_evidence/confirmation_doubt/disproof
+propeller_rotor/screw_none
+proper_correct/right_improper/wrong
+properly_correctly/rightly_improperly/wrongly
+property_possession/belongings_none
+prosperous_wealthy/successful_poor/failing
+protect_defend/guard_attack/harm
+protecting_guarding/defending_attacking/harming
+protein_nutrient/body builder_none
+protest_object/complain_agree/accept
+protester_demonstrator/objector_supporter
+proverb_saying/adage_none
+provide_supply/give_withhold/take
+province_region/state_none
+provisional_temporary/interim_permanent/final
+public_open/communal_private/personal
+publication_issue/book_none
+published_issued/printed_unpublished/hidden
+publisher_issuer/printer_none
+publishing_issuing/printing_none
+puff_blow/breathe_none
+pull_drag/tug_push
+pulling_dragging/tugging_pushing
+punished_penalised/disciplined_rewarded/forgiven
+pure_clean/unmixed_impure/contaminated
+purpose_aim/goal_accident
+pursue_chase/follow_flee/avoid
+pursuing_chasing/following_fleeing/avoiding
+push_shove/press_pull
+pushcart_hand cart/barrow_none
+put_place/set_remove/take
+qualification_certificate/degree_none
+quality_standard/excellence_none
+quantity_amount/number_none
+quarter_fourth part/one fourth_whole
+queen_female monarch/ruler_king
+question_ask/query_answer/reply
+quick_fast/rapid_slow
+quickly_fast/rapidly_slowly
+quiet_silent/hushed_loud/noisy
+quietly_silently/softly_loudly/noisily
+quilt_blanket/bedcover_none
+quite_fairly/rather_not at all
+race_contest/run_none
+racing_running/speeding_dawdling/crawling
+radio_wireless/broadcast_none
+rage_fury/anger_calm/peace
+rail_bar/track_none
+railway_train line/track_none
+rain_shower/drizzle_drought
+raindrop_drip/droplet_none
+rainforest_jungle/tropical forest_desert
+rainy_wet/showery_dry/sunny
+raise_lift/elevate_lower/drop
+rapid_fast/swift_slow/gradual
+rapidly_quickly/fast_slowly/gradually
+rare_scarce/uncommon_common/plentiful
+rat_rodent/vermin_none
+rate_speed/charge_none
+rather_somewhat/fairly_not at all/hardly
+reach_arrive/get to_miss/leave
+reaching_arriving/getting to_leaving/missing
+read_study/scan_write
+readable_clear/legible_unreadable/illegible
+reader_bookworm/scholar_writer
+reading_studying/perusing_writing
+ready_prepared/set_unready/unprepared
+real_genuine/actual_fake/imaginary
+reality_truth/fact_fantasy/fiction
+realize_understand/grasp_misunderstand/ignore
+really_truly/actually_falsely/hardly
+rearrange_reorder/reorganise_leave/keep
+reason_cause/motive_effect/result
+reassure_comfort/calm_alarm/worry
+rebellion_revolt/uprising_obedience/submission
+recall_remember/recollect_forget/overlook
+receive_get/accept_give/send
+received_got/accepted_gave/sent
+receiver_recipient/holder_sender
+recent_latest/new_old/ancient
+recently_lately/newly_long ago/formerly
+recipe_formula/instructions_none
+recite_say/repeat_forget/mumble
+recognition_acknowledgement/credit_ignorance/neglect
+recognized_known/identified_unknown/unrecognised
+record_note/register_forget/ignore
+recorded_noted/registered_forgotten/ignored
+recording_noting/registering_forgetting/ignoring
+recover_get better/heal_worsen/decline
+recreation_leisure/fun_work/labour
+red_scarlet/crimson_none
+redefine_restate/reword_none
+reduce_lessen/cut_increase/expand
+reduced_lowered/cut_increased/raised
+reed_cane/grass_none
+refer_mention/direct_ignore/neglect
+reference_mention/source_none
+reflect_think/ponder_ignore/neglect
+reflection_thought/image_none
+reflective_thoughtful/pensive_thoughtless/shallow
+refugee_exile/fugitive_citizen/native
+regard_consider/respect_disregard/ignore
+regime_government/rule_none
+region_area/zone_none
+regular_usual/normal_irregular/unusual
+regularity_routine/order_irregularity/disorder
+regularly_often/routinely_rarely/occasionally
+related_connected/linked_unrelated/separate
+relations_connections/dealings_none
+relationship_bond/connection_estrangement/separation
+relative_family member/kin_stranger
+relax_rest/unwind_tense/strain
+relaxation_rest/ease_tension/work
+relaxing_calming/restful_tiring/stressful
+relevant_connected/related_irrelevant/unrelated
+relief_comfort/ease_distress/burden
+religious_holy/devout_irreligious/worldly
+relocated_moved/shifted_stayed/remained
+rely_depend/trust_doubt/distrust
+remain_stay/linger_leave/depart
+remaining_left/surviving_gone/departed
+remedy_cure/treatment_disease/cause
+remember_recall/recollect_forget/overlook
+remind_prompt/jog memory_forget
+remote_far/distant_near/close
+remoteness_isolation/distance_nearness/closeness
+remove_take away/delete_add/insert
+renew_restore/refresh_destroy/end
+renounce_give up/reject_accept/claim
+renowned_famous/celebrated_unknown/obscure
+rent_hire/lease_buy/own
+replace_substitute/exchange_keep/retain
+replicate_copy/duplicate_original
+reply_answer/respond_ask/question
+report_account/statement_conceal/hide
+reporter_journalist/newsman_none
+represent_stand for/symbolise_misrepresent/distort
+representation_picture/portrayal_none
+repression_suppression/control_freedom/liberty
+republic_state/nation_monarchy/kingdom
+request_ask/appeal_refusal/order
+require_need/want_have/lack
+required_needed/essential_optional/unnecessary
+rescue_save/free_abandon/harm
+research_study/investigation_none
+researcher_investigator/scholar_none
+resemble_look like/be like_differ from/contrast
+reserved_shy/quiet_outgoing/open
+reside_live/dwell_leave/move away
+resist_oppose/withstand_obey/give in
+resistance_opposition/defiance_acceptance/surrender
+resource_supply/asset_none
+respect_esteem/admire_disrespect/scorn
+respondent_defendant/replier_none
+response_reply/answer_question/query
+responsibility_duty/obligation_irresponsibility/freedom
+rest_relax/pause_work/labour
+restricted_limited/controlled_free/unrestricted
+result_outcome/effect_cause/reason
+retell_tell again/repeat_none
+retry_try again/reattempt_give up
+return_come back/go back_leave/depart
+revealing_showing/telling_hiding/concealing
+reverberate_echo/resound_fade/die away
+review_check/revise_ignore/neglect
+reviewer_critic/judge_author
+revise_change/correct_keep/maintain
+revolution_uprising/rebellion_order/stability
+reward_prize/award_punishment/penalty
+rhyme_verse/poem_prose
+rhyming_matching in sound/chiming_none
+rhythm_beat/pulse_none
+rice_grain/cereal_none
+rich_wealthy/affluent_poor/needy
+riches_wealth/treasure_poverty/need
+richness_wealth/abundance_poverty/scarcity
+rickshaw_hand-pulled cart/cycle taxi_none
+rid_free/clear_burden/saddle
+ride_travel/drive_walk
+right_correct/accurate_wrong/incorrect
+rim_edge/border_centre/middle
+ripe_mature/ready_unripe/raw
+rise_ascend/climb_fall/sink
+risk_danger/hazard_safety/security
+rite_ceremony/ritual_none
+ritual_ceremony/custom_none
+river_stream/waterway_none
+riverbank_shore/waterside_none
+riverbed_channel floor/stream bottom_none
+road_street/way_none
+roam_wander/rove_stay/settle
+roasted_baked/grilled_raw/uncooked
+rock_stone/boulder_none
+rocket_missile/spacecraft_none
+rogue_scoundrel/rascal_hero/gentleman
+role_part/function_none
+roll_turn/spin_stay/stop
+roller_cylinder/wheel_none
+rolling_turning/spinning_staying/stopping
+roof_top/cover_floor/base
+room_chamber/space_none
+root_base/source_branch/top
+rose_flower/climbed_fell/dropped
+rotate_turn/spin_stay/stop
+rough_coarse/bumpy_smooth/soft
+round_circular/curved_square/straight
+route_way/path_none
+row_line/rank_none
+royal_regal/kingly_common/ordinary
+rubber_elastic/latex_none
+ruffled_untidy/crumpled_smooth/calm
+ruin_destroy/wreck_build/save
+rule_law/govern_obey/follow
+rumour_gossip/hearsay_fact/truth
+run_dash/sprint_walk/stroll
+running_dashing/sprinting_walking/strolling
+runway_airstrip/landing strip_none
+rural_country/farming_urban/city
+rush_hurry/dash_dawdle/delay
+rut_groove/furrow_none
+sacrifice_give up/surrender_gain/keep
+sad_unhappy/sorrowful_happy/glad
+safe_secure/protected_dangerous/unsafe
+safely_securely/harmlessly_dangerously/riskily
+safety_security/protection_danger/risk
+saga_epic/long story_none
+sage_wise/learned_foolish/ignorant
+sagging_drooping/sinking_rising/firm
+sake_benefit/purpose_none
+salary_pay/wages_none
+sale_selling/deal_purchase/buying
+sales_selling/deals_purchases/buying
+salty_briny/savoury_sweet/fresh
+same_identical/alike_different/unlike
+sample_specimen/example_whole
+sandwich_snack/bread filling_none
+sari_Indian dress/garment_none
+saturday_weekend day/day_none
+saw_cutting tool/saying_none
+say_speak/state_stay silent/listen
+saying_proverb/remark_silence
+scan_look over/skim_study/read closely
+scarce_rare/few_plentiful/abundant
+scared_afraid/frightened_brave/calm
+scattered_spread/dispersed_gathered/together
+scene_view/setting_none
+scenic_beautiful/picturesque_ugly/dull
+schedule_timetable/plan_none
+school_academy/institute_none
+science_knowledge/study_none
+scientist_researcher/expert_none
+scorching_burning/very hot_freezing/cold
+scratch_scrape/scrawl_smooth
+screen_display/monitor_none
+sea_ocean/main_land
+search_look for/hunt_find/ignore
+seashore_beach/coast_inland
+season_time of year/period_none
+seat_chair/place_none
+second_next/another_first/primary
+secondary_minor/lesser_primary/main
+secondly_next/in addition_firstly
+sect_group/faction_none
+section_part/segment_whole
+secure_safe/protected_insecure/unsafe
+security_safety/protection_danger/insecurity
+see_look/watch_ignore/miss
+seed_grain/pip_none
+seeing_looking/watching_ignoring/missing
+seek_search/look for_find/discover
+seem_appear/look_be/exist
+seize_grab/capture_release/free
+select_choose/pick_reject/refuse
+self_own person/ego_other
+selfish_self-centred/greedy_unselfish/generous
+selflessness_unselfishness/generosity_selfishness/greed
+sell_trade/vend_buy/purchase
+sellers_vendors/traders_buyers/customers
+selling_trading/vending_buying/purchasing
+send_dispatch/post_receive/keep
+sender_dispatcher/poster_receiver/recipient
+senior_older/elder_junior/younger
+sense_feeling/meaning_nonsense
+sentence_phrase/judgement_none
+separate_divide/split_join/unite
+separated_apart/divided_joined/united
+separation_division/split_union/togetherness
+sequence_order/series_disorder/chaos
+series_sequence/run_none
+serious_grave/earnest_trivial/light-hearted
+serve_help/wait on_command/rule
+service_help/duty_none
+serving_helping/portion_none
+set_put/fix_unset/remove
+settle_resolve/fix_unsettle/disturb
+settled_resolved/fixed_unsettled/uncertain
+seven_number/seventh_none
+seventy_70/seven tens_none
+several_some/a few_none/one
+severe_harsh/strict_mild/lenient
+shade_shadow/tint_light/brightness
+shaded_shadowed/dim_bright/sunny
+shaky_unsteady/trembling_steady/firm
+shape_form/figure_none
+shaped_formed/moulded_shapeless/formless
+share_divide/part_keep/hoard
+shared_divided/split_kept/hoarded
+sharing_dividing/splitting_keeping/hoarding
+sharp_pointed/keen_blunt/dull
+sharply_suddenly/keenly_gently/gradually
+sheep_lamb/ewe_none
+sheet_page/layer_none
+shelter_refuge/cover_exposure/danger
+shift_move/change_stay/keep
+shine_glow/gleam_dim/fade
+shining_bright/gleaming_dull/dim
+shiny_glossy/bright_dull/matt
+shoal_shallow/sandbank_none
+shock_surprise/jolt_calm/comfort
+shocked_stunned/startled_calm/unmoved
+shoes_footwear/boots_none
+shoot_fire/sprout_none
+shop_store/market_none
+shore_coast/beach_none
+short_brief/small_long/tall
+shortage_lack/scarcity_abundance/plenty
+shortly_soon/presently_later/long after
+shot_fired/attempt_none
+should_ought to/must_none
+shoulder_joint/bear_none
+shouted_yelled/called_whispered/murmured
+show_display/exhibit_hide/conceal
+shower_light rain/spray_drought
+showing_displaying/exhibiting_hiding/concealing
+shrimp_prawn/crustacean_none
+shrink_contract/reduce_expand/grow
+shudder_shake/tremble_stay still
+shy_timid/bashful_bold/confident
+sibling_brother or sister/relative_none
+side_edge/flank_centre/middle
+siege_blockade/attack_relief/release
+sign_symbol/mark_none
+signal_sign/gesture_none
+significance_importance/meaning_insignificance/triviality
+significant_important/notable_insignificant/trivial
+silence_quiet/stillness_noise/sound
+silent_quiet/mute_noisy/talkative
+silently_quietly/noiselessly_loudly/noisily
+similar_alike/akin_different/dissimilar
+similarly_likewise/in the same way_differently/unlike
+simple_easy/plain_complex/complicated
+simply_merely/just_complicatedly/elaborately
+sincere_genuine/honest_insincere/fake
+sincerely_truly/honestly_insincerely/falsely
+sing_chant/hum_none
+single_one/sole_multiple/many
+sinking_going down/dropping_rising/floating
+sip_taste/drink_gulp/swallow
+sister_sibling/female relative_brother
+sit_rest/perch_stand/rise
+site_place/location_none
+sitting_resting/perching_standing/rising
+situation_condition/position_none
+six_number/half-dozen_none
+size_dimensions/bulk_none
+sketch_draw/outline_complete/finish
+skill_ability/talent_incompetence/inability
+skilled_expert/trained_unskilled/clumsy
+skim_glide/read quickly_study/read carefully
+skin_hide/coat_none
+skip_jump/leap_stay/walk
+sky_heavens/air_earth/ground
+skyscraper_tall building/tower_none
+slay_kill/murder_save/spare
+sleep_slumber/nap_wake/stay awake
+sleeping_resting/dozing_awake/waking
+slender_slim/thin_stout/fat
+slice_cut/piece_whole
+slide_glide/slip_climb/stay
+slip_slide/trip_grip/hold
+slogan_motto/catchphrase_none
+slot_opening/slit_none
+slow_sluggish/gradual_fast/quick
+slowly_gradually/leisurely_quickly/rapidly
+sly_cunning/crafty_honest/frank
+small_little/tiny_large/big
+smaller_lesser/tinier_larger/bigger
+smart_clever/bright_foolish/stupid
+smell_scent/odour_none
+smelling_sniffing/scenting_none
+smile_grin/beam_frown/scowl
+smiling_grinning/beaming_frowning/scowling
+smoke_fumes/vapour_none
+smoker_tobacco user/puffer_non-smoker
+smoking_puffing/fuming_none
+smooth_even/sleek_rough/bumpy
+snack_light meal/bite_feast
+snake_serpent/reptile_none
+sneeze_snort/sniff_none
+sniff_smell/breathe in_none
+snow_frozen flakes/flurries_none
+soaked_drenched/wet_dry/parched
+soar_rise/fly_dive/fall
+social_friendly/communal_unsociable/solitary
+socially_publicly/communally_privately/alone
+society_community/public_individual/solitude
+sociology_study of society/social science_none
+sock_footwear/hose_none
+sod_turf/lawn_none
+soft_gentle/tender_hard/firm
+soggy_soaked/damp_dry/firm
+soil_earth/ground_clean/purify
+sold_traded/vended_bought/purchased
+solidarity_unity/support_division/discord
+solitude_loneliness/isolation_company/society
+solve_resolve/answer_complicate/confuse
+solving_resolving/answering_complicating/confusing
+some_a few/several_none/all
+someone_somebody/a person_no one
+somersault_flip/roll_none
+sometimes_occasionally/now and then_always/never
+somewhere_someplace/anywhere_nowhere
+son_male child/boy_daughter
+song_tune/melody_none
+songbird_singing bird/warbler_none
+songbook_book of songs/hymnbook_none
+soon_shortly/presently_late/later
+sooner_earlier/before_later
+soot_smoke residue/black dust_none
+sorrow_grief/sadness_joy/delight
+sorry_apologetic/regretful_unapologetic/glad
+sort_kind/type_none
+souk_market/bazaar_none
+soul_spirit/psyche_body
+sound_noise/tone_silence
+soup_broth/liquid food_none
+source_origin/root_result/end
+south_southward_north
+space_room/gap_none
+spade_digging tool/shovel_none
+sparkling_glittering/shining_dull/flat
+speak_talk/say_listen/keep quiet
+speaker_talker/orator_listener
+speaking_talking/saying_listening/silent
+special_particular/unique_ordinary/common
+species_kind/type_none
+specific_particular/exact_general/vague
+speculate_guess/wonder_know/confirm
+speech_talk/address_silence
+speed_pace/velocity_slowness/delay
+spelling_lettering/orthography_none
+spend_use/pay_save/earn
+spent_used/paid_saved/kept
+spice_seasoning/flavouring_none
+spin_turn/whirl_stop/still
+spirit_soul/courage_body/flesh
+spirits_mood/morale_none
+spiritual_religious/holy_physical/material
+spiritually_religiously/inwardly_physically/materially
+spit_expel/eject_swallow
+spitting_expelling/ejecting_swallowing
+splendid_magnificent/grand_poor/ordinary
+split_divide/crack_join/unite
+spoke_said/talked_listened/was silent
+sport_game/athletics_none
+spot_mark/place_none
+spotlight_attention/focus_obscurity/background
+spotted_dotted/marked_plain/unmarked
+spread_stretch/scatter_gather/fold
+spreading_scattering/stretching_gathering/folding
+sprightly_lively/energetic_sluggish/inactive
+spring_season/leap_autumn
+sprinkle_scatter/dust_pour/drench
+sprout_grow/shoot_wither/die
+spying_watching/snooping_none
+square_four-sided shape/plaza_circle
+staff_workers/stick_none
+stage_phase/platform_none
+staged_arranged/presented_unstaged/natural
+stamp_seal/mark_none
+stand_rise/be upright_sit/lie
+standing_upright/erect_sitting/lying
+staple_main/basic_minor/extra
+stare_gaze/look_glance/look away
+start_begin/commence_finish/stop
+starting_beginning/commencing_ending/finishing
+startling_shocking/surprising_expected/ordinary
+starvation_hunger/famine_plenty/feeding
+starving_hungry/famished_full/well-fed
+state_condition/say_none
+statement_declaration/remark_question
+station_stop/depot_none
+status_rank/standing_none
+stay_remain/wait_leave/go
+steadfastness_loyalty/firmness_disloyalty/weakness
+steady_stable/firm_unsteady/shaky
+steal_rob/take_return/give back
+steam_vapour/mist_none
+steamed_cooked/heated_raw
+steel_metal/alloy_none
+steer_guide/direct_follow/drift
+step_pace/stride_none
+stick_glue/branch_unstick/detach
+sticky_gluey/tacky_dry/smooth
+stiffen_harden/tighten_loosen/relax
+still_motionless/calm_moving/active
+stir_mix/move_still/settle
+stirring_exciting/moving_boring/dull
+stomach_belly/tummy_none
+stone_rock/pebble_none
+stop_halt/cease_start/continue
+stopped_halted/ended_started/continued
+stopping_halting/ending_starting/continuing
+store_shop/keep_spend/use
+storey_floor/level_none
+storm_tempest/gale_calm
+stormy_wild/rough_calm/sunny
+story_tale/narrative_fact
+stove_cooker/oven_none
+strand_thread/fibre_none
+strange_odd/unusual_familiar/normal
+stranger_outsider/foreigner_friend/acquaintance
+strap_band/belt_none
+straw_dried stalk/hay_none
+stream_brook/flow_none
+street_road/lane_none
+strength_power/force_weakness/frailty
+stress_pressure/emphasis_relaxation/calm
+stretch_extend/pull_shrink/shorten
+stretched_extended/pulled_shrunk/relaxed
+stretching_extending/pulling_shrinking/shortening
+striped_lined/banded_plain/unmarked
+strong_powerful/sturdy_weak/feeble
+strongly_firmly/powerfully_weakly/faintly
+structure_building/framework_chaos
+struggle_fight/strive_ease/yield
+struggling_striving/fighting_succeeding/giving up
+stuck_trapped/fixed_free/loose
+student_pupil/learner_teacher
+studied_learned/examined_ignored/neglected
+studio_workroom/workshop_none
+study_learn/examine_ignore/neglect
+style_manner/fashion_none
+subject_topic/theme_none
+submission_surrender/obedience_defiance/resistance
+subsonic_slower than sound/slow_supersonic
+substance_material/matter_nothing/nonsense
+substitution_replacement/exchange_none
+successful_prosperous/victorious_unsuccessful/failed
+such_like/of that kind_none
+sucking_drawing in/sipping_blowing/spitting
+sudden_abrupt/unexpected_gradual/expected
+suddenly_abruptly/unexpectedly_gradually/slowly
+suffering_pain/hardship_comfort/pleasure
+sufficient_enough/adequate_insufficient/inadequate
+suffix_word ending/ending_prefix
+sugar_sweetener/sweet stuff_salt
+suggest_propose/advise_order/demand
+suggestion_proposal/idea_order/command
+suitable_fitting/proper_unsuitable/improper
+suitcase_baggage/case_none
+sultana_raisin/dried grape_none
+summarize_sum up/shorten_expand/elaborate
+summary_outline/abstract_detail/full text
+summer_warm season/hot season_winter
+sun_star/daylight_moon
+sunlit_bright/sunny_dark/shady
+sunny_bright/clear_cloudy/gloomy
+sunrise_dawn/daybreak_sunset
+sunshine_sunlight/daylight_shade/darkness
+supersonic_faster than sound/very fast_subsonic
+superstition_false belief/myth_science/fact
+supper_evening meal/dinner_breakfast
+supply_provide/give_demand/take
+support_help/back_oppose/abandon
+supported_backed/helped_opposed/abandoned
+suppose_assume/guess_know/prove
+sure_certain/positive_unsure/doubtful
+surely_certainly/definitely_doubtfully/perhaps
+surface_top/face_inside/depth
+surplus_extra/excess_shortage/deficit
+surprisingly_unexpectedly/amazingly_expectedly/predictably
+surround_enclose/encircle_leave open/free
+surrounded_enclosed/encircled_free/open
+surrounding_neighbouring/enclosing_none
+surroundings_environment/setting_none
+survival_continuing/living_death/end
+survive_live/endure_die/perish
+swallow_gulp/gobble_spit out/cough up
+swan_waterbird/cygnet parent_none
+sweat_perspire/toil_none
+sweet_sugary/pleasant_sour/bitter
+swim_paddle/bathe_sink
+swimming_paddling/bathing_sinking
+symbol_sign/emblem_none
+symbolize_stand for/represent_none
+sympathise_pity/feel for_ignore/scorn
+synonym_same-meaning word/equivalent_antonym
+syrup_sweet liquid/treacle_none
+system_method/order_chaos/disorder
+tab_flap/label_none
+table_desk/counter_none
+tablespoon_big spoon/measure_none
+tablet_pill/slab_none
+tabloid_newspaper/popular paper_none
+tailwind_following wind/push_headwind
+take_grab/seize_give/offer
+taken_grabbed/seized_given/returned
+takeoff_departure/launch_landing
+taking_grabbing/seizing_giving/returning
+talisman_charm/amulet_none
+talk_speak/chat_listen/be silent
+talking_speaking/chatting_listening/silent
+tall_high/lofty_short/low
+tan_brown/sunburn_none
+tank_container/vessel_none
+tar_pitch/dark substance_none
+tarpaulin_waterproof sheet/cover_none
+taste_flavour/try_none
+taxi_cab/hired car_none
+tea_drink/brew_none
+teach_instruct/educate_learn
+teacher_tutor/instructor_student/pupil
+teaching_instructing/educating_learning/studying
+team_squad/group_individual
+tear_rip/split_mend/repair
+tears_drops/weeping_laughter
+technical_specialised/scientific_general/simple
+technician_expert/mechanic_none
+technique_method/skill_none
+technological_scientific/high-tech_primitive/low-tech
+technology_science/machinery_none
+teeth_chewers/fangs_none
+television_TV/telly_none
+tell_say/inform_ask/conceal
+telling_saying/informing_asking/concealing
+temper_mood/anger_calm/patience
+temperature_heat level/warmth_none
+temple_shrine/place of worship_none
+ten_number/decade_none
+tend_care for/look after_neglect/ignore
+tending_caring for/inclined_neglecting
+tense_nervous/anxious_relaxed/calm
+tent_canvas shelter/marquee_none
+term_word/period_none
+terminal_final/last_initial/first
+terrible_awful/dreadful_wonderful/excellent
+terrorize_frighten/scare_comfort/soothe
+test_exam/check_none
+tested_examined/tried_untested/unchecked
+tether_tie/fasten_free/untie
+text_wording/passage_none
+textbook_course book/manual_none
+textile_fabric/cloth_none
+thank_express gratitude/appreciate_blame/curse
+thanks_gratitude/appreciation_ingratitude
+theme_topic/subject_none
+then_next/afterwards_now/before
+there_at that place/yonder_here
+thereby_thus/by that means_none
+therefore_so/thus_none
+thick_wide/dense_thin/slim
+thigh_upper leg/leg part_none
+thing_object/item_none
+things_objects/items_none
+think_believe/ponder_ignore/forget
+thinking_pondering/reasoning_forgetting
+third_one of three/after second_none
+thirdly_in the third place/next_none
+thirsty_dry/parched_quenched/satisfied
+though_although/even if_none
+thought_idea/notion_none
+thoughtful_kind/considerate_thoughtless/inconsiderate
+thousand_1000/many_none
+thread_yarn/string_none
+threatened_endangered/menaced_protected/safe
+three_number/trio_none
+thrive_flourish/prosper_decline/wither
+through_via/by way of_none
+throughout_all through/during_none
+throw_toss/hurl_catch
+thursday_weekday/day_none
+thus_so/therefore_none
+tick_mark/check_none
+ticket_pass/slip_none
+tidal_of the tide/flowing_none
+tide_flow/current_none
+tidy_neat/orderly_messy/untidy
+tie_fasten/bind_untie/loosen
+tied_fastened/bound_untied/loose
+tilt_slant/lean_straighten/level
+time_period/moment_none
+times_occasions/periods_none
+tiny_small/minute_huge/enormous
+tired_weary/exhausted_energetic/fresh
+title_name/heading_none
+today_now/this day_yesterday/tomorrow
+toddler_small child/tot_adult
+toe_digit/foot part_none
+together_jointly/collectively_apart/separately
+toil_labour/work_rest/relax
+toilet_lavatory/bathroom_none
+token_sign/symbol_none
+toll_charge/fee_none
+tomato_fruit/vegetable_none
+tomorrow_next day_yesterday
+tongue_language/speech organ_none
+tonight_this evening/this night_none
+tons_heaps/loads_none
+too_also/excessively_hardly/barely
+tool_implement/instrument_none
+toothache_dental pain/pain in tooth_none
+toothy_having teeth/grinning_none
+top_peak/summit_bottom/base
+topic_subject/theme_none
+tops_best/highest_bottoms/worst
+torch_lamp/flashlight_none
+torment_torture/hurt_comfort/soothe
+total_whole/complete_partial/part
+touched_felt/moved_untouched/unmoved
+tour_trip/journey_none
+tourism_travel/sightseeing_none
+tourist_traveller/visitor_resident/native
+towel_drying cloth/wipe_none
+tower_high building/turret_none
+town_city/village_none
+toy_plaything/game_none
+trace_track/find_lose/erase
+tract_area/stretch_none
+trade_commerce/business_none
+tradition_custom/habit_novelty/innovation
+traditional_customary/conventional_modern/new
+traditionally_customarily/usually_newly/innovatively
+traffic_vehicles/movement_none
+tragedy_disaster/misfortune_comedy/blessing
+train_teach/railway_none
+trained_taught/skilled_untrained/unskilled
+trainer_coach/instructor_trainee
+training_teaching/practice_none
+tranquility_peace/calm_disturbance/noise
+transfer_move/shift_keep/hold
+transform_change/convert_keep/preserve
+transient_temporary/brief_permanent/lasting
+translation_conversion/rendering_original
+transmission_sending/broadcast_reception/receiving
+transport_carry/convey_keep/hold
+trash_rubbish/garbage_treasure
+traumatic_shocking/upsetting_comforting/soothing
+travel_journey/tour_stay/remain
+traveler_tourist/wayfarer_none
+tray_salver/plate_none
+treasure_riches/jewels_trash/rubbish
+treated_handled/cured_mistreated/neglected
+tree_woody plant/sapling_none
+trench_ditch/channel_none
+trend_fashion/tendency_none
+tribune_platform/champion_none
+tribute_praise/honour_insult/criticism
+trick_fool/deceive_inform/tell truth
+trickery_deceit/cunning_honesty/truthfulness
+tricky_difficult/awkward_easy/simple
+trigger_cause/start_prevent/stop
+trilogy_set of three/three works_none
+trimmed_cut/neatened_untrimmed/overgrown
+trip_journey/outing_none
+tripod_three-legged stand/support_none
+trouble_difficulty/worry_ease/peace
+trough_feeding box/channel_peak/crest
+trouser_pants/leg garment_none
+true_correct/accurate_false/untrue
+truly_really/genuinely_falsely/insincerely
+trumpet_horn/brass instrument_none
+trunk_stem/chest_none
+trustworthy_reliable/honest_untrustworthy/unreliable
+truth_fact/reality_lie/falsehood
+truthful_honest/sincere_untruthful/lying
+truthfulness_honesty/sincerity_dishonesty/deceit
+try_attempt/test_succeed/give up
+trying_attempting/testing_succeeding/giving up
+tube_pipe/hose_none
+tug_pull/drag_push
+tune_melody/air_none
+turbine_rotor/engine_none
+turbulence_unrest/disturbance_calm/stillness
+turn_rotate/spin_stay/stop
+turned_rotated/spun_stayed/stopped
+twenty_20/score_none
+twice_two times/double_once
+twisted_bent/crooked_straight/untwisted
+two_pair/couple_single
+type_kind/sort_none
+typically_usually/normally_unusually/rarely
+ultimate_final/last_first/initial
+unable_incapable/powerless_able/capable
+uncertain_unsure/doubtful_certain/sure
+uncertainty_doubt/unsureness_certainty/confidence
+uncle_relative/father's brother_aunt
+unclean_dirty/filthy_clean/pure
+unconcernedly_carelessly/indifferently_anxiously/worriedly
+unconquered_unbeaten/free_conquered/defeated
+unconventional_unusual/original_conventional/traditional
+uncover_reveal/expose_cover/hide
+undefiled_pure/clean_defiled/polluted
+under_below/beneath_over/above
+underline_emphasise/stress_ignore/neglect
+undershirt_vest/inner garment_none
+understand_grasp/comprehend_misunderstand/misread
+uneven_rough/bumpy_even/level
+unfasten_undo/untie_fasten/tie
+unfavorable_bad/adverse_favourable/good
+unfit_unsuitable/unhealthy_fit/suitable
+unforgettable_memorable/striking_forgettable/ordinary
+unfortunately_sadly/regrettably_fortunately/luckily
+ungrateful_unthankful/thankless_grateful/thankful
+uniformed_in uniform/dressed alike_none
+uninhabited_empty/deserted_inhabited/populated
+uninvited_unwelcome/unasked_invited/welcome
+unique_one of a kind/special_common/ordinary
+unison_harmony/agreement_disagreement/discord
+unit_item/one_whole
+unity_oneness/togetherness_division/disunity
+university_college/higher school_none
+unknown_strange/unfamiliar_known/familiar
+unlamented_not mourned/forgotten_mourned/lamented
+unnoticed_unseen/overlooked_noticed/seen
+unparalleled_unmatched/unique_ordinary/average
+unpredictable_uncertain/changeable_predictable/steady
+unpunished_unpenalised/free_punished/penalised
+unseen_invisible/hidden_visible/seen
+unsteady_shaky/wobbly_steady/firm
+until_till/up to_after/following
+untimely_early/premature_timely/well-timed
+unusual_rare/odd_usual/common
+unwelcome_unwanted/unpleasant_welcome/wanted
+unwillingly_reluctantly/grudgingly_willingly/gladly
+upright_vertical/erect_horizontal/flat
+uprising_revolt/rebellion_obedience/calm
+upset_distressed/troubled_calm/pleased
+urban_city/town_rural/country
+urbanisation_city growth/town development_ruralisation
+urge_press/encourage_discourage/deter
+urn_vase/pot_none
+use_utilise/employ_waste/misuse
+used_employed/second-hand_new/unused
+useful_helpful/handy_useless/worthless
+user_consumer/operator_none
+using_employing/utilising_wasting/misusing
+usual_normal/common_unusual/rare
+usually_normally/generally_rarely/seldom
+utterly_completely/totally_partly/slightly
+vacation_holiday/break_work/duty
+vain_conceited/proud_modest/humble
+valiant_brave/courageous_cowardly/timid
+valid_legal/sound_invalid/void
+valley_dale/vale_hill/mountain
+valuable_precious/worthy_worthless/cheap
+value_worth/price_worthlessness
+valued_prized/treasured_worthless/neglected
+values_principles/ideals_none
+van_vehicle/lorry_none
+varied_different/mixed_uniform/same
+variety_range/assortment_sameness/uniformity
+various_many/different_few/same
+vast_huge/immense_tiny/small
+vegetable_plant food/greens_meat
+vegetation_plants/greenery_none
+vehicle_car/transport_none
+vend_sell/trade_buy/purchase
+vending_selling/trading_buying
+verb_action word/doing word_none
+version_form/edition_none
+very_extremely/highly_slightly/hardly
+vessel_container/ship_none
+vest_waistcoat/undershirt_none
+vibrant_lively/vivid_dull/lifeless
+vicinity_neighbourhood/area_distance
+vicious_cruel/savage_gentle/kind
+victory_win/triumph_defeat/loss
+video_film/clip_none
+view_sight/opinion_none
+viewers_watchers/audience_none
+village_hamlet/settlement_city
+villager_rural resident/countryman_townsman/city dweller
+violently_fiercely/forcefully_gently/peacefully
+visa_travel permit/entry document_none
+visit_call on/see_leave/avoid
+visiting_calling on/seeing_none
+visual_seen/optical_unseen/audible
+vital_essential/crucial_unimportant/trivial
+vitamin_nutrient/supplement_none
+voice_speech/tone_silence
+volume_loudness/capacity_none
+voluntary_willing/optional_compulsory/forced
+voracious_greedy/hungry_moderate/satisfied
+voraciously_greedily/hungrily_moderately/sparingly
+voting_choosing/electing_abstaining
+wages_pay/earnings_none
+wagon_cart/truck_none
+waist_middle/midsection_none
+wait_stay/linger_go/hurry
+waiting_staying/lingering_going/leaving
+wake_rouse/awaken_sleep/doze
+walk_stroll/step_run/dash
+walking_strolling/stepping_running/dashing
+walkway_path/footpath_none
+wall_barrier/partition_none
+wan_pale/pallid_rosy/healthy
+wander_roam/stray_stay/settle
+want_wish/desire_have/own
+wanted_wished/desired_unwanted/rejected
+war_battle/conflict_peace
+ware_goods/product_none
+warfare_combat/fighting_peace
+warm_heated/cosy_cool/cold
+warn_alert/caution_reassure/ignore
+warning_caution/alert_reassurance/approval
+wash_clean/rinse_dirty/soil
+waste_squander/misuse_save/conserve
+watch_observe/look_ignore/overlook
+watching_observing/looking_ignoring/overlooking
+water_liquid/H2O_fire/dryness
+waterway_channel/canal_none
+wave_ripple/swell_none
+waving_flapping/signalling_none
+way_path/method_none
+ways_methods/means_none
+weak_feeble/frail_strong/powerful
+wealth_riches/fortune_poverty/need
+wealthy_rich/prosperous_poor/needy
+wear_put on/dress in_remove/take off
+wearing_putting on/dressing in_removing/taking off
+weather_climate/conditions_none
+web_net/network_none
+website_web page/site_none
+wed_marry/unite_divorce/separate
+wedding_marriage/union_divorce/separation
+weed_unwanted plant/pest plant_crop
+week_seven days/period_none
+weekend_Saturday and Sunday/days off_weekday
+weekly_every week/once a week_daily
+weight_heaviness/load_lightness
+welcome_greet/receive_reject/dismiss
+welcoming_friendly/warm_unwelcoming/cold
+well_healthy/fit_ill/sick
+west_occident/sunset side_east
+western_occidental/westward_eastern
+westward_towards the west/west-bound_eastward
+wet_damp/soaked_dry/arid
+wheel_disc/circle_none
+wherever_in any place/anywhere_none
+while_during/although_none
+whipping_beating/lashing_none
+whisper_murmur/mutter_shout/yell
+whistle_pipe/blow_none
+white_pale/snowy_black
+whole_entire/complete_part/partial
+wide_broad/extensive_narrow/thin
+widely_broadly/extensively_narrowly/slightly
+wife_spouse/partner_husband
+wild_untamed/fierce_tame/domestic
+wilderness_wild/wasteland_town/civilisation
+wildly_madly/recklessly_calmly/gently
+will_shall/determination_none
+win_triumph/succeed_lose/fail
+wind_breeze/gust_calm
+window_opening/pane_wall
+windowsill_ledge/window shelf_none
+windy_breezy/blowy_calm/still
+wings_flight parts/side parts_none
+winner_victor/champion_loser/runner-up
+winter_cold season/frosty season_summer
+wise_sensible/clever_foolish/unwise
+wish_desire/want_dislike/refuse
+within_inside/in_outside/beyond
+withstand_resist/endure_give in/yield
+witness_see/observer_ignore/overlook
+woman_lady/female_man
+wonder_marvel/admire_ignore/doubt
+wonderful_marvellous/excellent_terrible/awful
+wondering_thinking/curious_knowing/certain
+wood_timber/lumber_none
+wooded_forested/tree-covered_bare/treeless
+word_term/expression_none
+work_job/labour_play/rest
+worker_labourer/employee_boss/employer
+working_labouring/operating_idle/resting
+workman_labourer/worker_employer/boss
+world_earth/globe_none
+worried_anxious/concerned_calm/relaxed
+worry_fret/trouble_calm/relax
+worrying_troubling/upsetting_comforting/calming
+worsening_declining/deteriorating_improving/recovering
+worst_poorest/lowest_best
+worthless_useless/valueless_valuable/precious
+would_might/should_none
+wow_amazement/gosh_none
+wrinkle_crease/fold_smooth/flatten
+write_pen/record_read/erase
+writer_author/novelist_reader
+writing_penning/script_reading
+written_penned/recorded_spoken/oral
+wrong_incorrect/false_right/correct
+yard_courtyard/garden_none
+year_twelve months/annum_none
+yearly_annual/every year_rarely
+years_periods/ages_none
+yellow_golden/amber_none
+yes_certainly/agreed_no
+yet_still/however_none
+yield_give/produce_resist/withhold
+yoke_harness/burden_freedom/liberty
+young_youthful/juvenile_old/aged
+younger_junior/lesser_older/elder
+youth_childhood/adolescence_old age/age
+zone_area/region_none
