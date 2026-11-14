@@ -7,7 +7,7 @@
 <title>Sugarcane Editor</title>
 <meta name="description" content="Sugarcane Editor: a powerful all-in-one online editor from the Oryn suite. Write, design and edit with add-ons and extensions.">
 <meta name="keywords" content="Sugarcane Editor, SCEditor, DocuWrite Pro, sugarcane, sca add-ons, editor add-ons, extensions, online editor, document editor, online document editor, free document editor, Word alternative, Google Docs alternative, WYSIWYG editor, rich text editor, text editor, write documents online, A4 editor, docs, office, word processor, online word processor, create documents, edit documents, format documents, export document, export PDF, export DOCX, export HTML, print document, page layout, headings, fonts, tables, lists, templates, document templates, resume maker, letter writer, report writer, essay writer, Oryn, Oryn app, Oryn online, Mohtadi Azad Mahi, Education By Mohtadi Azad, mahi902, free online tools, online tools, web tools, browser tools, no signup, no login, no ads, no credit card, free forever, works in browser, client-side, privacy friendly, offline friendly, PWA, progressive web app, productivity tools, productivity suite, document suite, all-in-one workspace, online workspace, Android app, mobile friendly, dark mode, open source, GitHub Pages, Toolstructer, instant, fast, easy to use, secure, no installation, no server upload">
-<meta name="sceditor-version" content="240">
+<meta name="sceditor-version" content="241">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -4299,7 +4299,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v240…</p>
+    <p class="loading-text">Loading Sugarcane v241…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -9314,7 +9314,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 240; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 241; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -33248,9 +33248,9 @@ authInitFromCookie();
     return pass(!n, n ? n + ' found, e.g. “' + ex + '”' : 'None');
   });
   chk(WQ, 'Words are not overused (10 or fewer per 100 words)', 2, function (c) {
-    if (c.proseWords < 100) return NA('Under 100 words of text');
     var all = [], pos = {}, over = {}, d = 0, worst = '', wn = 0;
-    c.prose.forEach(function (b) { b.w.forEach(function (w) { all.push(w.toLowerCase()); }); });
+    c.blocks.forEach(function (b) { if (b.h) return; b.w.forEach(function (w) { all.push(w.toLowerCase()); }); });
+    if (all.length < 100) return NA('Under 100 words of text');
     for (var i = 0; i < all.length; i++) {
       var w = all[i];
       if (w.length < 4 || STOP[w] || /['’\-]/.test(w)) continue;
