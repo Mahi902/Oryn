@@ -7,7 +7,7 @@
 <title>Sugarcane Editor</title>
 <meta name="description" content="Sugarcane Editor: a powerful all-in-one online editor from the Oryn suite. Write, design and edit with add-ons and extensions.">
 <meta name="keywords" content="Sugarcane Editor, SCEditor, DocuWrite Pro, sugarcane, sca add-ons, editor add-ons, extensions, online editor, document editor, online document editor, free document editor, Word alternative, Google Docs alternative, WYSIWYG editor, rich text editor, text editor, write documents online, A4 editor, docs, office, word processor, online word processor, create documents, edit documents, format documents, export document, export PDF, export DOCX, export HTML, print document, page layout, headings, fonts, tables, lists, templates, document templates, resume maker, letter writer, report writer, essay writer, Oryn, Oryn app, Oryn online, Mohtadi Azad Mahi, Education By Mohtadi Azad, mahi902, free online tools, online tools, web tools, browser tools, no signup, no login, no ads, no credit card, free forever, works in browser, client-side, privacy friendly, offline friendly, PWA, progressive web app, productivity tools, productivity suite, document suite, all-in-one workspace, online workspace, Android app, mobile friendly, dark mode, open source, GitHub Pages, Toolstructer, instant, fast, easy to use, secure, no installation, no server upload">
-<meta name="sceditor-version" content="238">
+<meta name="sceditor-version" content="240">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -4299,7 +4299,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v239…</p>
+    <p class="loading-text">Loading Sugarcane v240…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -6063,6 +6063,26 @@ function waitForSugarcaneAddons(){
               </button>
               <button type="button" onclick="SCMarkdown.openSettings()" class="aw-correct-btn" style="margin-top:5px;background:hsl(calc(var(--sc-h,210) + -11.1) calc(18.4% * var(--sc-s,1)) calc(40.4% + var(--sc-l,0%) * 1));">
                 <span class="material-symbols-outlined" style="font-size:13px">tune</span>Markdown Settings
+              </button>
+            </div>
+
+            <!-- ELEGANT VARIATION -->
+            <div class="aw-row">
+              <div>
+                <div class="aw-row-label">Elegant Variation</div>
+                <div class="aw-row-sub">Swaps overused words for synonyms automatically</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="evAuto"/>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div style="padding:0 10px 6px">
+              <button type="button" id="evReduceBtn" onmousedown="event.preventDefault()" onclick="SCElegant.run(true)" class="aw-correct-btn">
+                <span class="material-symbols-outlined" style="font-size:13px">repeat</span>Reduce Repetitiveness
+              </button>
+              <button type="button" onclick="SCElegant.openSettings()" class="aw-correct-btn" style="margin-top:5px;background:hsl(calc(var(--sc-h,210) + -11.1) calc(18.4% * var(--sc-s,1)) calc(40.4% + var(--sc-l,0%) * 1));">
+                <span class="material-symbols-outlined" style="font-size:13px">tune</span>Synonym Settings
               </button>
             </div>
 
@@ -8285,6 +8305,25 @@ body #ulBulletChips .olcust-chip.active,body.dark #ulBulletChips .olcust-chip.ac
     <div class="mfooter"><button class="mbtn sec" onclick="SCMarkdown.reset()">Reset</button><button class="mbtn primary" onclick="closeMdl('mdMdl')">Done</button></div>
   </div>
 </div>
+<div class="modal" id="evMdl">
+  <div class="mbox" style="max-width:440px">
+    <div class="mhdr">
+      <h2 class="mtitle"><span class="material-symbols-outlined" style="font-size:20px;vertical-align:middle;margin-right:6px;color:hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1))">repeat</span>Synonym Settings</h2>
+      <button class="mclose" onclick="closeMdl('evMdl')"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="ev-scroll">
+    <div class="ev-grp">When to change a word</div>
+    <div class="aw-row"><div><div class="aw-row-label">Allowed repeats per 100 words</div><div class="aw-row-sub">A word is changed once it shows up more than this many times within any 100 words (%)</div></div><input type="number" class="ev-num" id="evLimit" min="1" max="50" step="1"/></div>
+    <div class="aw-row"><div><div class="aw-row-label">Shortest word to change</div><div class="aw-row-sub">Words with fewer letters are left alone</div></div><input type="number" class="ev-num" id="evMin" min="3" max="12" step="1"/></div>
+    <div class="aw-row"><div><div class="aw-row-label">Ignore common words</div><div class="aw-row-sub">Skips words like “which”, “because” and “about”</div></div><label class="toggle-switch"><input type="checkbox" id="evStop"/><span class="toggle-slider"></span></label></div>
+    <div class="ev-grp">How to change it</div>
+    <div class="aw-row"><div><div class="aw-row-label">Single-word synonyms only</div><div class="aw-row-sub">Avoids multi-word replacements that can break the sentence</div></div><label class="toggle-switch"><input type="checkbox" id="evSingle"/><span class="toggle-slider"></span></label></div>
+    <div class="aw-row"><div><div class="aw-row-label">Synonym choice</div><div class="aw-row-sub">Least used picks the one that appears the least nearby</div></div><select class="ev-num ev-sel" id="evPick"><option value="least">Least used</option><option value="first">First listed</option><option value="random">Random</option></select></div>
+    <div class="aw-row"><div><div class="aw-row-label">Skip headings</div><div class="aw-row-sub">Leaves headings and titles untouched</div></div><label class="toggle-switch"><input type="checkbox" id="evHeads"/><span class="toggle-slider"></span></label></div>
+    </div>
+    <div class="mfooter"><button class="mbtn sec" onclick="SCElegant.reset()">Reset</button><button class="mbtn primary" onclick="closeMdl('evMdl')">Done</button></div>
+  </div>
+</div>
 <div class="modal" id="dictationHistMdl">
   <div class="mbox" style="max-width:460px">
     <div class="mhdr">
@@ -9275,7 +9314,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 239; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 240; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -33208,6 +33247,19 @@ authInitFromCookie();
     c.blocks.forEach(function (b) { var m = b.t.match(/(?:^|[^\p{L}])(\p{L}{2,})\s+\1(?![\p{L}])/giu); if (m) m.forEach(function (x) { if (/^\W*(had had|that that)\W*$/i.test(x)) return; n++; if (!ex) ex = x.trim(); }); });
     return pass(!n, n ? n + ' found, e.g. “' + ex + '”' : 'None');
   });
+  chk(WQ, 'Words are not overused (10 or fewer per 100 words)', 2, function (c) {
+    if (c.proseWords < 100) return NA('Under 100 words of text');
+    var all = [], pos = {}, over = {}, d = 0, worst = '', wn = 0;
+    c.prose.forEach(function (b) { b.w.forEach(function (w) { all.push(w.toLowerCase()); }); });
+    for (var i = 0; i < all.length; i++) {
+      var w = all[i];
+      if (w.length < 4 || STOP[w] || /['’\-]/.test(w)) continue;
+      var a = pos[w] || (pos[w] = []); a.push(i);
+      while (a[0] <= i - 100) a.shift();
+      if (a.length > 10) { if (!over[w]) { over[w] = 1; d++; } if (a.length > wn) { wn = a.length; worst = w; } }
+    }
+    return [!d, d ? d + ' word' + (d === 1 ? '' : 's') + ' overused, e.g. “' + worst + '” ' + wn + '× in 100 words' : 'No word appears more than 10 times in any 100 words', Math.min(2, d * 0.5)];
+  }, true);
   chk(WQ, 'No double spaces between words', 1, function (c) { if (c.nW < 20) return NA('Under 20 words'); var n = 0; c.blocks.forEach(function (b) { if (/\S {2,}\S/.test(b.raw)) n++; }); return pass(!n, n + ' line(s) with extra spaces'); });
   chk(WQ, 'No space before punctuation', 1, function (c) { if (c.nW < 20) return NA('Under 20 words'); var n = textCount(c, /[\p{L}\p{N}]\s[,.;:!?](?=\s|$)/gu); return pass(!n, n + ' found'); });
   chk(WQ, 'A space follows commas and full stops', 1, function (c) { if (c.nW < 20) return NA('Under 20 words'); var n = (c.clean.match(/\p{Ll}{2}[,;:]\p{L}/gu) || []).length + (c.clean.match(/\p{Ll}{2}\.\p{Lu}\p{Ll}/gu) || []).length; return pass(!n, n + ' missing'); });
@@ -33475,7 +33527,7 @@ authInitFromCookie();
     ['at least one image', 'adding an image'], ['have alt text', 'adding alt text to images'], ['Alt text is meaningful', 'making alt text more descriptive'], ['No broken images', 'fixing broken images'], ['over 3 MB', 'compressing oversized images'], ['under 20 MB', 'reducing the total image size'], ['fit inside the page', 'resizing what overflows the page'], ['proportions', 'fixing stretched images'], ['duplicated images', 'removing duplicate images'], ['local files', 'embedding images that point at local files'], ['Image density', 'using fewer images per page'], ['outnumber paragraphs', 'balancing images with text'],
     ['at least one heading', 'adding headings'], ['main heading', 'adding a main heading'], ['never skip', 'fixing skipped heading levels'], ['one top-level', 'keeping a single top-level heading'], ['enough headings', 'adding more headings'], ['has content beneath', 'filling the empty sections'], ['Headings are unique', 'making headings unique'], ['Uses a list', 'using a list somewhere'], ['paragraph is 150', 'splitting long paragraphs'], ['over 300 words', 'breaking up very long paragraphs'], ['Table of contents', 'adding a table of contents'], ['Sections are balanced', 'balancing the sections'],
     ['font families', 'using fewer fonts'], ['font sizes', 'using fewer font sizes'], ['Body text size', 'adjusting the body text size'], ['Line spacing', 'adjusting the line spacing'], ['margins', 'adjusting the page margins'], ['text colours', 'using fewer text colours'], ['contrast', 'improving text contrast'], ['tiny text', 'enlarging tiny text'], ['Bold is', 'easing off the bold'], ['Italics', 'easing off the italics'], ['ALL-CAPS', 'cutting back on ALL-CAPS'], ['alignment', 'making text alignment consistent'], ['Highlighting', 'using less highlighting'],
-    ['repeated words', 'removing repeated words'], ['double spaces', 'removing double spaces'], ['space before punctuation', 'fixing spacing before punctuation'], ['space follows', 'adding missing spaces after punctuation'], ['repeated punctuation', 'cleaning up repeated punctuation'], ['Exclamation', 'using fewer exclamation marks'], ['Brackets and', 'balancing brackets and quotes'], ['duplicated paragraphs', 'removing duplicated paragraphs'], ['duplicated sentences', 'removing repeated sentences'], ['Lorem', 'replacing the filler text'], ['placeholders', 'filling in the leftover placeholders'], ['TODO', 'resolving the TODO notes'], ['spelling slip', 'correcting common misspellings'], ['could of', 'fixing “could of” style slips'], ['apostrophes', 'fixing misplaced apostrophes'], ['start with a capital', 'capitalising sentence starts'], ['“I” is capitalised', 'capitalising “I”'],
+    ['overused', 'using synonyms for overused words'], ['repeated words', 'removing repeated words'], ['double spaces', 'removing double spaces'], ['space before punctuation', 'fixing spacing before punctuation'], ['space follows', 'adding missing spaces after punctuation'], ['repeated punctuation', 'cleaning up repeated punctuation'], ['Exclamation', 'using fewer exclamation marks'], ['Brackets and', 'balancing brackets and quotes'], ['duplicated paragraphs', 'removing duplicated paragraphs'], ['duplicated sentences', 'removing repeated sentences'], ['Lorem', 'replacing the filler text'], ['placeholders', 'filling in the leftover placeholders'], ['TODO', 'resolving the TODO notes'], ['spelling slip', 'correcting common misspellings'], ['could of', 'fixing “could of” style slips'], ['apostrophes', 'fixing misplaced apostrophes'], ['start with a capital', 'capitalising sentence starts'], ['“I” is capitalised', 'capitalising “I”'],
     ['Average sentence', 'shortening the sentences'], ['very long sentences', 'splitting the longest sentences'], ['Sentence length varies', 'varying sentence length'], ['Flesch', 'simplifying the wording'], ['Kincaid', 'simplifying the wording'], ['Gunning', 'simplifying the wording'], ['Passive voice', 'using the active voice more'], ['Adverbs', 'trimming adverbs'], ['Filler words', 'cutting filler words'], ['Hedging', 'cutting hedging words'], ['jargon', 'replacing business jargon'], ['Wordy', 'tightening wordy phrases'], ['Transition', 'adding transition words'], ['start the same way', 'varying how sentences begin'], ['repeated over and over', 'avoiding a repeated phrase'],
     ['Spelling matches', 'fixing spelling'], ['offensive', 'reviewing the flagged words'], ['underlines pending', 'clearing the spelling and grammar underlines'],
     ['valid targets', 'fixing broken links'], ['HTTPS', 'switching links to HTTPS'], ['Link text', 'giving links descriptive text'], ['bare web', 'turning bare web addresses into links'], ['Link density', 'cutting down on links'],
@@ -48484,6 +48536,225 @@ function convert(md, opts) {
   };
 })();
 
+</script>
+
+<style id="sc-ev-style">
+/* ── Elegant Variation ── */
+#evMdl .ev-scroll{max-height:62vh;overflow-y:auto;padding-right:2px}
+#evMdl .ev-grp{margin:12px 0 2px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ui-muted,#6b7280)}
+#evMdl .ev-grp:first-child{margin-top:2px}
+#evMdl .ev-num{width:72px;flex:none;box-sizing:border-box;border:1px solid var(--ui-border,#d1d5db);border-radius:8px;padding:6px 8px;font:inherit;font-size:13px;background:var(--ui-chip,#f2f2f7);color:inherit;text-align:center}
+#evMdl .ev-sel{width:auto;max-width:140px;text-align:left}
+#evMdl .ev-num:focus{outline:2px solid hsl(calc(var(--sc-h,210) + -0.2) calc(78.7% * var(--sc-s,1)) calc(46.1% + var(--sc-l,0%) * 1));outline-offset:0}
+body.dark #evMdl .ev-num{background:#2a2a2e;border-color:#444}
+#evReduceBtn:disabled{opacity:.6;pointer-events:none}
+body.converter-mode #evMdl{display:none!important}
+</style>
+<script>
+/* ═══════════════════════════════════════════════════════
+   ELEGANT VARIATION
+   Sidebar: Assistive Writing → Elegant Variation → Auto · Reduce Repetitiveness · Synonym Settings.
+   Words come from bsa.txt (base_synonyms_antonyms). A word that appears more than the allowed
+   number of times within any 100 words is swapped for a synonym. Every swap goes through
+   execCommand('insertText') so undo, autosave, page overflow and collab see ordinary edits.
+═══════════════════════════════════════════════════════ */
+(function () {
+  var ea = document.getElementById('editorArea');
+  if (!ea) return;
+  var LS_KEY = 'sc_ev_cfg', BSA_URL = 'https://mahi902.github.io/Oryn/bsa.txt', WIN = 100, IDLE = 4000;
+  var HOST_SEL = '#editorArea .page-content[contenteditable="true"]';
+  var SKIP_SEL = 'pre,code,a,script,style,[contenteditable="false"],.katex,.watermark,.page-break-ui,.sc-remote-caret,.fw-field';
+  var HEAD_SEL = 'h1,h2,h3,h4,h5,h6';
+  var DEF = { auto: false, limit: 10, minLen: 4, stop: true, single: true, heads: true, pick: 'least' };
+  var cfg = JSON.parse(JSON.stringify(DEF));
+  try { var raw = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); if (raw) for (var k in DEF) if (raw[k] !== undefined) cfg[k] = raw[k]; } catch (e) {}
+  function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(cfg)); } catch (e) {} }
+  function $(id) { return document.getElementById(id); }
+  function toast(m, t) { if (typeof showToast === 'function') showToast(m, t || 'info'); }
+  function blocked() { var c = document.body.classList; return c.contains('viewing-mode') || c.contains('sc-view-only') || c.contains('converter-mode'); }
+
+  var STOP = {};
+  ('about above after again against almost also although always among because been before being below between both cannot could does doing down during each either else even ever every from further have having here hers herself himself into itself just least less many might more most much must myself neither never nor once only other ought ours ourselves over own perhaps quite rather same shall should since some such than that their theirs them themselves then there these they this those though through thus under until upon very were what when where whether which while whom whose will with within without would your yours yourself yourselves').split(' ').forEach(function (w) { STOP[w] = 1; });
+
+  /* ── synonym list ── */
+  var SYN = null, loading = null;
+  function loadSyn() {
+    if (SYN) return Promise.resolve(SYN);
+    if (loading) return loading;
+    loading = fetch(BSA_URL).then(function (r) { if (!r.ok) throw new Error('bsa'); return r.text(); }).then(function (t) {
+      var m = Object.create(null);
+      t.split(/\r?\n/).forEach(function (l) {
+        var p = l.split('_'); if (p.length < 2) return;
+        var b = p[0].trim().toLowerCase(), sy = p[1].trim();
+        if (!b || !sy || sy.toLowerCase() === 'none') return;
+        var list = m[b] || (m[b] = []);
+        sy.split('/').forEach(function (x) { x = x.trim().toLowerCase(); if (x && x !== b && list.indexOf(x) < 0) list.push(x); });
+      });
+      SYN = m; return m;
+    }).catch(function (e) { loading = null; throw e; });
+    return loading;
+  }
+  function plur(x) {
+    if (/(s|x|z|ch|sh)$/.test(x)) return x + 'es';
+    if (/[^aeiou]y$/.test(x)) return x.slice(0, -1) + 'ies';
+    return x + 's';
+  }
+  function synsFor(w) {
+    if (SYN[w]) return SYN[w];
+    var b;
+    if (/ies$/.test(w) && SYN[(b = w.slice(0, -3) + 'y')]) return SYN[b].map(plur);
+    if (/es$/.test(w) && SYN[(b = w.slice(0, -2))]) return SYN[b].map(plur);
+    if (/[^s]s$/.test(w) && SYN[(b = w.slice(0, -1))]) return SYN[b].map(plur);
+    return null;
+  }
+  function matchCase(o, c) {
+    if (o.length > 1 && o === o.toUpperCase()) return c.toUpperCase();
+    if (o.charAt(0) !== o.charAt(0).toLowerCase()) return c.charAt(0).toUpperCase() + c.slice(1);
+    return c;
+  }
+
+  /* ── reading the document ── */
+  var TOK = /[A-Za-z]+(?:['\u2019][A-Za-z]+)*/g, EDGE = /[\p{L}\p{N}_\-@\/\\#]/u;
+  function caretTop() {
+    var s = window.getSelection(); if (!s || !s.rangeCount) return null;
+    var n = s.anchorNode, e = n && (n.nodeType === 1 ? n : n.parentNode), h = e && e.closest && e.closest(HOST_SEL);
+    if (!h) return null;
+    while (n && n.parentNode !== h) n = n.parentNode;
+    return n || null;
+  }
+  function collect(lockTop) {
+    var out = [], idx = 0;
+    ea.querySelectorAll(HOST_SEL).forEach(function (h) {
+      var w = document.createTreeWalker(h, NodeFilter.SHOW_TEXT, null), n;
+      while ((n = w.nextNode())) {
+        var p = n.parentNode, v = n.nodeValue;
+        if (!v || !p || !p.closest) continue;
+        if (p.closest(SKIP_SEL) || (cfg.heads && p.closest(HEAD_SEL))) continue;
+        var lock = !!(lockTop && lockTop.contains(n)), m;
+        TOK.lastIndex = 0;
+        while ((m = TOK.exec(v))) {
+          var raw = m[0], lo = raw.toLowerCase(), s = m.index, e = s + raw.length;
+          var cand = !lock && lo.length >= cfg.minLen && !(cfg.stop && STOP[lo]) && raw.indexOf("'") < 0 && raw.indexOf('\u2019') < 0 &&
+            !(s > 0 && EDGE.test(v.charAt(s - 1))) && !(e < v.length && EDGE.test(v.charAt(e)));
+          out.push({ node: n, s: s, e: e, raw: raw, w: lo, i: idx++, cand: cand });
+        }
+      }
+    });
+    return out;
+  }
+
+  /* ── deciding what to change ── */
+  function countIn(a, lo, hi) { var c = 0; for (var i = 0; i < a.length; i++) if (a[i] >= lo && a[i] <= hi) c++; return c; }
+  function drop(a, v) { var i = a.indexOf(v); if (i > -1) a.splice(i, 1); }
+  function add(a, v) { var i = 0; while (i < a.length && a[i] < v) i++; a.splice(i, 0, v); }
+  function choose(t, pos) {
+    var list = synsFor(t.w); if (!list) return null;
+    var ok = [];
+    for (var j = 0; j < list.length; j++) {
+      var c = list[j];
+      if (c === t.w) continue;
+      if (cfg.single ? !/^[a-z]+$/.test(c) : !/^[a-z][a-z' \-]*$/.test(c)) continue;
+      var load = countIn(pos[c] || [], t.i - WIN + 1, t.i + WIN - 1);
+      if (load >= cfg.limit) continue;
+      ok.push({ c: c, load: load });
+    }
+    if (!ok.length) return null;
+    if (cfg.pick === 'random') return ok[Math.floor(Math.random() * ok.length)].c;
+    if (cfg.pick === 'first') return ok[0].c;
+    var best = ok[0]; ok.forEach(function (x) { if (x.load < best.load) best = x; });
+    return best.c;
+  }
+  function plan(tokens) {
+    var pos = Object.create(null), reps = [], noSyn = 0, over = 0;
+    tokens.forEach(function (t) { (pos[t.w] || (pos[t.w] = [])).push(t.i); });
+    tokens.forEach(function (t) {
+      if (!t.cand) return;
+      if (countIn(pos[t.w], t.i - WIN + 1, t.i) <= cfg.limit) return;
+      over++;
+      var c = choose(t, pos);
+      if (!c) { noSyn++; return; }
+      drop(pos[t.w], t.i); add(pos[c] || (pos[c] = []), t.i);
+      reps.push({ t: t, to: matchCase(t.raw, c) });
+    });
+    return { reps: reps, noSyn: noSyn, over: over };
+  }
+
+  /* ── applying ── */
+  var busy = false, running = false, timer = 0;
+  function apply(reps) {
+    var sel = window.getSelection(), saved = sel && sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null, done = 0, by = new Map();
+    reps.forEach(function (r) { var l = by.get(r.t.node); if (!l) by.set(r.t.node, (l = [])); l.push(r); });
+    busy = true;
+    try {
+      by.forEach(function (list, node) {
+        list.sort(function (a, b) { return b.t.s - a.t.s; });
+        list.forEach(function (r) {
+          if (!node.isConnected || node.nodeValue.slice(r.t.s, r.t.e) !== r.t.raw) return;
+          var rg = document.createRange(); rg.setStart(node, r.t.s); rg.setEnd(node, r.t.e);
+          var s2 = window.getSelection(); s2.removeAllRanges(); s2.addRange(rg);
+          if (document.execCommand('insertText', false, r.to)) done++;
+        });
+      });
+    } finally {
+      busy = false;
+      if (saved) { try { var s3 = window.getSelection(); s3.removeAllRanges(); s3.addRange(saved); } catch (e) {} }
+    }
+    return done;
+  }
+  function setBtn(on) { var b = $('evReduceBtn'); if (b) b.disabled = !!on; }
+  function run(manual) {
+    if (busy || running) return;
+    if (blocked()) { if (manual) toast('Switch to editing mode first', 'info'); return; }
+    running = true; setBtn(true);
+    loadSyn().then(function () {
+      var p = plan(collect(manual ? null : caretTop())), n = p.reps.length ? apply(p.reps) : 0;
+      if (!manual) return;
+      if (n) toast('Varied ' + n + ' repeated word' + (n === 1 ? '' : 's') + (p.noSyn ? ' · ' + p.noSyn + ' had no synonym' : ''), 'success');
+      else if (!p.over) toast('No word repeats more than ' + cfg.limit + ' times per 100 words', 'info');
+      else toast('No synonyms found for the ' + p.over + ' repeated word' + (p.over === 1 ? '' : 's'), 'info');
+    }).catch(function () {
+      if (manual) toast('Could not load the synonym list. Check your connection', 'error');
+    }).then(function () { running = false; setBtn(false); });
+  }
+
+  /* ── auto ── */
+  function schedule(ms) { clearTimeout(timer); timer = setTimeout(function () { run(false); }, ms); }
+  ea.addEventListener('input', function () { if (busy || !cfg.auto || blocked()) return; schedule(IDLE); }, true);
+
+  /* ── sidebar + settings modal ── */
+  function syncUi() {
+    var set = function (id, v) { var el = $(id); if (el) el.checked = !!v; }, val = function (id, v) { var el = $(id); if (el) el.value = v; };
+    set('evAuto', cfg.auto); set('evStop', cfg.stop); set('evSingle', cfg.single); set('evHeads', cfg.heads);
+    val('evLimit', cfg.limit); val('evMin', cfg.minLen); val('evPick', cfg.pick);
+  }
+  function num(id, lo, hi, def) { var v = parseInt($(id).value, 10); if (isNaN(v)) v = def; v = Math.max(lo, Math.min(hi, v)); $(id).value = v; return v; }
+  function openSettings() { syncUi(); if (typeof openMdl === 'function') openMdl('evMdl'); }
+  function reset() { var a = cfg.auto; cfg = JSON.parse(JSON.stringify(DEF)); cfg.auto = a; save(); syncUi(); }
+  (function initUi() {
+    var a = $('evAuto'), mdl = $('evMdl');
+    if (!a || !mdl) return;
+    a.addEventListener('change', function () {
+      cfg.auto = this.checked; save();
+      toast(cfg.auto ? 'Elegant Variation is on' : 'Elegant Variation is off', 'info');
+      if (cfg.auto) { loadSyn().catch(function () {}); schedule(800); } else clearTimeout(timer);
+    });
+    mdl.addEventListener('change', function (e) {
+      var t = e.target; if (!t || !t.id) return;
+      if (t.id === 'evLimit') cfg.limit = num('evLimit', 1, 50, DEF.limit);
+      else if (t.id === 'evMin') cfg.minLen = num('evMin', 3, 12, DEF.minLen);
+      else if (t.id === 'evStop') cfg.stop = t.checked;
+      else if (t.id === 'evSingle') cfg.single = t.checked;
+      else if (t.id === 'evHeads') cfg.heads = t.checked;
+      else if (t.id === 'evPick') cfg.pick = t.value;
+      else return;
+      save();
+    });
+    syncUi();
+    if (cfg.auto) loadSyn().catch(function () {});
+  })();
+
+  window.SCElegant = { run: run, openSettings: openSettings, reset: reset };
+})();
 </script>
 
 </body>
