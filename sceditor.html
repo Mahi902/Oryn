@@ -7,7 +7,7 @@
 <title>Sugarcane Editor</title>
 <meta name="description" content="Sugarcane Editor: a powerful all-in-one online editor from the Oryn suite. Write, design and edit with add-ons and extensions.">
 <meta name="keywords" content="Sugarcane Editor, SCEditor, DocuWrite Pro, sugarcane, sca add-ons, editor add-ons, extensions, online editor, document editor, online document editor, free document editor, Word alternative, Google Docs alternative, WYSIWYG editor, rich text editor, text editor, write documents online, A4 editor, docs, office, word processor, online word processor, create documents, edit documents, format documents, export document, export PDF, export DOCX, export HTML, print document, page layout, headings, fonts, tables, lists, templates, document templates, resume maker, letter writer, report writer, essay writer, Oryn, Oryn app, Oryn online, Mohtadi Azad Mahi, Education By Mohtadi Azad, mahi902, free online tools, online tools, web tools, browser tools, no signup, no login, no ads, no credit card, free forever, works in browser, client-side, privacy friendly, offline friendly, PWA, progressive web app, productivity tools, productivity suite, document suite, all-in-one workspace, online workspace, Android app, mobile friendly, dark mode, open source, GitHub Pages, Toolstructer, instant, fast, easy to use, secure, no installation, no server upload">
-<meta name="sceditor-version" content="241">
+<meta name="sceditor-version" content="242">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -6793,6 +6793,14 @@ body #ulBulletChips .olcust-chip.active,body.dark #ulBulletChips .olcust-chip.ac
                 </div>
               </div>
             </div>
+
+            <div class="scf-sec" id="imgPosSec">
+              <div class="scf-sec-h"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z M9.6 10a2.4 2.4 0 1 0 4.8 0a2.4 2.4 0 1 0 -4.8 0z"/></svg></span>Coordinate</div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <input type="text" class="scf-input" id="imgPosBox" placeholder="x, y (automatic)" autocomplete="off" spellcheck="false" inputmode="decimal" title="Image position on the page: x, y" oninput="imgPosBtn()" onblur="imgPosBlur()" onkeydown="imgPosKey(event)" style="flex:1;min-width:0;box-sizing:border-box"/>
+                <button type="button" class="scf-icon-btn" id="imgPosBtn" data-mode="copy" title="Copy coordinate" aria-label="Copy coordinate" onmousedown="event.preventDefault()" onclick="imgPosAct()"></button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -9314,7 +9322,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 241; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 242; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -47174,6 +47182,131 @@ var psCur = 'pages';
     if(img)apply(img);
     return r;
   };
+})();
+</script>
+
+<script>
+/* Image coordinate box — bottom of the Edit Image screen. Type "x, y" to move the image; copy button becomes save when the edit is valid. */
+(function(){
+  var ICO_COPY='<span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 9h9a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-9a2 2 0 0 1 -2 -2v-8a2 2 0 0 1 2 -2z M15 5.5V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h.5"/></svg></span>';
+  var ICO_SAVE='<span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10a3 3 0 0 1 3 3v10a3 3 0 0 1 -3 3h-10a3 3 0 0 1 -3 -3v-10a3 3 0 0 1 3 -3z M8 4v5h6V4M8 20v-6h8v6"/></svg></span>';
+  var pend=null, moved=false;   /* pend: coordinate for NEW images / saved defaults; moved: existing image repositioned from this box */
+  function box(){return document.getElementById('imgPosBox');}
+  function btn(){return document.getElementById('imgPosBtn');}
+  function fmt(p){return p?(Math.round(p.x*10)/10)+', '+(Math.round(p.y*10)/10):'';}
+  function parse(t){
+    var m=String(t||'').trim().match(/^\(?\s*(-?\d+(?:\.\d+)?)\s*(?:,|;|\s)\s*(-?\d+(?:\.\d+)?)\s*\)?$/);
+    if(!m)return null;var x=+m[1],y=+m[2];
+    if(!isFinite(x)||!isFinite(y)||Math.abs(x)>20000||Math.abs(y)>20000)return null;
+    return {x:x,y:y};
+  }
+  function cur(){
+    var img=_editingImg;
+    if(img){
+      if(img.style.position==='absolute'&&img.style.left!==''&&img.style.top!=='')return {x:parseFloat(img.style.left)||0,y:parseFloat(img.style.top)||0};
+      var pc=img.closest&&img.closest('.page-content');if(!pc)return null;
+      var z=(S.zoom||100)/100,r=img.getBoundingClientRect(),q=pc.getBoundingClientRect();
+      return {x:(r.left-q.left)/z,y:(r.top-q.top)/z};
+    }
+    return pend;
+  }
+  function setBtn(mode){
+    var b=btn();if(!b)return;
+    if(b.dataset.mode===mode&&b.innerHTML)return;
+    b.dataset.mode=mode;b.innerHTML=mode==='save'?ICO_SAVE:ICO_COPY;
+    var t=mode==='save'?'Save coordinate':'Copy coordinate';b.title=t;b.setAttribute('aria-label',t);
+  }
+  function sync(){var b=box();if(!b)return;b.value=fmt(cur());b.dataset.base=b.value;setBtn('copy');}
+  function revert(){var b=box();if(!b)return;b.value=b.dataset.base||'';setBtn('copy');}
+  window.imgPosBtn=function(){
+    var b=box();if(!b)return;
+    var t=b.value.trim();
+    setBtn(t!==(b.dataset.base||'')&&parse(t)?'save':'copy');
+  };
+  window.imgPosBlur=function(){
+    var b=box();if(!b)return;
+    if(b.value.trim()!==(b.dataset.base||'')&&!parse(b.value))revert();
+  };
+  window.imgPosKey=function(e){
+    var b=box();
+    if(e.key==='Enter'){
+      e.preventDefault();
+      if(btn().dataset.mode==='save')window.imgPosSave();else revert();
+      b.blur();
+    }else if(e.key==='Escape'&&b.value.trim()!==(b.dataset.base||'')){
+      e.preventDefault();e.stopPropagation();revert();
+    }
+  };
+  window.imgPosSave=function(){
+    var b=box(),p=parse(b.value);
+    if(!p){revert();return;}
+    var img=_editingImg;
+    if(img){
+      if(S.lockedImgs&&S.lockedImgs.has(img)){showToast('This image is locked','error');revert();return;}
+      if(img.dataset.solid==='1'){
+        delete img.dataset.solid;
+        if(img.style.display==='inline-block')img.style.display='';
+        img.style.verticalAlign='';
+        try{imgChipSelById('imgProperty','image');}catch(_){}
+      }
+      img.style.position='absolute';img.style.left=p.x+'px';img.style.top=p.y+'px';
+      if(!img.style.zIndex)img.style.zIndex='1000';
+      moved=true;
+      try{if(S.selImg===img)showResizeH(img);syncResizeHandle();}catch(_){}
+      try{scheduleAutoSave();}catch(_){}
+    }else{
+      pend=p;
+    }
+    b.value=fmt(p);b.dataset.base=b.value;setBtn('copy');
+    showToast(img?'Image moved':'Coordinate saved','success');
+  };
+  window.imgPosAct=function(){
+    var b=box();
+    if(btn().dataset.mode==='save'){window.imgPosSave();return;}
+    if(b.value.trim()!==(b.dataset.base||''))revert();
+    var v=b.dataset.base||'';
+    if(!v){showToast('No coordinate yet','info');return;}
+    var done=function(){showToast('Coordinate copied','success');};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(v).then(done,function(){fallback(v,done);});}
+    else fallback(v,done);
+  };
+  function fallback(v,done){
+    var t=document.createElement('textarea');t.value=v;t.style.cssText='position:fixed;opacity:0;left:-999px';
+    document.body.appendChild(t);t.select();try{document.execCommand('copy');done();}catch(_){showToast('Could not copy','error');}
+    t.remove();
+  }
+
+  var _reset=window.imgResetControls;
+  window.imgResetControls=function(){var r=_reset.apply(this,arguments);pend=null;moved=false;try{sync();}catch(_){}return r;};
+  var _open=window.openEditImgAttrs;
+  window.openEditImgAttrs=function(){var r=_open.apply(this,arguments);try{sync();}catch(_){}return r;};
+  var _def=window.imgDefApplyToControls;
+  window.imgDefApplyToControls=function(c){var r=_def.apply(this,arguments);pend=(c&&c.saved&&c.pos)?{x:c.pos.x,y:c.pos.y}:null;try{sync();}catch(_){}return r;};
+  var _sd=window.saveImgDefaults;
+  window.saveImgDefaults=function(){
+    var p=pend,r=_sd.apply(this,arguments);
+    try{var c=imgDefGet();if(p)c.pos={x:p.x,y:p.y};else delete c.pos;imgDefSet(c);}catch(_){}
+    pend=null;return r;
+  };
+  var _edit=window.applyEditImgAttrs;
+  window.applyEditImgAttrs=function(){
+    var img=_editingImg,keep=null;
+    if(img&&moved&&img.style.position==='absolute')keep={l:img.style.left,t:img.style.top,z:img.style.zIndex};
+    var r=_edit.apply(this,arguments);
+    if(keep&&img.dataset.solid!=='1'){img.style.position='absolute';img.style.left=keep.l;img.style.top=keep.t;img.style.zIndex=keep.z||'1000';try{syncResizeHandle();}catch(_){}}
+    moved=false;return r;
+  };
+  var _ins=window.insertImage;
+  window.insertImage=function(){
+    var p=pend,before=new Set(document.querySelectorAll('#editorArea .page-content img'));
+    var r=_ins.apply(this,arguments);
+    if(p){
+      var made=[].filter.call(document.querySelectorAll('#editorArea .page-content img'),function(i){return !before.has(i);})[0];
+      if(made&&made.dataset.solid!=='1'){made.style.position='absolute';made.style.left=p.x+'px';made.style.top=p.y+'px';made.style.zIndex='1000';try{scheduleAutoSave();}catch(_){}}
+    }
+    pend=null;return r;
+  };
+  window.addEventListener('load',function(){try{setBtn('copy');}catch(_){}});
 })();
 </script>
 
