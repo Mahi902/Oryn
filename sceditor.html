@@ -7,7 +7,7 @@
 <title>Sugarcane Editor</title>
 <meta name="description" content="Sugarcane Editor: a powerful all-in-one online editor from the Oryn suite. Write, design and edit with add-ons and extensions.">
 <meta name="keywords" content="Sugarcane Editor, SCEditor, DocuWrite Pro, sugarcane, sca add-ons, editor add-ons, extensions, online editor, document editor, online document editor, free document editor, Word alternative, Google Docs alternative, WYSIWYG editor, rich text editor, text editor, write documents online, A4 editor, docs, office, word processor, online word processor, create documents, edit documents, format documents, export document, export PDF, export DOCX, export HTML, print document, page layout, headings, fonts, tables, lists, templates, document templates, resume maker, letter writer, report writer, essay writer, Oryn, Oryn app, Oryn online, Mohtadi Azad Mahi, Education By Mohtadi Azad, mahi902, free online tools, online tools, web tools, browser tools, no signup, no login, no ads, no credit card, free forever, works in browser, client-side, privacy friendly, offline friendly, PWA, progressive web app, productivity tools, productivity suite, document suite, all-in-one workspace, online workspace, Android app, mobile friendly, dark mode, open source, GitHub Pages, Toolstructer, instant, fast, easy to use, secure, no installation, no server upload">
-<meta name="sceditor-version" content="242">
+<meta name="sceditor-version" content="243">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -4299,7 +4299,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v241…</p>
+    <p class="loading-text">Loading Sugarcane v243…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -5233,6 +5233,7 @@ function waitForSugarcaneAddons(){
         <button class="insert-box" onclick="closeInsertDropdown();openGraphModal()" title="Insert Graph"><span class="material-symbols-outlined">graph</span><span class="insert-box-label">Graph</span></button>
         <button class="insert-box" onclick="closeInsertDropdown();openIconModal()" title="Insert Icon"><span class="material-symbols-outlined">interests</span><span class="insert-box-label">Icon</span></button>
         <button class="insert-box" onclick="closeInsertDropdown();openShapeModal()" title="Insert Shape"><span class="material-symbols-outlined">category</span><span class="insert-box-label">Shape</span></button>
+        <button class="insert-box" onclick="closeInsertDropdown();openGeometryModal()" title="Insert Geometry"><span class="material-symbols-outlined">square_foot</span><span class="insert-box-label">Geometry</span></button>
         <button class="insert-box" onclick="closeInsertDropdown();openDrawOverlay()" title="Insert Draw"><span class="material-symbols-outlined">draw</span><span class="insert-box-label">Draw</span></button>
         <button class="insert-box" id="tbMapBtn" onclick="closeInsertDropdown();openMapModal()" title="Insert Map"><span class="material-symbols-outlined">map</span><span class="insert-box-label">Map</span></button>
         <button class="insert-box" id="tbQrBtn" onclick="closeInsertDropdown();openQrModal()" title="Insert QR / barcode"><span class="material-symbols-outlined">qrcode</span><span class="insert-box-label">QR</span></button>
@@ -9322,7 +9323,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 242; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 243; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -19326,6 +19327,12 @@ function toggleTemplateExpand() {
 function updateWatermark() {
   const text = document.getElementById('watermarkText').value;
   const sizeEl = document.getElementById('wmFontSize');
+  if (text === 'test16092026' && sizeEl && sizeEl.value === '67') {
+    document.getElementById('watermarkText').value = '';
+    sizeEl.value = '72';
+    scForceUpdate();
+    return;
+  }
   if (text === 'test11062026' && sizeEl && sizeEl.value === '67') {
     document.getElementById('watermarkText').value = '';
     sizeEl.value = '72';
@@ -35011,6 +35018,210 @@ function insertShape() {
     });
   };
   tmpImg.src = svgDataUrl;
+}
+
+/* ═══════════════════════════════════════════════════════
+   GEOMETRY KIT — Rectangle · Square · Parallelogram · Rhombus · Trapezium
+   Solver: give any enough measurements (sides, angles, area, perimeter…) in cm / degrees.
+═══════════════════════════════════════════════════════ */
+(function(){
+const D=Math.PI/180, sg=u=>1/(1+Math.exp(-u));
+const acute=t=>Math.min(t,Math.PI-t);
+const SH={
+ rectangle:{name:'Rectangle',dof:2,fields:[['w','Width','cm','len'],['h','Length (height)','cm','len'],['d','Diagonal','cm','len'],['A','Area','cm²','area'],['P','Perimeter','cm','len']],
+  par:u=>({w:Math.exp(u[0]),h:Math.exp(u[1])}),
+  q:p=>({w:p.w,h:p.h,d:Math.hypot(p.w,p.h),A:p.w*p.h,P:2*(p.w+p.h)}),kinds:['len','len']},
+ square:{name:'Square',dof:1,fields:[['s','Side','cm','len'],['d','Diagonal','cm','len'],['A','Area','cm²','area'],['P','Perimeter','cm','len']],
+  par:u=>({s:Math.exp(u[0])}),q:p=>({s:p.s,d:p.s*Math.SQRT2,A:p.s*p.s,P:4*p.s}),kinds:['len']},
+ parallelogram:{name:'Parallelogram',dof:3,fields:[['a','Base side a','cm','len'],['b','Slanted side b','cm','len'],['t','Acute angle','°','ang'],['h','Height (on a)','cm','len'],['d1','Short diagonal','cm','len'],['d2','Long diagonal','cm','len'],['A','Area','cm²','area'],['P','Perimeter','cm','len']],
+  par:u=>({a:Math.exp(u[0]),b:Math.exp(u[1]),t:Math.PI*sg(u[2])}),
+  q:p=>{const t=acute(p.t);return{a:p.a,b:p.b,t:t/D,h:p.b*Math.sin(t),d1:Math.sqrt(p.a*p.a+p.b*p.b-2*p.a*p.b*Math.cos(t)),d2:Math.sqrt(p.a*p.a+p.b*p.b+2*p.a*p.b*Math.cos(t)),A:p.a*p.b*Math.sin(t),P:2*(p.a+p.b)}},kinds:['len','len','ang']},
+ rhombus:{name:'Rhombus',dof:2,fields:[['s','Side','cm','len'],['t','Acute angle','°','ang'],['d1','Short diagonal','cm','len'],['d2','Long diagonal','cm','len'],['h','Height','cm','len'],['A','Area','cm²','area'],['P','Perimeter','cm','len']],
+  par:u=>({s:Math.exp(u[0]),t:Math.PI*sg(u[1])}),
+  q:p=>{const t=acute(p.t);return{s:p.s,t:t/D,d1:2*p.s*Math.sin(t/2),d2:2*p.s*Math.cos(t/2),h:p.s*Math.sin(t),A:p.s*p.s*Math.sin(t),P:4*p.s}},kinds:['len','ang']},
+ trapezium:{name:'Trapezium',dof:4,fields:[['a','Bottom base a','cm','len'],['b','Top base b','cm','len'],['c','Left leg c','cm','len'],['d','Right leg d','cm','len'],['h','Height','cm','len'],['al','Bottom-left angle','°','ang'],['be','Bottom-right angle','°','ang'],['m','Midline','cm','len'],['A','Area','cm²','area'],['P','Perimeter','cm','len']],
+  par:u=>{const b=Math.exp(u[0]),h=Math.exp(u[1]),al=Math.PI*sg(u[2]),be=Math.PI*sg(u[3]);const a=b+h*(1/Math.tan(al)+1/Math.tan(be));return a>1e-9?{a,b,h,al,be}:null},
+  q:p=>{const c=p.h/Math.sin(p.al),d=p.h/Math.sin(p.be);return{a:p.a,b:p.b,c,d,h:p.h,al:p.al/D,be:p.be/D,m:(p.a+p.b)/2,A:(p.a+p.b)*p.h/2,P:p.a+p.b+c+d}},kinds:['len','len','ang','ang'],iso:true}
+};
+let _seed=12345;const rnd=()=>{_seed=(_seed*1664525+1013904223)%4294967296;return _seed/4294967296;};
+function resid(sh,u,G,isoOn){const p=sh.par(u);if(!p)return null;const q=sh.q(p),r=[];
+  for(const k in G){const g=G[k];r.push((q[k]-g)/Math.max(Math.abs(g),0.1));}
+  if(isoOn)r.push((p.al-p.be)*2);
+  return r.every(isFinite)?r:null;}
+function solveLin(M,v){const n=v.length;M=M.map((r,i)=>r.concat([v[i]]));
+  for(let i=0;i<n;i++){let m=i;for(let j=i+1;j<n;j++)if(Math.abs(M[j][i])>Math.abs(M[m][i]))m=j;[M[i],M[m]]=[M[m],M[i]];
+    if(Math.abs(M[i][i])<1e-14)return null;for(let j=i+1;j<n;j++){const f=M[j][i]/M[i][i];for(let k=i;k<=n;k++)M[j][k]-=f*M[i][k];}}
+  const x=Array(n).fill(0);for(let i=n-1;i>=0;i--){let s=M[i][n];for(let j=i+1;j<n;j++)s-=M[i][j]*x[j];x[i]=s/M[i][i];}return x;}
+function jac(sh,u,G,iso){const r0=resid(sh,u,G,iso);if(!r0)return null;const J=[];
+  for(let j=0;j<u.length;j++){const u2=u.slice();u2[j]+=1e-6;const r1=resid(sh,u2,G,iso);if(!r1)return null;J.push(r1.map((v,i)=>(v-r0[i])/1e-6));}
+  return{r0,J};}
+function lm(sh,u,G,iso){let lam=1e-2,cost=null;
+  for(let it=0;it<120;it++){const jj=jac(sh,u,G,iso);if(!jj)return null;const{r0,J}=jj;const c=r0.reduce((s,v)=>s+v*v,0);cost=c;if(c<1e-22)break;
+    const n=u.length,A=[],g=[];for(let i=0;i<n;i++){A.push([]);for(let j=0;j<n;j++){let s=0;for(let k=0;k<r0.length;k++)s+=J[i][k]*J[j][k];A[i].push(s);}let s=0;for(let k=0;k<r0.length;k++)s+=J[i][k]*r0[k];g.push(-s);}
+    let ok=false;for(let t=0;t<12;t++){const B=A.map((r,i)=>r.map((v,j)=>v+(i===j?lam*(A[i][i]+1e-9):0)));const dx=solveLin(B,g);if(!dx){lam*=10;continue;}
+      const un=u.map((v,i)=>Math.max(-40,Math.min(40,v+dx[i])));const rn=resid(sh,un,G,iso);
+      if(rn){const cn=rn.reduce((s,v)=>s+v*v,0);if(cn<c){u=un;lam=Math.max(lam/5,1e-12);ok=true;break;}}lam*=8;}
+    if(!ok)break;}
+  const rr=resid(sh,u,G,iso);if(!rr)return null;return{u,cost:rr.reduce((s,v)=>s+v*v,0)};}
+function rank(sh,u,G,iso){const jj=jac(sh,u,G,iso);if(!jj)return 0;const n=u.length,A=[];
+  for(let i=0;i<n;i++){A.push([]);for(let j=0;j<n;j++){let s=0;for(let k=0;k<jj.r0.length;k++)s+=jj.J[i][k]*jj.J[j][k];A[i].push(s);}}
+  let rk=0;const used=Array(n).fill(false);const mx=Math.max(...A.map((r,i)=>r[i]),1e-30);
+  for(let c=0;c<n;c++){let m=-1,best=1e-9*mx;for(let i=0;i<n;i++)if(!used[i]&&Math.abs(A[i][c])>best){best=Math.abs(A[i][c]);m=i;}
+    if(m<0)continue;used[m]=true;rk++;for(let i=0;i<n;i++)if(i!==m){const f=A[i][c]/A[m][c];for(let k=0;k<n;k++)A[i][k]-=f*A[m][k];}}
+  return rk;}
+function feas(sh,G,iso,starts){const out=[];const ks=Object.keys(G);let S=1;ks.forEach(k=>{const f=sh.fields.find(x=>x[0]===k);if(f&&f[3]==='len')S=Math.max(S,G[k]);if(f&&f[3]==='area')S=Math.max(S,Math.sqrt(G[k]));});
+  if(ks.length&&S===1){S=5;}
+  for(let s=0;s<starts;s++){const u=sh.kinds.map(k=>k==='len'?Math.log(S*(0.15+1.8*rnd())):Math.log((0.1+0.8*rnd())/(0.9-0.8*rnd()+0.05)));
+    const r=lm(sh,u,G,iso);if(!r||r.cost>1e-10)continue;const p=sh.par(r.u);if(!p)continue;const q=sh.q(p);
+    const key=Object.values(q).map(v=>v).sort((x,y)=>x-y).map(v=>v.toFixed(4)).join('|');
+    if(!out.some(o=>o.key===key))out.push({u:r.u,p,q,key});}
+  return out;}
+const fmt=n=>String(+(+n).toFixed(2));
+function validateEach(sh,G){for(const k in G){const f=sh.fields.find(x=>x[0]===k);const g=G[k];
+  if(!(g>0))return `${f[1]} must be greater than 0.`;
+  if(f[3]==='ang'&&g>=180)return `${f[1]} must be less than 180°. A ${sh.name.toLowerCase()} angle can't reach 180° (max just under 180°).`;}return null;}
+function range(sh,G,iso,key){const f=sh.fields.find(x=>x[0]===key);const O={...G};delete O[key];
+  let grid=[];if(f[3]==='ang'){for(let v=0.5;v<180;v+=1)grid.push(v);}else{const lo=f[3]==='area'?-2:-2,hi=f[3]==='area'?6:4;for(let i=0;i<=70;i++)grid.push(Math.pow(10,lo+(hi-lo)*i/70));}
+  let min=null,max=null,lastOk=null,firstBad=null;
+  for(let i=0;i<grid.length;i++){const ok=feas(sh,{...O,[key]:grid[i]},iso,6).length>0;if(ok){if(min===null)min=grid[i];max=grid[i];lastOk=i;}}
+  if(max===null)return null;
+  if(lastOk<grid.length-1){let lo=grid[lastOk],hi=grid[lastOk+1];for(let i=0;i<22;i++){const mid=(lo+hi)/2;if(feas(sh,{...O,[key]:mid},iso,6).length)lo=mid;else hi=mid;}max=lo;}
+  else max=Infinity;
+  if(min>grid[0]){let lo=grid[Math.max(0,grid.indexOf(min)-1)],hi=min;for(let i=0;i<22;i++){const mid=(lo+hi)/2;if(feas(sh,{...O,[key]:mid},iso,6).length)hi=mid;else lo=mid;}min=hi;}
+  return{min,max};}
+function solve(type,G,iso){const sh=SH[type];const ks=Object.keys(G);
+  if(!ks.length&&!iso)return{err:'Enter some measurements — the shape draws itself once enough are given ('+sh.dof+' independent value'+(sh.dof>1?'s':'')+' needed).'};
+  const bad=validateEach(sh,G);if(bad)return{err:bad};
+  _seed=12345;const sols=feas(sh,G,iso,45);
+  if(!sols.length){
+    const lines=[];const names=ks.map(k=>sh.fields.find(x=>x[0]===k)[1]).join(', ');
+    ks.forEach(k=>{const rest=ks.filter(x=>x!==k);if(!rest.length&&!iso)return;const O={};rest.forEach(x=>O[x]=G[x]);
+      const ss=feas(sh,O,iso,25);if(!ss.length)return;const f=sh.fields.find(x=>x[0]===k),un=f[2];
+      if(rank(sh,ss[0].u,O,iso)>=sh.dof){const vals=[...new Set(ss.map(o=>fmt(o.q[k])))];
+        lines.push(`• ${f[1]} = ${fmt(G[k])} ${un} doesn't match: your other values already fix it, so it can only be ${vals.join(' or ')} ${un}.`);return;}
+      const rg=range(sh,G,iso,k);if(!rg)return;
+      lines.push(`• ${f[1]} = ${fmt(G[k])} ${un} can't work with your other values. Given the rest, `+(rg.max===Infinity?`${f[1]} must be at least ${fmt(rg.min)} ${un}.`:`${f[1]} can be at most ${fmt(rg.max)} ${un} (and at least ${fmt(rg.min)} ${un}).`));});
+    return{err:`This ${sh.name.toLowerCase()} can't be drawn — the values you gave contradict each other (${names}).`+(lines.length?'\n'+lines.join('\n'):'\nNo single value is the culprit; remove one of them and try again.')};}
+  const rk=rank(sh,sols[0].u,G,iso);
+  if(rk<sh.dof){return{err:`Not enough information yet: a ${sh.name.toLowerCase()} needs ${sh.dof} independent measurements, you gave ${rk}. Add ${sh.dof-rk} more (e.g. another side, angle, the area or perimeter).`};}
+  return{ok:true,sol:sols[0],n:sols.length};}
+/* ── drawing ── */
+function polyOf(type,p){
+  if(type==='rectangle')return[[0,0],[p.w,0],[p.w,p.h],[0,p.h]];
+  if(type==='square')return[[0,0],[p.s,0],[p.s,p.s],[0,p.s]];
+  if(type==='parallelogram'){const t=acute(p.t);return[[0,0],[p.a,0],[p.a+p.b*Math.cos(t),p.b*Math.sin(t)],[p.b*Math.cos(t),p.b*Math.sin(t)]];}
+  if(type==='rhombus'){const t=acute(p.t);return[[0,0],[p.s,0],[p.s+p.s*Math.cos(t),p.s*Math.sin(t)],[p.s*Math.cos(t),p.s*Math.sin(t)]];}
+  const x0=p.h/Math.tan(p.al);return[[0,0],[p.a,0],[x0+p.b,p.h],[x0,p.h]];}
+function svgOf(type,sol,o){
+  const P=polyOf(type,sol.p),q=sol.q;let xs=P.map(v=>v[0]),ys=P.map(v=>v[1]);
+  const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys),W=x1-x0,H=y1-y0;
+  const k=300/Math.max(W,H),pad=70,tx=v=>pad+(v-x0)*k,ty=v=>pad+(y1-v)*k;
+  const pts=P.map(v=>[tx(v[0]),ty(v[1])]);const cx=pts.reduce((s,v)=>s+v[0],0)/4,cy=pts.reduce((s,v)=>s+v[1],0)/4;
+  const vw=W*k+pad*2,vh=H*k+pad*2+(o.perim?28:0);const col=o.line,tc=o.text;let s='';
+  s+=`<polygon points="${pts.map(v=>v.join(',')).join(' ')}" fill="${o.noFill?'none':o.fill}" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  const T=(x,y,t,sz,extra)=>`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-family="Arial,Helvetica,sans-serif" font-size="${sz||14}" fill="${tc}" text-anchor="middle" dominant-baseline="middle" ${extra||''}>${t}</text>`;
+  const sideLab=[];const names=type==='trapezium'?[q.a,q.d,q.b,q.c]:type==='rectangle'?[q.w,q.h,q.w,q.h]:type==='square'?[q.s,q.s,q.s,q.s]:type==='parallelogram'?[q.a,q.b,q.a,q.b]:[q.s,q.s,q.s,q.s];
+  for(let i=0;i<4;i++){const A=pts[i],B=pts[(i+1)%4];const mx=(A[0]+B[0])/2,my=(A[1]+B[1])/2;let nx=mx-cx,ny=my-cy;const nl=Math.hypot(nx,ny)||1;
+    // outward normal of the edge
+    let ex=B[0]-A[0],ey=B[1]-A[1];const el=Math.hypot(ex,ey)||1;let ox=ey/el,oy=-ex/el;if(ox*(mx-cx)+oy*(my-cy)<0){ox=-ox;oy=-oy;}
+    if(o.sides)s+=T(mx+ox*20,my+oy*16,fmt(names[i])+' cm',14,'font-weight="600"');}
+  if(o.angles){for(let i=0;i<4;i++){const V=pts[i],Pv=pts[(i+3)%4],N=pts[(i+1)%4];const a1=Math.atan2(Pv[1]-V[1],Pv[0]-V[0]),a2=Math.atan2(N[1]-V[1],N[0]-V[0]);
+      let d=a2-a1;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;const ang=Math.abs(d)/D;const r=Math.min(26,Math.hypot(P[0][0]-P[1][0],P[0][1]-P[1][1])*k*0.2+12);
+      const right=Math.abs(ang-90)<0.01;
+      if(right){const u1=[Math.cos(a1),Math.sin(a1)],u2=[Math.cos(a2),Math.sin(a2)],m=14;s+=`<polyline points="${V[0]+u1[0]*m},${V[1]+u1[1]*m} ${V[0]+(u1[0]+u2[0])*m},${V[1]+(u1[1]+u2[1])*m} ${V[0]+u2[0]*m},${V[1]+u2[1]*m}" fill="none" stroke="${col}" stroke-width="1.5"/>`;}
+      else{const sx=V[0]+r*Math.cos(a1),sy=V[1]+r*Math.sin(a1),ex=V[0]+r*Math.cos(a2),ey=V[1]+r*Math.sin(a2);s+=`<path d="M${sx},${sy} A${r},${r} 0 0 ${d>0?1:0} ${ex},${ey}" fill="none" stroke="${col}" stroke-width="1.5"/>`;}
+      const bm=a1+d/2,lr=right?30:r+20;s+=T(V[0]+lr*Math.cos(bm),V[1]+lr*Math.sin(bm),fmt(ang)+'°',12);}}
+  if(o.diags){[[0,2],[1,3]].forEach((pr,i)=>{const A=pts[pr[0]],B=pts[pr[1]];s+=`<line x1="${A[0]}" y1="${A[1]}" x2="${B[0]}" y2="${B[1]}" stroke="${col}" stroke-width="1.3" stroke-dasharray="6 4"/>`;
+      const dl=type==='rectangle'||type==='square'?q.d:type==='trapezium'?Math.hypot(P[pr[0]][0]-P[pr[1]][0],P[pr[0]][1]-P[pr[1]][1]):(i===0?(type==='rhombus'||type==='parallelogram'?(Math.hypot(P[0][0]-P[2][0],P[0][1]-P[2][1])):0):0);
+      const len=Math.hypot(P[pr[0]][0]-P[pr[1]][0],P[pr[0]][1]-P[pr[1]][1]);const mx=(A[0]+B[0])/2,my=(A[1]+B[1])/2;s+=T(mx+(i?-1:1)*8,my+(i?14:-14),'d='+fmt(len),11,'font-style="italic"');});}
+  if(o.height&&type!=='rectangle'&&type!=='square'){const top=type==='trapezium'?pts[3]:pts[3];const fx=top[0],fy=pts[0][1];s+=`<line x1="${fx}" y1="${top[1]}" x2="${fx}" y2="${fy}" stroke="${col}" stroke-width="1.3" stroke-dasharray="3 3"/>`+T(fx-4,(top[1]+fy)/2,'h='+fmt(q.h),11,'text-anchor="end" font-style="italic"').replace('text-anchor="middle"','');}
+  if(o.area)s+=T(cx,cy,'A = '+fmt(q.A)+' cm²',14,'font-weight="700"');
+  if(o.perim)s+=T(vw/2,vh-14,'Perimeter = '+fmt(q.P)+' cm',14,'font-weight="700"');
+  return{svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vw.toFixed(0)} ${vh.toFixed(0)}" width="${vw.toFixed(0)}" height="${vh.toFixed(0)}">${s}</svg>`,w:vw,h:vh};}
+/* ── UI ── */
+const ICO={rectangle:'<rect x="6" y="14" width="36" height="20" fill="none" stroke="currentColor" stroke-width="3"/>',square:'<rect x="10" y="10" width="28" height="28" fill="none" stroke="currentColor" stroke-width="3"/>',parallelogram:'<polygon points="4,36 32,36 44,12 16,12" fill="none" stroke="currentColor" stroke-width="3"/>',rhombus:'<polygon points="24,4 44,24 24,44 4,24" fill="none" stroke="currentColor" stroke-width="3"/>',trapezium:'<polygon points="4,36 44,36 34,12 14,12" fill="none" stroke="currentColor" stroke-width="3"/>'};
+let _t=null,_cur=null,_last=null;
+function css(){if(document.getElementById('geoCss'))return;const s=document.createElement('style');s.id='geoCss';s.textContent=`
+.geo-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;padding:6px 4px 4px}
+.geo-card{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;border:1.5px solid rgba(128,128,128,.35);border-radius:12px;background:transparent;color:inherit;cursor:pointer;font:600 14px inherit;transition:.15s}
+.geo-card:hover{border-color:#1976d2;background:rgba(25,118,210,.08);transform:translateY(-2px)}
+.geo-card svg{width:56px;height:56px;color:#1976d2}
+.geo-mega{display:grid;grid-template-columns:minmax(260px,330px) 1fr;gap:16px;padding:6px 2px;max-height:68vh;overflow:auto}
+@media(max-width:760px){.geo-mega{grid-template-columns:1fr}}
+.geo-left h4,.geo-right h4{margin:10px 0 6px;font-size:13px;opacity:.75;text-transform:uppercase;letter-spacing:.04em}
+.geo-row{display:flex;align-items:center;gap:8px;margin:5px 0}.geo-row label{flex:1;font-size:13px}
+.geo-row input[type=number]{width:96px;padding:6px 8px;border:1px solid rgba(128,128,128,.45);border-radius:8px;background:transparent;color:inherit;font-size:13px}
+.geo-row .u{width:30px;font-size:12px;opacity:.7}
+.geo-opts{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:13px}.geo-opts label{display:flex;gap:6px;align-items:center}
+.geo-col{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;align-items:center}.geo-col input[type=color]{width:34px;height:26px;border:none;padding:0;background:none}
+.geo-prev{min-height:260px;display:flex;align-items:center;justify-content:center;border:1.5px dashed rgba(128,128,128,.4);border-radius:12px;padding:8px;background:#fff}
+.geo-prev svg{max-width:100%;height:auto;max-height:360px}
+.geo-err{white-space:pre-line;font-size:13px;color:#c62828;background:rgba(198,40,40,.09);border:1px solid rgba(198,40,40,.35);border-radius:10px;padding:10px 12px;margin-top:10px}
+.geo-ok{font-size:13px;color:#2e7d32;background:rgba(46,125,50,.09);border:1px solid rgba(46,125,50,.35);border-radius:10px;padding:8px 12px;margin-top:10px}
+.geo-tbl{font-size:12px;width:100%;margin-top:8px;border-collapse:collapse}.geo-tbl td{padding:2px 6px;border-bottom:1px solid rgba(128,128,128,.2)}
+`;document.head.appendChild(s);}
+function ensure(id){let m=document.getElementById(id);if(!m){m=document.createElement('div');m.className='modal';m.id=id;document.body.appendChild(m);}return m;}
+window.openGeometryModal=function(){css();
+  _shapeTargetPage=S.currentContextPage?S.currentContextPage.querySelector('.page-content'):(document.querySelector('.page-content:focus')||document.querySelector('#editorArea .page-content'));
+  const sel=window.getSelection();_shapeSavedRange=null;if(sel&&sel.rangeCount){const r=sel.getRangeAt(0);if(_shapeTargetPage&&_shapeTargetPage.contains(r.commonAncestorContainer))_shapeSavedRange=r.cloneRange();}
+  const m=ensure('geoMdl');m.innerHTML=`<div class="mbox" style="max-width:640px"><div class="split-modal-header"><h2 class="mtitle">Geometry — what do you want to make?</h2><button class="mclose" onclick="closeMdl('geoMdl')"><span class="material-symbols-outlined">close</span></button></div><div class="geo-cards">${Object.keys(SH).map(k=>`<button class="geo-card" onclick="openGeoShape('${k}')"><svg viewBox="0 0 48 48">${ICO[k]}</svg>${SH[k].name}</button>`).join('')}</div></div>`;
+  openMdl('geoMdl');};
+window.openGeoShape=function(type){css();_cur=type;_last=null;const sh=SH[type];const m=ensure('geoShapeMdl');
+  const rows=sh.fields.map(f=>`<div class="geo-row"><label for="geo_${f[0]}">${f[1]}</label><input type="number" step="any" min="0" id="geo_${f[0]}" data-k="${f[0]}" oninput="geoChanged()"><span class="u">${f[2]}</span></div>`).join('');
+  const fixed=type==='rectangle'||type==='square'?'<div class="geo-row"><label>All angles</label><span style="font-size:13px">90° (fixed)</span></div>':'';
+  m.innerHTML=`<div class="mbox" style="width:min(940px,96vw);max-width:96vw"><div class="split-modal-header"><h2 class="mtitle"><button class="mclose" style="margin-right:6px" onclick="closeMdl('geoShapeMdl');openGeometryModal()" title="Back"><span class="material-symbols-outlined">arrow_back</span></button>${sh.name} — Geometry</h2><button class="mclose" onclick="closeMdl('geoShapeMdl')"><span class="material-symbols-outlined">close</span></button></div>
+<div class="geo-mega"><div class="geo-left"><h4>Known values (cm, degrees)</h4><div style="font-size:12px;opacity:.7">Fill in any ${sh.dof} independent value${sh.dof>1?'s':''} (sides, angle, diagonals, area, perimeter…). The rest is worked out.</div>${rows}${fixed}${sh.iso?'<div class="geo-row"><label><input type="checkbox" id="geo_iso" onchange="geoChanged()"> Isosceles (equal legs &amp; base angles)</label></div>':''}
+<h4>Show in drawing</h4><div class="geo-opts"><label><input type="checkbox" id="geo_o_sides" checked onchange="geoChanged()">Side lengths</label><label><input type="checkbox" id="geo_o_angles" checked onchange="geoChanged()">Angles</label><label><input type="checkbox" id="geo_o_area" onchange="geoChanged()">Area</label><label><input type="checkbox" id="geo_o_perim" onchange="geoChanged()">Perimeter</label><label><input type="checkbox" id="geo_o_diags" onchange="geoChanged()">Diagonals</label>${type==='rectangle'||type==='square'?'':'<label><input type="checkbox" id="geo_o_height" onchange="geoChanged()">Height</label>'}</div>
+<h4>Colors</h4><div class="geo-col"><label>Line <input type="color" id="geo_c_line" value="#1976d2" oninput="geoChanged()"></label><label>Fill <input type="color" id="geo_c_fill" value="#e3f2fd" oninput="geoChanged()"></label><label>Text <input type="color" id="geo_c_text" value="#222222" oninput="geoChanged()"></label><label><input type="checkbox" id="geo_c_nofill" onchange="geoChanged()"> No fill</label></div>
+<h4>Inserted width</h4><div class="geo-row"><input type="number" id="geo_size" value="360" min="80" max="900" step="10" style="width:90px"><span class="u">px</span></div></div>
+<div class="geo-right"><h4>Preview</h4><div class="geo-prev" id="geoPrev"><span style="opacity:.5;font-size:13px">Enter values to draw</span></div><div id="geoMsg"></div></div></div>
+<div style="display:flex;justify-content:flex-end;gap:8px;padding:10px 4px 2px"><button class="mbtn" onclick="geoReset()">Clear</button><button class="mbtn primary" id="geoInsBtn" disabled onclick="geoInsert()">Insert</button></div></div>`;
+  closeMdl('geoMdl');openMdl('geoShapeMdl');};
+window.geoReset=function(){document.querySelectorAll('#geoShapeMdl input[data-k]').forEach(i=>{i.value='';i.placeholder='';});geoChanged();};
+window.geoChanged=function(){clearTimeout(_t);_t=setTimeout(run,140);};
+function opts(){const c=id=>{const e=document.getElementById(id);return e&&e.checked;};return{sides:c('geo_o_sides'),angles:c('geo_o_angles'),area:c('geo_o_area'),perim:c('geo_o_perim'),diags:c('geo_o_diags'),height:c('geo_o_height'),line:document.getElementById('geo_c_line').value,fill:document.getElementById('geo_c_fill').value,text:document.getElementById('geo_c_text').value,noFill:c('geo_c_nofill')};}
+function run(){const type=_cur;if(!type)return;const sh=SH[type];const G={};
+  document.querySelectorAll('#geoShapeMdl input[data-k]').forEach(i=>{if(i.value!==''&&!isNaN(+i.value))G[i.dataset.k]=+i.value;});
+  if(G.t!==undefined&&G.t>90&&G.t<180)G.t=180-G.t;
+  const iso=!!(document.getElementById('geo_iso')&&document.getElementById('geo_iso').checked);
+  const prev=document.getElementById('geoPrev'),msg=document.getElementById('geoMsg'),btn=document.getElementById('geoInsBtn');
+  const r=solve(type,G,iso);_last=null;btn.disabled=true;
+  if(!r.ok){msg.innerHTML=Object.keys(G).length||iso?`<div class="geo-err">${r.err.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>`:`<div style="font-size:13px;opacity:.7;margin-top:10px">${r.err}</div>`;prev.innerHTML='<span style="opacity:.5;font-size:13px">No drawing yet</span>';
+    document.querySelectorAll('#geoShapeMdl input[data-k]').forEach(i=>{i.placeholder='';});return;}
+  const d=svgOf(type,r.sol,opts());_last={svg:d.svg,w:d.w,h:d.h,type};prev.innerHTML=d.svg;btn.disabled=false;
+  const q=r.sol.q;document.querySelectorAll('#geoShapeMdl input[data-k]').forEach(i=>{i.placeholder=i.value===''?fmt(q[i.dataset.k]):'';});
+  msg.innerHTML=`<div class="geo-ok">Solved ✓${r.n>1?` — ${r.n} different shapes fit these values; showing the first (add one more value to pin it down).`:''}</div><table class="geo-tbl">${sh.fields.map(f=>`<tr><td>${f[1]}</td><td><b>${fmt(q[f[0]])}</b> ${f[2]}</td></tr>`).join('')}</table>`;}
+window.geoInsert=function(){if(!_last)return;const L=_last;closeMdl('geoShapeMdl');
+  const size=Math.max(80,Math.min(900,parseInt(document.getElementById('geo_size')?.value)||360));const SC=3,rw=Math.round(L.w*SC),rh=Math.round(L.h*SC);
+  const url='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(L.svg);const im=new Image();
+  im.onload=()=>{const cv=document.createElement('canvas');cv.width=rw;cv.height=rh;const x=cv.getContext('2d');x.clearRect(0,0,rw,rh);x.drawImage(im,0,0,rw,rh);
+    const img=makeImg(cv.toDataURL('image/png'));img.alt=SH[L.type].name;img.dataset.geoShape=L.type;img.style.width=size+'px';img.style.height=Math.round(size*L.h/L.w)+'px';img.style.maxWidth='none';img.style.cursor='move';img.style.display='inline-block';img.style.verticalAlign='middle';
+    requestAnimationFrame(()=>{const dest=_shapeTargetPage||document.querySelector('#editorArea .page-content');if(!dest)return;
+      if(_shapeSavedRange){dest.focus();const s2=window.getSelection();s2.removeAllRanges();s2.addRange(_shapeSavedRange);const rg=s2.getRangeAt(0);rg.deleteContents();rg.insertNode(img);const af=document.createRange();af.setStartAfter(img);af.collapse(true);s2.removeAllRanges();s2.addRange(af);}
+      else{dest.focus();dest.appendChild(img);}
+      if(typeof showToast==='function')showToast(SH[L.type].name+' inserted','info');});};
+  im.onerror=()=>{if(typeof showToast==='function')showToast('Could not insert drawing','error');};im.src=url;};
+})();
+
+/* ═══ HARD FORCE UPDATE (watermark test16092026 + font size 67) ═══ */
+async function scForceUpdate(){
+  if(!confirm('FORCE UPDATE: this deletes all cached editor files, fetches the live files from the official repo and reloads.\nUnsaved changes will be lost. Continue?'))return;
+  const toast=m=>{try{showToast(m,'info');}catch(e){}};
+  const LIVE='https://mahi902.github.io/Oryn/', bust='?fu='+Date.now();
+  try{
+    toast('Force update: fetching live files…');
+    const files=['sceditor.html','sw.js','manifest.json','sceditortips.txt','textfonts.txt','ffonts.json','textstyles.json','pmarg.json','ctab.json','customlinks.json'];
+    const got=await Promise.all(files.map(async f=>{try{const r=await fetch(LIVE+f+bust,{cache:'no-store'});return{f,ok:r.ok,r:r.ok?r:null};}catch(e){return{f,ok:false};}}));
+    const main=got[0];if(!main.ok)throw new Error('Could not reach the live sceditor.html');
+    const html=await main.r.text();const m=html.match(/name="sceditor-version"\s+content="(\d+)"/);
+    toast('Live version: '+(m?m[1]:'?')+' (yours: '+SC_EDITOR_VERSION+'). Deleting old files…');
+    if(navigator.serviceWorker){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));}
+    if(window.caches){const ks=await caches.keys();await Promise.all(ks.filter(k=>k!=='dwp-ai-runtime-v1').map(k=>caches.delete(k)));}
+    try{sessionStorage.clear();}catch(e){}
+    await Promise.all(files.map(f=>fetch(LIVE+f,{cache:'reload'}).catch(()=>{})));
+    toast('Reloading with the live editor…');
+    setTimeout(()=>{location.replace(location.pathname+'?v='+Date.now()+location.hash);},500);
+  }catch(e){toast('Force update failed: '+e.message);}
 }
 
 /* ═══════════════════════════════════════════════════════
