@@ -7,7 +7,7 @@
 <title>Sugarcane Editor</title>
 <meta name="description" content="Sugarcane Editor: a powerful all-in-one online editor from the Oryn suite. Write, design and edit with add-ons and extensions.">
 <meta name="keywords" content="Sugarcane Editor, SCEditor, DocuWrite Pro, sugarcane, sca add-ons, editor add-ons, extensions, online editor, document editor, online document editor, free document editor, Word alternative, Google Docs alternative, WYSIWYG editor, rich text editor, text editor, write documents online, A4 editor, docs, office, word processor, online word processor, create documents, edit documents, format documents, export document, export PDF, export DOCX, export HTML, print document, page layout, headings, fonts, tables, lists, templates, document templates, resume maker, letter writer, report writer, essay writer, Oryn, Oryn app, Oryn online, Mohtadi Azad Mahi, Education By Mohtadi Azad, mahi902, free online tools, online tools, web tools, browser tools, no signup, no login, no ads, no credit card, free forever, works in browser, client-side, privacy friendly, offline friendly, PWA, progressive web app, productivity tools, productivity suite, document suite, all-in-one workspace, online workspace, Android app, mobile friendly, dark mode, open source, GitHub Pages, Toolstructer, instant, fast, easy to use, secure, no installation, no server upload">
-<meta name="sceditor-version" content="243">
+<meta name="sceditor-version" content="245">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -4299,7 +4299,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v243…</p>
+    <p class="loading-text">Loading Sugarcane v245…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -9323,7 +9323,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 243; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 245; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -35142,22 +35142,18 @@ function svgOf(type,sol,o){
 const ICO={rectangle:'<rect x="6" y="14" width="36" height="20" fill="none" stroke="currentColor" stroke-width="3"/>',square:'<rect x="10" y="10" width="28" height="28" fill="none" stroke="currentColor" stroke-width="3"/>',parallelogram:'<polygon points="4,36 32,36 44,12 16,12" fill="none" stroke="currentColor" stroke-width="3"/>',rhombus:'<polygon points="24,4 44,24 24,44 4,24" fill="none" stroke="currentColor" stroke-width="3"/>',trapezium:'<polygon points="4,36 44,36 34,12 14,12" fill="none" stroke="currentColor" stroke-width="3"/>'};
 let _t=null,_cur=null,_last=null;
 function css(){if(document.getElementById('geoCss'))return;const s=document.createElement('style');s.id='geoCss';s.textContent=`
-.scf-cards.geo-cards{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
-.geo-card svg{width:34px;height:34px;color:var(--scf-a);flex-shrink:0}
-.mbox.scf-box.geo-wide{width:min(96vw,940px);max-width:940px}
+.scf-cards.geo-cards{grid-template-columns:1fr 1fr}
+.geo-cards .scf-card:last-child:nth-child(odd){grid-column:1/-1}
+.geo-card .pic svg{width:30px;height:30px;color:var(--scf-a)}
+@media (min-width:721px) and (orientation:landscape){.mbox.geo-wide{max-width:1020px;width:min(1020px,96vw)}#geoShapeMdl .scf-ed{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}}
+#geoShapeMdl .scf-ed-frame{position:relative;padding:8px;min-height:120px}
+#geoShapeMdl .scf-row{flex-wrap:wrap}#geoShapeMdl .scf-row .scf-input{flex:1 1 90px}#geoShapeMdl .sm-row{flex-wrap:wrap}
 .geo-hint{font-size:12px;color:var(--ui-muted);margin:0 0 10px;line-height:1.4}
 .geo-fr{display:flex;align-items:center;gap:8px}
-.geo-fr .finput{flex:1;min-width:0}
+.geo-fr .scf-input{flex:1;min-width:0}
 .geo-fr .u{min-width:30px;font-size:12px;color:var(--ui-muted)}
-.geo-chk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ui-text);margin:6px 0;cursor:pointer}
-.geo-chk input{accent-color:var(--scf-a);width:16px;height:16px}
-.geo-opts{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
-.geo-col{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;align-items:center;color:var(--ui-text)}
-.geo-col input[type=color]{width:34px;height:26px;border:none;padding:0;background:none;vertical-align:middle;cursor:pointer}
 .geo-prev{min-height:260px;display:flex;align-items:center;justify-content:center;padding:8px;background:#fff;border-radius:12px;width:100%;box-sizing:border-box}
 .geo-prev svg{max-width:100%;height:auto;max-height:360px}
-.geo-left-scroll{max-height:62vh;overflow:auto;padding-right:2px}
-@media(max-width:760px){.scf-ed.geo-ed{grid-template-columns:1fr}.scf-ed.geo-ed .scf-ed-view{position:static;order:-1}}
 .geo-err{white-space:pre-line;font-size:13px;color:#c62828;background:rgba(198,40,40,.09);border:1px solid rgba(198,40,40,.35);border-radius:10px;padding:10px 12px;margin-top:10px}
 .geo-ok{font-size:13px;color:#2e7d32;background:rgba(46,125,50,.09);border:1px solid rgba(46,125,50,.35);border-radius:10px;padding:8px 12px;margin-top:10px}
 .geo-tbl{font-size:12px;width:100%;margin-top:8px;border-collapse:collapse}.geo-tbl td{padding:3px 6px;border-bottom:1px solid var(--ui-line);color:var(--ui-text)}
@@ -35167,23 +35163,25 @@ window.openGeometryModal=function(){css();
   _shapeTargetPage=S.currentContextPage?S.currentContextPage.querySelector('.page-content'):(document.querySelector('.page-content:focus')||document.querySelector('#editorArea .page-content'));
   const sel=window.getSelection();_shapeSavedRange=null;if(sel&&sel.rangeCount){const r=sel.getRangeAt(0);if(_shapeTargetPage&&_shapeTargetPage.contains(r.commonAncestorContainer))_shapeSavedRange=r.cloneRange();}
   const DESC={rectangle:'Width and length, any known values.',square:'One side is all it takes.',parallelogram:'Sides, angle, diagonals or area.',rhombus:'Equal sides with an acute angle.',trapezium:'Bases, legs, height or angles.'};
-  const m=ensure('geoMdl');m.innerHTML=`<div class="mbox scf-box"><div class="split-modal-header"><h2 class="mtitle">Insert Geometry</h2><button class="mclose" onclick="closeMdl('geoMdl')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button></div><div class="scf-flow"><section class="scf-stage on"><div class="scf-cards geo-cards">${Object.keys(SH).map(k=>`<button type="button" class="scf-card geo-card" onclick="openGeoShape('${k}')"><svg viewBox="0 0 48 48">${ICO[k]}</svg><b>${SH[k].name}</b><small>${DESC[k]}</small></button>`).join('')}</div></section></div></div>`;
+  const m=ensure('geoMdl');m.innerHTML=`<div class="mbox scf-box"><div class="split-modal-header"><h2 class="mtitle">Insert Geometry</h2><button class="mclose" onclick="closeMdl('geoMdl')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button></div><div class="scf-flow"><section class="scf-stage on"><div class="scf-cards geo-cards">${Object.keys(SH).map(k=>`<button type="button" class="scf-card geo-card" onclick="openGeoShape('${k}')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 48 48">${ICO[k]}</svg></span><b>${SH[k].name}</b><small>${DESC[k]}</small></button>`).join('')}</div></section></div></div>`;
   openMdl('geoMdl');};
 window.openGeoShape=function(type){css();_cur=type;_last=null;const sh=SH[type];const m=ensure('geoShapeMdl');
-  const rows=sh.fields.map(f=>`<div class="frow"><label for="geo_${f[0]}">${f[1]}</label><div class="geo-fr"><input type="number" step="any" min="0" class="finput" id="geo_${f[0]}" data-k="${f[0]}" oninput="geoChanged()"><span class="u">${f[2]}</span></div></div>`).join('');
-  const fixed=type==='rectangle'||type==='square'?'<div class="frow"><label>All angles</label><div style="font-size:13px;color:var(--ui-text)">90° (fixed)</div></div>':'';
-  m.innerHTML=`<div class="mbox scf-box geo-wide" data-stage="edit"><div class="split-modal-header"><h2 class="mtitle" style="display:flex;align-items:center;gap:8px"><button class="mclose" onclick="closeMdl('geoShapeMdl');openGeometryModal()" title="Back"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></span></button>${sh.name}</h2><button class="mclose" onclick="closeMdl('geoShapeMdl')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button></div>
-<div class="scf-flow"><section class="scf-stage on" data-stage="edit"><div class="scf-ed geo-ed">
-<div class="scf-ed-panel geo-left-scroll">
-<div class="scf-sec"><div class="sm-label">Known values</div><div class="geo-hint">Fill in any ${sh.dof} independent value${sh.dof>1?'s':''} (sides, angle, diagonals, area, perimeter…). The rest is worked out.</div>${rows}${fixed}${sh.iso?'<label class="geo-chk"><input type="checkbox" id="geo_iso" onchange="geoChanged()"> Isosceles (equal legs &amp; base angles)</label>':''}</div>
-<div class="scf-sec"><div class="sm-label">Show in drawing</div><div class="geo-opts"><label class="geo-chk"><input type="checkbox" id="geo_o_sides" checked onchange="geoChanged()">Side lengths</label><label class="geo-chk"><input type="checkbox" id="geo_o_angles" checked onchange="geoChanged()">Angles</label><label class="geo-chk"><input type="checkbox" id="geo_o_area" onchange="geoChanged()">Area</label><label class="geo-chk"><input type="checkbox" id="geo_o_perim" onchange="geoChanged()">Perimeter</label><label class="geo-chk"><input type="checkbox" id="geo_o_diags" onchange="geoChanged()">Diagonals</label>${type==='rectangle'||type==='square'?'':'<label class="geo-chk"><input type="checkbox" id="geo_o_height" onchange="geoChanged()">Height</label>'}</div></div>
-<div class="scf-sec"><div class="sm-label">Colors</div><div class="geo-col"><label>Line <input type="color" id="geo_c_line" value="#1976d2" oninput="geoChanged()"></label><label>Fill <input type="color" id="geo_c_fill" value="#e3f2fd" oninput="geoChanged()"></label><label>Text <input type="color" id="geo_c_text" value="#222222" oninput="geoChanged()"></label><label class="geo-chk" style="margin:0"><input type="checkbox" id="geo_c_nofill" onchange="geoChanged()"> No fill</label></div></div>
-<div class="scf-sec"><div class="sm-label">Inserted width</div><div class="geo-fr"><input type="number" class="finput" id="geo_size" value="360" min="80" max="900" step="10" style="max-width:110px;flex:none"><span class="u">px</span></div></div>
-</div>
-<div class="scf-ed-view"><div class="scf-ed-frame sh"><div class="geo-prev" id="geoPrev"><span style="opacity:.5;font-size:13px;color:#222">Enter values to draw</span></div></div><div id="geoMsg"></div></div>
-</div></section></div>
-<div class="mfooter"><button class="mbtn sec" onclick="geoReset()">Clear</button><button class="mbtn primary" id="geoInsBtn" disabled onclick="geoInsert()">Insert</button></div></div>`;
-  closeMdl('geoMdl');openMdl('geoShapeMdl');};
+  const rows=sh.fields.map(f=>`<label class="gm-f" style="margin-bottom:8px">${f[1]}<div class="geo-fr"><input type="number" step="any" min="0" class="scf-input" id="geo_${f[0]}" data-k="${f[0]}" oninput="geoChanged()" inputmode="decimal"><span class="u">${f[2]}</span></div></label>`).join('');
+  const fixed=type==='rectangle'||type==='square'?'<div class="mp-trow"><span>All angles</span><span style="font-size:13px;color:var(--ui-muted)">90° (fixed)</span></div>':'';
+  const X='<span class="material-symbols-outlined">close</span>';
+  m.innerHTML=`<div class="mbox scf-box geo-wide" data-stage="edit"><div class="split-modal-header"><h2 class="mtitle" style="display:flex;align-items:center;gap:8px"><button class="mclose" onclick="closeMdl('geoShapeMdl');openGeometryModal()" title="Back"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></span></button>${sh.name}</h2><button class="mclose" onclick="closeMdl('geoShapeMdl')" title="Close">${X}</button></div>
+<div class="scf-flow"><section class="scf-stage on" data-stage="edit"><div class="scf-ed">
+<div class="scf-ed-view"><div class="scf-ed-bar"><span>Preview</span><button type="button" class="scf-icon-btn scf-prev-toggle" title="Collapse preview" onclick="SCFlow.togglePreview('geoShapeMdl')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6l4 4 4-4M8 18l4-4 4 4"/></svg></span></button></div>
+<div class="scf-ed-frame"><div class="geo-prev" id="geoPrev"><span style="opacity:.5;font-size:13px;color:#222">Enter values to draw</span></div></div><div id="geoMsg"></div></div>
+<div class="scf-ed-panel">
+<div class="scf-sec"><div class="scf-sec-h"><span class="material-symbols-outlined">straighten</span>Known values</div><div class="geo-hint">Fill in any ${sh.dof} independent value${sh.dof>1?'s':''} (sides, angle, diagonals, area, perimeter…). The rest is worked out.</div>${rows}${fixed}${sh.iso?`<div class="mp-trow"><span>Isosceles (equal legs &amp; base angles)</span><label class="toggle-switch"><input type="checkbox" id="geo_iso" onchange="geoChanged()"><span class="toggle-slider"></span></label></div>`:''}<div class="scf-row" style="margin-top:6px"><button type="button" class="scf-btn" onclick="geoReset()"><span class="material-symbols-outlined">delete_sweep</span>Clear</button></div></div>
+<div class="scf-sec"><div class="scf-sec-h"><span class="material-symbols-outlined">visibility</span>Show in drawing</div><div class="mp-trow"><span>Side lengths</span><label class="toggle-switch"><input type="checkbox" id="geo_o_sides" checked onchange="geoChanged()"><span class="toggle-slider"></span></label></div><div class="mp-trow"><span>Angles</span><label class="toggle-switch"><input type="checkbox" id="geo_o_angles" checked onchange="geoChanged()"><span class="toggle-slider"></span></label></div><div class="mp-trow"><span>Area</span><label class="toggle-switch"><input type="checkbox" id="geo_o_area" onchange="geoChanged()"><span class="toggle-slider"></span></label></div><div class="mp-trow"><span>Perimeter</span><label class="toggle-switch"><input type="checkbox" id="geo_o_perim" onchange="geoChanged()"><span class="toggle-slider"></span></label></div><div class="mp-trow"><span>Diagonals</span><label class="toggle-switch"><input type="checkbox" id="geo_o_diags" onchange="geoChanged()"><span class="toggle-slider"></span></label></div>${type==='rectangle'||type==='square'?'':'<div class="mp-trow"><span>Height</span><label class="toggle-switch"><input type="checkbox" id="geo_o_height" onchange="geoChanged()"><span class="toggle-slider"></span></label></div>'}</div>
+<div class="scf-sec"><div class="scf-sec-h"><span class="material-symbols-outlined">palette</span>Colors</div><div class="sm-row"><label>Line colour</label><button type="button" class="cc-swatch-btn" id="geo_c_line_btn" title="Line colour" onclick="openColorChooser('geo_c_line',this)"><span class="cc-swatch-fill" style="background:#1976d2"></span></button><input type="color" class="sm-color" id="geo_c_line" value="#1976d2" style="display:none"></div><div class="sm-row"><label>Fill colour</label><button type="button" class="cc-swatch-btn" id="geo_c_fill_btn" title="Fill colour" onclick="openColorChooser('geo_c_fill',this)"><span class="cc-swatch-fill" style="background:#e3f2fd"></span></button><input type="color" class="sm-color" id="geo_c_fill" value="#e3f2fd" style="display:none"></div><div class="sm-row"><label>Text colour</label><button type="button" class="cc-swatch-btn" id="geo_c_text_btn" title="Text colour" onclick="openColorChooser('geo_c_text',this)"><span class="cc-swatch-fill" style="background:#222222"></span></button><input type="color" class="sm-color" id="geo_c_text" value="#222222" style="display:none"></div><div class="mp-trow"><span>No fill</span><label class="toggle-switch"><input type="checkbox" id="geo_c_nofill" onchange="geoChanged()"><span class="toggle-slider"></span></label></div></div>
+<div class="scf-sec"><div class="scf-sec-h"><span class="material-symbols-outlined">aspect_ratio</span>Inserted size</div><label class="gm-f">Inserted width (px)<input type="number" class="scf-input" id="geo_size" value="360" min="80" max="900" step="10"></label></div>
+</div></div></section></div>
+<div class="mfooter"><button class="mbtn primary" id="geoInsBtn" disabled onclick="geoInsert()">Insert</button></div></div>`;
+  ['geo_c_line','geo_c_fill','geo_c_text'].forEach(id=>{const el=document.getElementById(id);el.addEventListener('input',()=>{const f=document.getElementById(id+'_btn');if(f)f.querySelector('.cc-swatch-fill').style.background=el.value;geoChanged();});});
+  closeMdl('geoMdl');SCFlow.togglePreview('geoShapeMdl',false);openMdl('geoShapeMdl');};
 window.geoReset=function(){document.querySelectorAll('#geoShapeMdl input[data-k]').forEach(i=>{i.value='';i.placeholder='';});geoChanged();};
 window.geoChanged=function(){clearTimeout(_t);_t=setTimeout(run,140);};
 function opts(){const c=id=>{const e=document.getElementById(id);return e&&e.checked;};return{sides:c('geo_o_sides'),angles:c('geo_o_angles'),area:c('geo_o_area'),perim:c('geo_o_perim'),diags:c('geo_o_diags'),height:c('geo_o_height'),line:document.getElementById('geo_c_line').value,fill:document.getElementById('geo_c_fill').value,text:document.getElementById('geo_c_text').value,noFill:c('geo_c_nofill')};}
