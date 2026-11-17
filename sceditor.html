@@ -43234,6 +43234,16 @@ body.dark .sc-hit-bad{box-shadow:0 0 0 4px hsl(calc(0.0 * var(--sc-hk,1) + var(-
   background:linear-gradient(var(--ui-line),var(--ui-line)),var(--ui-shell);
   box-shadow:0 0 0 6px var(--ui-shell),0 -6px 0 6px var(--ui-shell);
 }
+/* Editor Widgets inside the EXPANDED Insert modal: use the full width (was stuck at 300px with a blank strip), 3 columns, hint on one line, pinned header stays clean. */
+@media(min-width:769px){
+  #insertDropdown.dd-modal #ewDdList{max-width:none;width:100%;grid-template-columns:repeat(3,minmax(0,1fr));align-content:start;overflow-y:auto;overscroll-behavior:contain;}
+  #insertDropdown.dd-modal #ewDdList .ew-menu-hint{contain:none;font-size:12px;padding:2px 4px 4px;}
+  #insertDropdown.dd-modal #ewDdList .forms-dd-back{margin:-6px -6px 4px;padding:0 14px;font-size:14px;border-radius:12px 12px 0 0;}
+  #insertDropdown.dd-modal #ewDdList .ew-seg{padding:3px;margin:0 0 2px;box-shadow:0 0 0 6px var(--ui-shell),0 -6px 0 6px var(--ui-shell);}
+  #insertDropdown.dd-modal #ewDdList .insert-box{min-width:0;padding:16px 8px 12px;}
+  #insertDropdown.dd-modal #ewDdList .insert-box-label{white-space:normal;text-align:center;line-height:1.2;}
+  #insertDropdown.dd-modal>.dd-expand-btn{display:none;}
+}
 /* Small screens: Editor Widgets list inside the Insert bottom sheet.
    Was capped at 300px wide (blank strip beside it) and clipped at a fixed height with no way to see the rest. */
 @media(max-width:768px){
