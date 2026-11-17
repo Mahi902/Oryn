@@ -7,7 +7,7 @@
 <title>Sugarcane Editor</title>
 <meta name="description" content="Sugarcane Editor: a powerful all-in-one online editor from the Oryn suite. Write, design and edit with add-ons and extensions.">
 <meta name="keywords" content="Sugarcane Editor, SCEditor, DocuWrite Pro, sugarcane, sca add-ons, editor add-ons, extensions, online editor, document editor, online document editor, free document editor, Word alternative, Google Docs alternative, WYSIWYG editor, rich text editor, text editor, write documents online, A4 editor, docs, office, word processor, online word processor, create documents, edit documents, format documents, export document, export PDF, export DOCX, export HTML, print document, page layout, headings, fonts, tables, lists, templates, document templates, resume maker, letter writer, report writer, essay writer, Oryn, Oryn app, Oryn online, Mohtadi Azad Mahi, Education By Mohtadi Azad, mahi902, free online tools, online tools, web tools, browser tools, no signup, no login, no ads, no credit card, free forever, works in browser, client-side, privacy friendly, offline friendly, PWA, progressive web app, productivity tools, productivity suite, document suite, all-in-one workspace, online workspace, Android app, mobile friendly, dark mode, open source, GitHub Pages, Toolstructer, instant, fast, easy to use, secure, no installation, no server upload">
-<meta name="sceditor-version" content="245">
+<meta name="sceditor-version" content="246">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -4299,7 +4299,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v245…</p>
+    <p class="loading-text">Loading Sugarcane v246…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -9391,7 +9391,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 245; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 246; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -20789,6 +20789,7 @@ function _closeAllOverlays(exceptId) {
   document.querySelectorAll('.modal').forEach(m => { if (m.id !== exceptId) closeMdl(m.id); });
   if (exceptId !== 'fontChooserModal') closeFontChooser();
   if (exceptId !== 'scThemePanel' && window.SCTheme) SCTheme.close();
+  if (window.SCToggles) SCToggles.close();
   if (exceptId !== 'hrNavMenu') closeHrNavigator();
   if (exceptId !== 'imgNavMenu') closeImgNavigator();
   if (exceptId !== 'tableNavMenu') closeTableNavigator();
@@ -41658,6 +41659,175 @@ setInterval(()=>{ try{ const A=window.SCAdmin; const u=(typeof _googleUser!=='un
 <script>
 /* v155 — live accent colour for canvas / fabric drawing (they cannot read CSS variables directly) */
 window._scAcc=function(){ try{ const p=document.createElement('span'); p.style.cssText='position:absolute;visibility:hidden;pointer-events:none;color:var(--ui-link)'; document.body.appendChild(p); const c=getComputedStyle(p).color; p.remove(); return c||'#1976d2'; }catch(e){ return '#1976d2'; } };
+/* v246 — SCToggles: animated toggle designs for verified users, fetched from uib.json */
+window.SCToggles=(function(){
+  const URL_='uib.json', KEY='sc-toggle-design';
+  const SEL='.toggle-switch,.cls-switch,.c-toggle,.fp-switch';
+  const ADAPT=[
+    {sel:'.toggle-switch',host:':scope>.toggle-slider',box:0},
+    {sel:'.cls-switch',host:':scope>.cls-switch-track',box:0},
+    {sel:'.c-toggle',host:':scope>.c-toggle-track',box:0,hide:1},
+    {sel:'.fp-switch',host:':scope>.fp-knob',box:1}
+  ];
+  let list=null,loading=null,cur='',DES=null,panel=null,q='',cat='All',obs=null,sched=0,prevTimer=0,failed=false;
+  try{ cur=localStorage.getItem(KEY)||''; }catch(e){}
+  const isVer=()=>!!(window.SCTheme&&SCTheme.verified());
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const byId=id=>list&&list.find(d=>d.id===id)||null;
+  const dims=d=>{ let k=(d.th||26)/d.h; if(d.w*k>64) k=64/d.w; return {k:k,w:Math.round(d.w*k),h:Math.round(d.h*k)}; };
+  const cssFor=d=>{ const H='.uib-h[data-uib="'+d.id+'"]'; return d.css.replace(/\$on/g,'input:checked + '+H+' .uib-s').replace(/\$h/g,H).replace(/\$/g,H+' .uib-s').replace(/KF_/g,'uib_'+d.id+'_'); };
+  const BASE='.uib-h{display:block;background:none!important;box-shadow:none!important;border:0!important;border-radius:0!important;overflow:visible!important;transition:none!important;animation:none!important;outline-offset:2px}'
+    +'.uib-h::before,.uib-h::after{display:none!important}input:checked+.uib-h{background:none!important}'
+    +'.uib-hide>.c-toggle-thumb{display:none!important}'
+    +'.uib-h>.uib-s{position:absolute!important;inset:0 auto auto 0!important;width:var(--uib-w)!important;height:var(--uib-h)!important;margin:0!important;box-sizing:border-box!important;transform:scale(var(--uib-k))!important;transform-origin:0 0!important;display:block}'
+    +'input:focus-visible+.uib-h{outline:2px solid var(--ui-link,#2b8cf0)}input:disabled+.uib-h{opacity:.5;filter:grayscale(.6)}'
+    +'.uib-defs{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}';
+  function sty(id){ let s=document.getElementById(id); if(!s){ s=document.createElement('style'); s.id=id; document.head.appendChild(s); } return s; }
+  function defsFor(ds){ let h=document.getElementById('scUibDefs'); if(!h){ h=document.createElement('div'); h.id='scUibDefs'; h.className='uib-defs'; document.body.appendChild(h); } const want=ds.filter(d=>d.defs).map(d=>d.defs).join(''); if(h.dataset.k!==want){ h.dataset.k=want; h.innerHTML=want; } }
+  function load(){
+    if(list) return Promise.resolve(list);
+    if(loading) return loading;
+    loading=fetch(URL_).then(r=>{ if(!r.ok) throw 0; return r.json(); }).then(j=>{ list=(j&&j.designs)||[]; failed=false; return list; }).catch(e=>{ failed=true; loading=null; throw e; });
+    return loading;
+  }
+  function hostOf(el){ for(const a of ADAPT){ if(el.matches(a.sel)){ const h=el.querySelector(a.host); return h?{h:h,a:a}:null; } } return null; }
+  function unskinEl(el){
+    const x=hostOf(el); if(!x||!x.h.classList.contains('uib-h')) return;
+    const h=x.h, box=x.a.box?h:el;
+    h.classList.remove('uib-h'); h.removeAttribute('data-uib'); h.innerHTML='';
+    ['--uib-w','--uib-h','--uib-k'].forEach(p=>h.style.removeProperty(p));
+    box.style.removeProperty('width'); box.style.removeProperty('height'); el.classList.remove('uib-hide');
+  }
+  function skinEl(el,d){
+    d=d||DES; if(!d) return; const x=hostOf(el); if(!x) return;
+    const h=x.h; if(h.dataset.uib===d.id&&h.firstElementChild&&h.firstElementChild.classList.contains('uib-s')) return;
+    unskinEl(el);
+    const m=dims(d), box=x.a.box?h:el;
+    h.classList.add('uib-h'); h.dataset.uib=d.id;
+    h.style.setProperty('--uib-w',d.w+'px'); h.style.setProperty('--uib-h',d.h+'px'); h.style.setProperty('--uib-k',m.k);
+    box.style.width=m.w+'px'; box.style.height=m.h+'px';
+    if(x.a.hide) el.classList.add('uib-hide');
+    h.innerHTML='<span class="uib-s">'+d.html+'</span>';
+  }
+  function scan(root){
+    if(!DES) return;
+    if(root.matches&&root.matches(SEL)&&!root.closest('.stg-card')) skinEl(root);
+    if(root.querySelectorAll) root.querySelectorAll(SEL).forEach(e=>{ if(!e.closest('.stg-card')) skinEl(e); });
+  }
+  function unskinAll(){ if(obs){ obs.disconnect(); obs=null; } document.querySelectorAll(SEL).forEach(e=>{ if(!e.closest('.stg-card')) unskinEl(e); }); const s=document.getElementById('scUibCss'); if(s) s.textContent=''; DES=null; }
+  function watch(){
+    if(obs) return;
+    obs=new MutationObserver(ms=>{
+      let hit=false;
+      for(const m of ms){
+        if(m.target.closest&&m.target.closest('#editorArea')) continue;
+        for(const n of m.addedNodes){ if(n.nodeType===1&&(n.matches(SEL)||n.querySelector(SEL))){ hit=true; break; } }
+        if(hit) break;
+      }
+      if(hit&&!sched) sched=requestAnimationFrame(()=>{ sched=0; scan(document.body); });
+    });
+    obs.observe(document.body,{childList:true,subtree:true});
+  }
+  function sync(){
+    if(!document.body) return;
+    if(!isVer()||!cur){ unskinAll(); return; }
+    load().then(()=>{
+      if(!isVer()||!cur) return;
+      const d=byId(cur); if(!d){ unskinAll(); return; }
+      DES=d; sty('scUibBase').textContent=BASE; sty('scUibCss').textContent=cssFor(d); defsFor([d]);
+      scan(document.body); watch();
+    }).catch(()=>{});
+  }
+  function set(id){
+    cur=id||''; try{ if(cur) localStorage.setItem(KEY,cur); else localStorage.removeItem(KEY); }catch(e){}
+    if(!cur) unskinAll(); else sync();
+    if(panel&&panel.classList.contains('open')) mark();
+    const d=byId(cur); if(typeof showToast==='function') showToast(d?'Toggles: '+d.name:'Toggles: Default','info');
+  }
+  function clear(){ cur=''; try{ localStorage.removeItem(KEY); }catch(e){} unskinAll(); }
+  const label=()=>{ const d=byId(cur); return cur?(d?d.name:'Custom'):'Default'; };
+  function css(){
+    const s=sty('scTogglesCss'); if(s.textContent) return;
+    s.textContent=
+      '#scTogglesPanel{position:fixed;inset:0;z-index:9310;display:none;align-items:center;justify-content:center;background:rgba(10,16,28,.5);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);opacity:0;transition:opacity .22s ease}'
+     +'#scTogglesPanel.open{display:flex}#scTogglesPanel.vis{opacity:1}'
+     +'#scTogglesPanel .stg-box{position:relative;display:flex;flex-direction:column;width:440px;max-width:94vw;height:640px;max-height:90vh;background:linear-gradient(180deg,var(--ui-shell),var(--ui-shell-2));color:var(--ui-text);border:1px solid var(--ui-line);border-radius:16px;box-shadow:var(--ui-shadow-lg);overflow:hidden}'
+     +'#scTogglesPanel .stp-body{padding:14px 16px 0;flex:none}#scTogglesPanel .stp-head{margin-bottom:10px}'
+     +'.stg-q{width:100%;box-sizing:border-box;padding:9px 12px;border-radius:10px;border:1px solid var(--ui-divider);background:var(--ui-card);color:var(--ui-text);font:inherit;font-size:13px;outline:none}.stg-q:focus{border-color:var(--ui-link)}'
+     +'.stg-cats{display:flex;gap:6px;overflow-x:auto;padding:10px 0;scrollbar-width:none}.stg-cats::-webkit-scrollbar{display:none}'
+     +'.stg-cats button{flex:none;padding:5px 11px;border-radius:999px;border:1px solid var(--ui-divider);background:var(--ui-card);color:var(--ui-text);font:inherit;font-size:12px;cursor:pointer}.stg-cats button.on{background:var(--ui-link);border-color:var(--ui-link);color:#fff}'
+     +'.stg-scroll{flex:1;min-height:0;overflow-y:auto;padding:2px 16px 16px;-webkit-overflow-scrolling:touch}'
+     +'.stg-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}'
+     +'.stg-card{position:relative;border:1px solid var(--ui-divider);background:var(--ui-card);color:var(--ui-text);border-radius:14px;padding:0;cursor:pointer;font:inherit;display:flex;flex-direction:column;overflow:hidden;text-align:left}'
+     +'.stg-card.on{border-color:var(--ui-link);box-shadow:0 0 0 2px var(--ui-link)}'
+     +'.stg-stage{height:74px;display:flex;align-items:center;justify-content:center;background:var(--ui-shell-2);border-bottom:1px solid var(--ui-divider)}'
+     +'.stg-card .toggle-switch{pointer-events:none}'
+     +'.stg-meta{padding:8px 10px;display:flex;flex-direction:column;gap:1px}.stg-meta b{font-size:12.5px;font-weight:700}.stg-meta small{font-size:10.5px;color:var(--ui-muted)}'
+     +'.stg-tick{position:absolute;right:8px;top:8px;width:20px;height:20px;border-radius:50%;background:var(--ui-link);color:#fff;display:none;align-items:center;justify-content:center}.stg-card.on .stg-tick{display:flex}.stg-tick .material-symbols-outlined{font-size:14px}'
+     +'.stg-msg{padding:30px 10px;text-align:center;color:var(--ui-muted);font-size:13px}.stg-msg button{margin-top:10px;padding:7px 14px;border-radius:10px;border:1px solid var(--ui-divider);background:var(--ui-card);color:var(--ui-text);font:inherit;cursor:pointer}'
+     +'@media(min-width:560px){.stg-grid{grid-template-columns:repeat(3,1fr)}#scTogglesPanel .stg-box{width:560px}}'
+     +'@media(max-width:600px){#scTogglesPanel{align-items:flex-end}#scTogglesPanel .stg-box{width:100%;max-width:100%;border-radius:20px 20px 0 0;border-bottom:0;height:85vh}}';
+  }
+  function build(){
+    if(panel) return; css();
+    panel=document.createElement('div'); panel.id='scTogglesPanel';
+    panel.innerHTML='<div class="stg-box" role="dialog" aria-label="Toggles"><div class="stp-body"><div class="stp-head"><button class="stp-x" style="margin:0" data-a="back" aria-label="Back"><span class="material-symbols-outlined">arrow_back</span></button>Toggles<button class="stp-x" data-a="close" aria-label="Close"><span class="material-symbols-outlined">close</span></button></div><input class="stg-q" type="search" placeholder="Search toggles" autocomplete="off"><div class="stg-cats"></div></div><div class="stg-scroll"></div></div>';
+    panel.addEventListener('mousedown',e=>{ if(e.target===panel) close(); });
+    panel.addEventListener('click',e=>{
+      const a=e.target.closest('[data-a]'); if(a){ if(a.dataset.a==='close') close(); else if(a.dataset.a==='back'){ close(); if(window.SCTheme) setTimeout(SCTheme.open,230); } else if(a.dataset.a==='retry') render(true); return; }
+      const c=e.target.closest('.stg-cats button'); if(c){ cat=c.dataset.c; render(); return; }
+      const k=e.target.closest('.stg-card'); if(k) set(k.dataset.id);
+    });
+    panel.querySelector('.stg-q').addEventListener('input',e=>{ q=e.target.value.trim().toLowerCase(); renderGrid(); });
+    document.body.appendChild(panel);
+  }
+  function mark(){ panel.querySelectorAll('.stg-card').forEach(c=>c.classList.toggle('on',c.dataset.id===cur)); }
+  function card(d){
+    return '<button class="stg-card'+((d?d.id:'')===cur?' on':'')+'" data-id="'+(d?esc(d.id):'')+'"><span class="stg-tick"><span class="material-symbols-outlined">check</span></span><span class="stg-stage"><label class="toggle-switch"><input type="checkbox" tabindex="-1"><span class="toggle-slider"></span></label></span><span class="stg-meta"><b>'+(d?esc(d.name):'Default')+'</b><small>'+(d?esc(d.cat):'Standard switch')+'</small></span></button>';
+  }
+  function renderGrid(){
+    const box=panel.querySelector('.stg-scroll'); if(!list) return;
+    const L=list.filter(d=>(cat==='All'||d.cat===cat)&&(!q||(d.name+' '+d.cat).toLowerCase().includes(q)));
+    const showDef=!q&&cat==='All';
+    box.innerHTML=(L.length||showDef)?'<div class="stg-grid">'+(showDef?card(null):'')+L.map(card).join('')+'</div>':'<div class="stg-msg">No toggles match.</div>';
+    sty('scUibPrev').textContent=BASE+list.map(cssFor).join('\n'); defsFor(list);
+    box.querySelectorAll('.stg-card').forEach(c=>{ const d=byId(c.dataset.id); if(d) skinEl(c.querySelector('.toggle-switch'),d); });
+    box.scrollTop=0; startPrev();
+  }
+  function render(force){
+    const box=panel.querySelector('.stg-scroll');
+    if(!list){
+      box.innerHTML='<div class="stg-msg">'+(failed?'Could not load toggles.<br><button data-a="retry">Retry</button>':'Loading toggles…')+'</div>';
+      if(force||!failed) load().then(()=>{ if(panel.classList.contains('open')) render(); }).catch(()=>{ if(panel.classList.contains('open')) render(); });
+      return;
+    }
+    const cats=['All'].concat(list.map(d=>d.cat).filter((v,i,a)=>a.indexOf(v)===i));
+    panel.querySelector('.stg-cats').innerHTML=cats.map(c=>'<button data-c="'+esc(c)+'"'+(c===cat?' class="on"':'')+'>'+esc(c)+'</button>').join('');
+    renderGrid();
+  }
+  function startPrev(){
+    clearInterval(prevTimer); let n=0;
+    const tick=()=>{ if(!panel||!panel.classList.contains('open')){ clearInterval(prevTimer); return; }
+      const bx=panel.querySelector('.stg-scroll').getBoundingClientRect(); n++;
+      panel.querySelectorAll('.stg-card').forEach((c,i)=>{ const r=c.getBoundingClientRect(); if(r.bottom<bx.top||r.top>bx.bottom) return; if((i+n)%2===0){ const inp=c.querySelector('input'); inp.checked=!inp.checked; } }); };
+    tick(); prevTimer=setInterval(tick,1500);
+  }
+  function open(){
+    if(!isVer()) return;
+    if(window.SCTheme) SCTheme.close();
+    build(); q=''; panel.querySelector('.stg-q').value=''; render();
+    panel.classList.add('open'); requestAnimationFrame(()=>requestAnimationFrame(()=>panel.classList.add('vis')));
+  }
+  function close(){
+    if(!panel||!panel.classList.contains('open')) return;
+    clearInterval(prevTimer); panel.classList.remove('vis'); setTimeout(()=>panel&&panel.classList.remove('open'),200);
+  }
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') close(); });
+  const boot=()=>setTimeout(sync,60);
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+  return {open:open,close:close,sync:sync,clear:clear,label:label,set:set,current:()=>cur};
+})();
+
 /* v152 — SCTheme: Theme Panel for users tagged "verified" in su.json */
 window.SCTheme=(function(){
   const SU_URL='https://mahi902.github.io/Oryn/su.json';
@@ -41819,6 +41989,7 @@ window.SCTheme=(function(){
   function apply(){
     if(!document.body) return;
     ensureStyle(); stopRainbow(); clearVars(); applyCss();
+    if(window.SCToggles) SCToggles.sync();
     if(!isVer){ bloomStop(); if(window._scThemeIcon) _scThemeIcon(); return; }
     const a=prefs.accent; syncBloom(); schedDel();
     if(!prefs.css){
@@ -41857,7 +42028,8 @@ window.SCTheme=(function(){
       (a!=='rainbow'?'<button class="stp-tog'+(prefs.bloom?' on':'')+'" onclick="SCTheme.bloom()"><span>Rainbow bloom<br><small style="font-weight:400;color:var(--ui-muted)">Rainbow glow around your cursor or touch</small></span><b></b></button>':'')+
       ((a==='rainbow'||prefs.bloom)?'<div class="stp-t">Rainbow palette</div><div class="stp-pal">'+Object.keys(PAL).map(k=>'<button class="'+(prefs.palette===k?'on':'')+'" onclick="SCTheme.palette(\''+k+'\')"><i style="background:linear-gradient(90deg,'+palStops(PAL[k],6)+')"></i>'+PAL[k].n+'</button>').join('')+'</div>':'')+
       '<div class="stp-t">Custom CSS</div><div class="stp-css"><button class="'+(hasCss?'on':'')+'" onclick="SCTheme.pick()">'+(hasCss?'Replace CSS':'Upload CSS')+'</button>'+(hasCss?'<button onclick="SCTheme.clearCss()">Remove</button>':'')+'</div>'+
-      '<div class="stp-note">'+(hasCss?'Custom CSS is overriding everything.':'Overrides the theme and accent.')+'</div><div class="stp-pad"></div>';
+      '<div class="stp-note">'+(hasCss?'Custom CSS is overriding everything.':'Overrides the theme and accent.')+'</div>'+
+      '<div class="stp-t">Toggles</div><button class="stp-rb" onclick="SCToggles.open()"><span class="material-symbols-outlined" style="font-size:18px">toggle_on</span>Animated toggles</button><div class="stp-pad"></div>';
     const i=document.getElementById('scThemeImg'); if(i) i.style.filter=a==='rainbow'&&!hasCss?i.style.filter:imgFilter();
   }
   function build(){
