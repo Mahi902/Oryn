@@ -320,13 +320,15 @@ body.dark .fc-card.gray{background:linear-gradient(160deg,#6b6b71,#48484c)}
   <div class="toolbar">
     <button class="tchip" onclick="addSetManual()"><span class="ms">add</span>Add set</button>
     <button class="tchip" onclick="sortByMark()"><span class="ms">sort</span><span id="sortLbl">Sort by mark</span></button>
+    <button class="tchip" onclick="shuffleSets()"><span class="ms">shuffle</span>Shuffle</button>
+    <button class="tchip" onclick="swapSides()"><span class="ms">swap_horiz</span>Swap sides</button>
     <button class="tchip" onclick="openHistoryForDeck()"><span class="ms">history</span>Practices</button>
     <span class="stat-line" id="statLine"></span>
   </div>
   <div class="gen-banner" id="genBanner"><span class="ms">progress_activity</span><span id="genText">Generating…</span></div>
   <div class="set-scroll"><div class="set-list" id="setList"></div></div>
 </div>
-<input type="file" id="importFile" accept=".json,.csv,.txt,.md" style="display:none" onchange="importFile(this)">
+<input type="file" id="importFile" accept=".json,.csv,.tsv,.txt,.md" style="display:none" onchange="importFile(this)">
 
 <!-- ═════════ Exercise ═════════ -->
 <div id="exScreen">
@@ -354,6 +356,7 @@ body.dark .fc-card.gray{background:linear-gradient(160deg,#6b6b71,#48484c)}
     <div class="opt-row" onclick="doExport('json')"><span class="ms">data_object</span><div><b>JSON</b><small>Whole deck with marks. Re-importable.</small></div></div>
     <div class="opt-row" onclick="doExport('csv')"><span class="ms">table</span><div><b>CSV</b><small>card1, card2, mark</small></div></div>
     <div class="opt-row" onclick="doExport('md')"><span class="ms">description</span><div><b>Markdown</b><small>A readable table of every set.</small></div></div>
+    <div class="opt-row" onclick="doExport('anki')"><span class="ms">school</span><div><b>Anki (TSV)</b><small>Tab-separated, ready for Anki's import.</small></div></div>
     <div class="opt-row" onclick="doExport('txt')"><span class="ms">notes</span><div><b>Plain text</b><small>One set per line: card 1 | card 2</small></div></div>
   </div>
 </div>
@@ -709,6 +712,16 @@ function sortByMark(){
   $('sortLbl').textContent = markDesc ? 'Marks 5 → 1' : 'Marks 1 → 5'; markDesc = !markDesc;
   renderEditor(); scheduleSave();
 }
+function shuffleSets(){
+  if (!curDeck || curDeck.sets.length < 2) return;
+  const before = curDeck.sets.slice(); curDeck.sets = shuffle(curDeck.sets); renderEditor(); scheduleSave();
+  toast('Sets shuffled', '', 5000, 'Undo', () => { curDeck.sets = before; renderEditor(); scheduleSave(); });
+}
+function swapSides(){
+  if (!curDeck || !curDeck.sets.length) return;
+  const doSwap = () => { curDeck.sets.forEach(s => { const t = s.c1; s.c1 = s.c2; s.c2 = t; }); renderEditor(); scheduleSave(); };
+  doSwap(); toast('Card 1 and Card 2 swapped', '', 5000, 'Undo', doSwap);
+}
 function flashRow(id){
   const r = document.querySelector('.set-row[data-id="' + id + '"]'); if (!r) return;
   r.scrollIntoView({block: 'center', behavior: 'smooth'}); r.classList.remove('flash'); void r.offsetWidth; r.classList.add('flash');
@@ -756,6 +769,7 @@ function doExport(kind){
   if (kind === 'json') download(base + '.json', 'application/json', JSON.stringify({format: 'oryn-flashcards', version: 1, name: d.name, sets: d.sets.map(s => ({card1: s.c1, card2: s.c2, mark: s.mark})), practices: sessionsOf(d.id).map(s => ({at: s.at, mode: s.mode, total: s.total, known: s.known, ms: s.ms}))}, null, 2));
   else if (kind === 'csv') download(base + '.csv', 'text/csv', 'card1,card2,mark\n' + d.sets.map(s => [csvq(s.c1), csvq(s.c2), s.mark].join(',')).join('\n'));
   else if (kind === 'md') download(base + '.md', 'text/markdown', '# ' + d.name + '\n\n| # | Card 1 | Card 2 | Mark |\n|---|---|---|---|\n' + d.sets.map((s, i) => '| ' + (i + 1) + ' | ' + s.c1.replace(/\|/g, '\\|') + ' | ' + s.c2.replace(/\|/g, '\\|') + ' | ' + s.mark + ' |').join('\n') + '\n');
+  else if (kind === 'anki') download(base + '.tsv', 'text/tab-separated-values', d.sets.filter(s => s.c1.trim() && s.c2.trim()).map(s => [s.c1, s.c2].map(v => v.replace(/[\t\r\n]+/g, ' ')).join('\t')).join('\n') + '\n');
   else download(base + '.txt', 'text/plain', d.sets.map(s => s.c1 + ' | ' + s.c2).join('\n'));
   closeMdl('exportModal'); toast('Exported ' + kind.toUpperCase(), 'success');
 }
