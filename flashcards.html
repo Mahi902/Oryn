@@ -341,7 +341,7 @@ body.dark .fc-card.gray{background:linear-gradient(160deg,#6b6b71,#48484c)}
     <div class="ex-reveal" id="exReveal"></div>
     <div class="ex-btns">
       <button class="ex-btn" id="exBtnL" onclick="exPress('left')"><span class="ms">check</span></button>
-      <div class="ex-mid"><button onclick="exPeek()"><span class="ms">visibility</span>Peek</button><br><span id="exHint">Swipe outward: I can say the other point out loud.<br>Swipe inward: not yet.</span></div>
+      <div class="ex-mid"><button onclick="exPeek()"><span class="ms">visibility</span>Peek</button> <button onclick="exUndo()" title="Undo last answer (Backspace)"><span class="ms">undo</span>Undo</button><br><span id="exHint">Swipe outward: I can say the other point out loud.<br>Swipe inward: not yet.</span></div>
       <button class="ex-btn" id="exBtnR" onclick="exPress('right')"><span class="ms">close</span></button>
     </div>
   </div>
@@ -362,6 +362,8 @@ body.dark .fc-card.gray{background:linear-gradient(160deg,#6b6b71,#48484c)}
   <div class="mbox"><div class="mhdr"><span class="mtitle">Exercise</span><button class="mclose" onclick="closeMdl('exerciseModal')"><span class="ms">close</span></button></div>
     <div class="mlabel" style="margin-top:0">Order</div>
     <div class="seg" id="segOrder"><button data-v="ordered" class="on"><span class="ms">format_list_numbered</span>In order</button><button data-v="shuffled"><span class="ms">shuffle</span>Shuffled</button></div>
+    <div class="mlabel">Show first</div>
+    <div class="seg" id="segPrompt"><button data-v="random" class="on">Random</button><button data-v="1">Card 1</button><button data-v="2">Card 2</button></div>
     <div class="mlabel">Sets to practice</div>
     <div class="seg" id="segFilter" style="flex-wrap:wrap"><button data-v="all" class="on">All</button><button data-v="3">Mark 3+</button><button data-v="4">Mark 4+</button><button data-v="weak">Missed last</button></div>
     <div class="note" id="exInfo"></div>
@@ -576,7 +578,7 @@ function recRender(){
         '<div class="rec-card-icon"><span class="ms">style</span></div>' +
         '<div class="rec-card-info"><div class="rec-card-name">' + esc(d.name) + '</div><div class="rec-card-meta"><span class="rec-card-date">' + fmtDate(d.modified) + '</span><span class="chip">' + d.sets.length + ' sets</span>' +
         (sc != null ? '<span class="chip">last ' + sc + '%</span>' : '') + (n ? '<span class="chip">' + n + (n === 1 ? ' practice' : ' practices') + '</span>' : '') + '</div></div>' +
-        '<div class="rec-card-actions"><button class="rec-card-btn" title="Rename" onclick="event.stopPropagation();recRename(\'' + d.id + '\')"><span class="ms">edit</span></button>' +
+        '<div class="rec-card-actions"><button class="rec-card-btn" title="Duplicate" onclick="event.stopPropagation();recDuplicate(\'' + d.id + '\')"><span class="ms">content_copy</span></button><button class="rec-card-btn" title="Rename" onclick="event.stopPropagation();recRename(\'' + d.id + '\')"><span class="ms">edit</span></button>' +
         '<button class="rec-card-btn danger" title="Delete" onclick="event.stopPropagation();recDelete(\'' + d.id + '\')"><span class="ms">delete</span></button></div></div>';
     }).join('') + '</div>';
   } else {
@@ -594,6 +596,12 @@ function recRender(){
   }
 }
 function recOpen(id){ openDeck(id); }
+function recDuplicate(id){
+  const d = store.decks.get(id); if (!d) return;
+  const c = mkDeck((d.name + ' (copy)').slice(0, 80));
+  c.sets = d.sets.map(x => mkSet(x.c1, x.c2, x.mark));
+  store.decks.set(c.id, c); saveDeck(c); recRender(); toast('Duplicated "' + d.name + '"');
+}
 async function recDelete(id){
   const d = store.decks.get(id); if (!d) return;
   if (!(await confirmBox('Delete flashcards?', '"' + d.name + '" and its ' + sessionsOf(id).length + ' saved practices will be removed.', 'Delete'))) return;
@@ -796,7 +804,7 @@ function importFile(inp){
 /* ═══════════════════════════════════════════════════════
    EXERCISE
 ═══════════════════════════════════════════════════════ */
-let exOpts = {order: 'ordered', filter: 'all'};
+let exOpts = {order: 'ordered', filter: 'all', prompt: 'random'};
 let ex = null;
 function eligibleSets(deck, filter){
   let sets = deck.sets.filter(s => s.c1.trim() && s.c2.trim());
@@ -815,8 +823,8 @@ function openExerciseSetup(){
     $('exInfo').textContent = n + (n === 1 ? ' set' : ' sets') + ' will be practiced. Each one shows a single point on the left (green) or right (gray); swipe it outward if you can say the other point out loud, inward if not.' + (exOpts.filter === 'weak' && !sessionsOf(curDeck.id).length ? ' (No earlier practice yet, so all sets are used.)' : '');
     $('exStartBtn').disabled = n === 0;
   };
-  ['segOrder', 'segFilter'].forEach(id => {
-    const key = id === 'segOrder' ? 'order' : 'filter';
+  ['segOrder', 'segFilter', 'segPrompt'].forEach(id => {
+    const key = id === 'segOrder' ? 'order' : id === 'segPrompt' ? 'prompt' : 'filter';
     $(id).querySelectorAll('button').forEach(b => {
       b.classList.toggle('on', b.dataset.v === exOpts[key]);
       b.onclick = () => { exOpts[key] = b.dataset.v; $(id).querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); upd(); };
@@ -827,17 +835,18 @@ function openExerciseSetup(){
 function exStartFromSetup(){
   closeMdl('exerciseModal');
   let sets = eligibleSets(curDeck, exOpts.filter);
-  exStart(curDeck, sets, exOpts.order, exOpts.filter);
+  exStart(curDeck, sets, exOpts.order, exOpts.filter, exOpts.prompt);
 }
-function exStart(deck, sets, order, filter){
+function exStart(deck, sets, order, filter, prompt){
+  prompt = prompt || 'random';
   if (!sets.length) return;
   if (order === 'shuffled') sets = shuffle(sets);
   const queue = sets.map(set => {
     const c1Left = Math.random() < .5, promptSide = Math.random() < .5 ? 'left' : 'right';
-    const promptCard = ((promptSide === 'left') === c1Left) ? 1 : 2;
+    const promptCard = prompt === '1' ? 1 : prompt === '2' ? 2 : (((promptSide === 'left') === c1Left) ? 1 : 2);
     return {set, promptSide, promptCard};
   });
-  ex = {deck, queue, i: 0, results: [], t0: Date.now(), cardT0: Date.now(), order, filter, peeked: false, busy: false, partialSaved: false};
+  ex = {deck, queue, i: 0, results: [], t0: Date.now(), cardT0: Date.now(), order, filter, prompt, peeked: false, busy: false, partialSaved: false};
   $('exPlay').style.display = 'flex'; $('exSum').style.display = 'none';
   showScreen('exercise'); $('exReveal').classList.remove('show'); exShowCard();
 }
@@ -908,6 +917,10 @@ function exDecide(known, dir){
   showReveal(q, (known ? '✓ ' : '✗ ') + 'The other point was', q.promptSide === 'left' ? 'gray' : 'green');
   setTimeout(() => { ex.i++; exShowCard(); }, 280);
 }
+function exUndo(){
+  if (!ex || ex.busy || ex.i < 1 || !ex.results.length) return;
+  ex.results.pop(); ex.i--; $('exReveal').classList.remove('show'); exShowCard();
+}
 function buildSession(partial){
   const known = ex.results.filter(r => r.known).length;
   return {id: uid(), deckId: ex.deck.id, deckName: ex.deck.name, at: Date.now(), mode: ex.order, filter: ex.filter, total: ex.results.length, known, ms: Date.now() - ex.t0, partial: !!partial, results: ex.results.slice()};
@@ -939,9 +952,9 @@ function summaryHtml(s){
 function exRepeatMissed(){
   const ids = new Set(ex.last.results.filter(r => !r.known).map(r => r.setId));
   const sets = ex.deck.sets.filter(s => ids.has(s.id) && s.c1.trim() && s.c2.trim());
-  if (sets.length) exStart(ex.deck, sets, 'shuffled', 'weak');
+  if (sets.length) exStart(ex.deck, sets, 'shuffled', 'weak', ex.prompt);
 }
-function exAgain(){ const sets = eligibleSets(ex.deck, 'all'); exStart(ex.deck, sets, ex.order, 'all'); }
+function exAgain(){ const sets = eligibleSets(ex.deck, 'all'); exStart(ex.deck, sets, ex.order, 'all', ex.prompt); }
 function exDone(){ const d = ex.deck; ex = null; showScreen('editor'); curDeck = d; renderEditor(); }
 async function exClose(){
   if (!ex) return;
@@ -958,6 +971,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft'){ e.preventDefault(); exPress('left'); }
   else if (e.key === 'ArrowRight'){ e.preventDefault(); exPress('right'); }
   else if (e.key === ' '){ e.preventDefault(); exPeek(); }
+  else if (e.key === 'Backspace'){ e.preventDefault(); exUndo(); }
   else if (e.key === 'Escape') exClose();
 });
 function showPractice(id){
