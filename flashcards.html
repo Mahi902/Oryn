@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="canonical" href="https://mahi902.github.io/Oryn/flashcards.html">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Flashcards</title>
+<meta name="description" content="Oryn Flashcards: create two-point flashcard sets by hand or with any MCP agent, practice them by swiping, and let agents analyze your progress.">
+<meta name="keywords" content="flashcards, Oryn flashcards, study, swipe flashcards, spaced practice, MCP agent flashcards, Claude, ChatGPT, Gemini, Mohtadi Azad Mahi, mahi902, free online tools, no signup">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden}
+body{
+  --bg:#f2f2f7;--shell:#fff;--shell2:#fafbfd;--card:#fff;--text:#1c1c1e;--muted:#8e8e93;--chip:#f0f2f7;--line:rgba(20,30,50,.10);
+  --divider:#e5e5ea;--accent:linear-gradient(135deg,#2f8dff,#0a6ee0);--accent-solid:#007aff;--accent-shadow:0 2px 8px rgba(10,110,224,.3);
+  --danger:#ff3b30;--shadow:0 4px 12px rgba(0,0,0,.03),0 1px 2px rgba(0,0,0,.04);--shadow-lg:0 12px 36px rgba(20,30,50,.2),0 2px 6px rgba(20,30,50,.1);
+  --green:#30b350;--green-soft:rgba(52,199,89,.14);--gray-soft:rgba(142,142,147,.16);--orange:#ff9f0a;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);color:var(--text);
+}
+body.dark{
+  --bg:#000;--shell:#1e1e21;--shell2:#18181b;--card:#1c1c1e;--text:#fff;--muted:#9a9aa1;--chip:#2c2c2e;--line:rgba(255,255,255,.09);
+  --divider:#38383a;--accent:linear-gradient(135deg,#2f84e8,#1659b5);--accent-solid:#0a84ff;--accent-shadow:0 2px 8px rgba(22,89,181,.5);
+  --shadow:none;--shadow-lg:0 12px 36px rgba(0,0,0,.55),0 2px 6px rgba(0,0,0,.3);--green:#32d74b;--green-soft:rgba(50,215,75,.16);--gray-soft:rgba(152,152,157,.2);
+}
+button{font-family:inherit;cursor:pointer}
+.ms{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:20px;letter-spacing:normal;white-space:nowrap;font-feature-settings:'liga';font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;user-select:none;-webkit-user-select:none}
+.ms.fill{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+
+/* ── Recents ─────────────────────────────────────────── */
+#recentsScreen{position:fixed;inset:0;z-index:20000;display:none;flex-direction:column;background:var(--bg);user-select:none;-webkit-user-select:none}
+#recentsScreen.visible{display:flex}
+.rec-header{display:flex;align-items:center;gap:10px;padding:calc(18px + env(safe-area-inset-top,0px)) 20px 0;flex-shrink:0}
+.rec-title{font-size:34px;font-weight:700;letter-spacing:-.5px;margin:0 0 12px;flex:1}
+.rec-controls{display:flex;align-items:center;gap:10px;padding:8px 12px;flex-shrink:0;position:sticky;top:0;z-index:10;background:var(--bg)}
+.rec-search-wrap{flex:1;background:rgba(142,142,147,.12);border-radius:10px;padding:10px 12px;display:flex;align-items:center;min-width:0}
+body.dark .rec-search-wrap{background:#1c1c1e}
+.rec-search-wrap .ms{color:var(--muted);opacity:.8}
+.rec-search{border:none;background:transparent;width:100%;outline:none;margin-left:8px;font-size:16px;color:var(--text);padding:0;font-family:inherit}
+.rec-search::placeholder{color:var(--muted)}
+.circ-btn{width:44px;height:44px;background:var(--card);border:none;border-radius:50%;color:var(--accent-solid);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;position:relative}
+.circ-btn:active{background:var(--divider)}
+.circ-btn.primary{background:var(--accent);color:#fff;box-shadow:var(--accent-shadow)}
+.circ-btn .badge{position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:9px;background:var(--danger);color:#fff;font-size:11px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 5px}
+.circ-btn[data-state=connected]::after,.circ-btn[data-state=busy]::after{content:"";position:absolute;bottom:5px;right:5px;width:9px;height:9px;border-radius:50%;background:var(--green);border:2px solid var(--card)}
+.circ-btn[data-state=busy]::after{background:var(--orange)}
+.rec-tabs{display:flex;gap:8px;padding:6px 20px 0;flex-shrink:0}
+.rec-tab{border:none;background:var(--chip);color:var(--muted);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.rec-tab.active{background:var(--accent);color:#fff;box-shadow:var(--accent-shadow)}
+.rec-tab .ms{font-size:17px}
+.rec-body{flex:1;overflow-y:auto;padding:0 20px 28px}
+.rec-section-label{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:22px 0 10px 5px}
+.rec-list{display:flex;flex-direction:column;gap:8px}
+.rec-card{background:var(--card);border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);cursor:pointer;transition:all .2s;position:relative;border:none;text-align:left;color:inherit;width:100%}
+.rec-card:active{background:var(--divider);transform:scale(.99)}
+.rec-card-icon{width:40px;height:40px;background:rgba(0,122,255,.1);color:var(--accent-solid);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+body.dark .rec-card-icon{background:rgba(10,132,255,.2)}
+.rec-card-icon.good{background:var(--green-soft);color:var(--green)}
+.rec-card-icon.mid{background:rgba(255,159,10,.16);color:var(--orange)}
+.rec-card-icon.low{background:rgba(255,59,48,.14);color:var(--danger)}
+.rec-card-info{flex:1;min-width:0}
+.rec-card-name{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-card-meta{display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap}
+.rec-card-date{font-size:13px;color:var(--muted)}
+.chip{font-size:12px;color:var(--muted);background:var(--bg);padding:2px 8px;border-radius:20px;white-space:nowrap}
+body.dark .chip{background:#2c2c2e}
+.rec-card-actions{display:flex;align-items:center;gap:4px;opacity:0;transition:opacity .15s;flex-shrink:0}
+.rec-card:hover .rec-card-actions{opacity:1}
+@media (hover:none){.rec-card-actions{opacity:1}}
+.rec-card-btn{background:none;border:none;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:background .13s,color .13s}
+.rec-card-btn:hover{background:rgba(0,122,255,.1);color:var(--accent-solid)}
+.rec-card-btn.danger:hover{background:rgba(255,59,48,.12);color:var(--danger)}
+.rec-card-btn .ms{font-size:18px}
+.rec-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;color:var(--muted);text-align:center}
+.rec-empty .ms{font-size:52px;opacity:.5}
+.rec-empty-title{font-size:16px;font-weight:600}
+.rec-empty-sub{font-size:13px;max-width:290px;line-height:1.5}
+.rec-rename-input{font-size:16px;font-weight:600;border:none;outline:none;background:transparent;color:var(--text);border-bottom:2px solid var(--accent-solid);min-width:120px;max-width:340px;padding:1px 2px;font-family:inherit}
+
+/* picker sheets */
+.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:30000;display:flex;flex-direction:column;justify-content:flex-end;opacity:0;pointer-events:none;transition:opacity .3s;padding-top:60px}
+body.dark .sheet-overlay{background:rgba(0,0,0,.6)}
+.sheet-overlay.open{opacity:1;pointer-events:auto}
+.sheet{background:var(--card);border-radius:20px 20px 0 0;padding:20px 16px calc(32px + env(safe-area-inset-bottom,0px));transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);max-height:calc(100vh - 60px);display:flex;flex-direction:column;width:100%;max-width:640px;margin:0 auto}
+body.dark .sheet{background:#000}
+.sheet-overlay.open .sheet{transform:translateY(0)}
+.sheet-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:0 5px}
+.sheet-title{font-size:18px;font-weight:700}
+.sheet-close{width:36px;height:36px;background:rgba(120,120,120,.15);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text)}
+.sheet-opts{overflow-y:auto}
+.sheet-opt{padding:15px 18px;display:flex;justify-content:space-between;align-items:center;font-size:16px;border-bottom:1px solid var(--divider);cursor:pointer}
+.sheet-opt:last-child{border-bottom:none}
+.sheet-opt:active{background:var(--divider)}
+.sheet-opt.selected{color:var(--accent-solid);font-weight:600}
+.sheet-opt .ms{color:var(--accent-solid);display:none}
+.sheet-opt.selected .ms{display:block}
+.sheet-opt.plain .ms{display:block;color:var(--muted)}
+
+/* ── Editor ──────────────────────────────────────────── */
+#editorContainer{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg)}
+#editorContainer.visible{display:flex}
+.top-bar{padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;flex-shrink:0;overflow-x:auto;overflow-y:hidden;white-space:nowrap;background:linear-gradient(180deg,var(--shell),var(--shell2));box-shadow:0 1px 0 var(--line),0 4px 14px rgba(20,30,50,.08);z-index:5}
+#docTitle{font-size:17px;border:none;outline:none;padding:6px 10px;font-family:inherit;min-width:100px;max-width:280px;color:var(--text);font-weight:600;border-radius:10px;background:transparent;flex-shrink:1}
+#docTitle:hover,#docTitle:focus{background:var(--chip)}
+.top-spacer{flex:1;min-width:8px}
+.icon-btn{background:none;border:none;padding:7px;display:flex;align-items:center;color:var(--accent-solid);border-radius:10px;flex-shrink:0;position:relative}
+.icon-btn:hover{background:var(--chip)}
+.icon-btn[data-state=connected]::after,.icon-btn[data-state=busy]::after{content:"";position:absolute;bottom:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--green);border:2px solid var(--shell)}
+.icon-btn[data-state=busy]::after{background:var(--orange)}
+.icon-btn .badge{position:absolute;top:0;right:0;min-width:16px;height:16px;border-radius:8px;background:var(--danger);color:#fff;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 4px}
+.action-btn{color:#fff;border:none;padding:8px 18px;font-size:13px;display:flex;align-items:center;gap:6px;white-space:nowrap;background:var(--accent);border-radius:999px;box-shadow:var(--accent-shadow);font-weight:600;flex-shrink:0}
+.action-btn:hover{filter:brightness(1.08)}
+.action-btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.action-btn.secondary{background:var(--chip);color:var(--muted);box-shadow:none}
+.action-btn.exercise{background:linear-gradient(135deg,#3ddc6a,#1f9d45);box-shadow:0 2px 8px rgba(31,157,69,.35)}
+.action-btn .ms{font-size:18px}
+.rec-open-btn{background:var(--chip);border:none;color:var(--accent-solid);border-radius:999px;padding:7px 12px 7px 8px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:2px;flex-shrink:0}
+.rec-open-btn .ms{font-size:18px}
+.toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;flex-shrink:0;overflow-x:auto;white-space:nowrap}
+.tchip{border:none;background:var(--card);color:var(--text);box-shadow:var(--shadow);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.tchip .ms{font-size:18px;color:var(--accent-solid)}
+.tchip:active{background:var(--divider)}
+.stat-line{margin-left:auto;font-size:13px;color:var(--muted);padding-left:10px}
+.gen-banner{display:none;margin:0 16px 8px;padding:9px 14px;border-radius:12px;background:var(--green-soft);color:var(--green);font-size:13px;font-weight:600;align-items:center;gap:8px}
+.gen-banner.show{display:flex}
+.gen-banner .ms{font-size:18px;animation:spin 1.2s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.set-scroll{flex:1;overflow-y:auto;padding:4px 16px calc(40px + env(safe-area-inset-bottom,0px))}
+.set-list{display:flex;flex-direction:column;gap:10px;max-width:980px;margin:0 auto}
+.set-row{display:grid;grid-template-columns:30px 1fr 1fr auto;gap:10px;align-items:stretch;background:var(--card);border-radius:16px;padding:12px;box-shadow:var(--shadow)}
+.set-row.gen{animation:genIn .45s cubic-bezier(.2,.8,.2,1)}
+.set-row.flash{animation:flashRow 1.2s ease}
+@keyframes genIn{from{opacity:0;transform:translateY(12px) scale(.98);background:var(--green-soft)}to{opacity:1;transform:none}}
+@keyframes flashRow{0%{box-shadow:0 0 0 3px var(--accent-solid)}100%{box-shadow:var(--shadow)}}
+.set-num{font-size:13px;font-weight:700;color:var(--muted);padding-top:10px;text-align:center}
+.set-field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.set-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.set-text{width:100%;resize:none;border:none;outline:none;background:var(--bg);color:var(--text);border-radius:10px;padding:9px 11px;font-size:15px;font-family:inherit;line-height:1.35;min-height:44px;overflow:hidden}
+.set-text:focus{box-shadow:0 0 0 2px var(--accent-solid)}
+.set-side{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:6px}
+.marks{display:flex;gap:4px}
+.mk{width:26px;height:26px;border-radius:8px;border:none;background:var(--chip);color:var(--muted);font-size:12px;font-weight:700}
+.mk.on{background:var(--accent);color:#fff}
+.mk[data-m="4"].on,.mk[data-m="5"].on{background:linear-gradient(135deg,#ff9f0a,#ff6a00)}
+.row-actions{display:flex;gap:2px}
+.row-actions .rec-card-btn{width:30px;height:30px}
+.empty-editor{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--muted);text-align:center;padding:60px 20px}
+.empty-editor .ms{font-size:52px;opacity:.5}
+@media (max-width:720px){
+  .set-row{grid-template-columns:24px 1fr;grid-template-areas:"n a" "n b" "n s"}
+  .set-row .set-num{grid-area:n}.set-row .f1{grid-area:a}.set-row .f2{grid-area:b}.set-row .set-side{grid-area:s;flex-direction:row;align-items:center}
+}
+
+/* ── Modals ──────────────────────────────────────────── */
+.modal{display:none;position:fixed;inset:0;z-index:40000;align-items:center;justify-content:center;background:rgba(20,30,50,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.modal.open{display:flex}
+.mbox{padding:24px;width:90%;max-width:480px;max-height:88vh;overflow-y:auto;position:relative;background:linear-gradient(180deg,var(--shell),var(--shell2));border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-lg);color:var(--text)}
+.mbox.wide{max-width:560px}
+.mhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.mtitle{font-size:19px;font-weight:600}
+.mclose{border:none;display:flex;align-items:center;background:var(--chip);width:30px;height:30px;padding:0;justify-content:center;border-radius:50%;color:var(--muted)}
+.mclose .ms{font-size:19px}
+.mfooter{display:flex;gap:9px;justify-content:flex-end;margin-top:18px}
+.mbtn{border:none;font-size:13px;border-radius:999px;padding:9px 20px;font-weight:600}
+.mbtn.primary{background:var(--accent);color:#fff;box-shadow:var(--accent-shadow)}
+.mbtn.sec{background:var(--chip);color:var(--muted)}
+.mbtn.danger-btn{background:linear-gradient(135deg,#ff6259,#e0342b);color:#fff}
+.mbtn:disabled{opacity:.45}
+.mlabel{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px}
+.seg{display:flex;background:var(--chip);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;border:none;background:transparent;color:var(--muted);padding:9px 8px;border-radius:9px;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px}
+.seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.seg button .ms{font-size:17px}
+.fld{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;outline:none}
+.fld:focus{border-color:var(--accent-solid)}
+.row{display:flex;gap:8px;align-items:center}
+.opt-row{display:flex;align-items:center;gap:12px;padding:13px 4px;border-bottom:1px solid var(--divider);cursor:pointer}
+.opt-row:last-child{border-bottom:none}
+.opt-row:hover{background:var(--chip)}
+.opt-row .ms{color:var(--accent-solid)}
+.opt-row b{font-size:14px;display:block}
+.opt-row small{color:var(--muted);font-size:12px}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:10px}
+.status-line{font-size:13px;margin-top:10px;padding:9px 12px;border-radius:10px;background:var(--chip);color:var(--muted)}
+.status-line[data-s=connected]{background:var(--green-soft);color:var(--green)}
+.status-line[data-s=badurl],.status-line[data-s=dropped]{background:rgba(255,59,48,.12);color:var(--danger)}
+.agent-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--divider)}
+.agent-row:last-child{border-bottom:none}
+.agent-av{width:34px;height:34px;border-radius:10px;background:rgba(0,122,255,.12);color:var(--accent-solid);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.agent-info{flex:1;min-width:0}
+.agent-info b{font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agent-info small{color:var(--muted);font-size:12px}
+.mini{border:none;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;background:var(--chip);color:var(--muted)}
+.mini.ok{background:var(--accent);color:#fff}
+.mini.bad{background:rgba(255,59,48,.12);color:var(--danger)}
+.chat-log{max-height:130px;overflow-y:auto;margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.chat-msg{font-size:13px;background:var(--chip);border-radius:10px;padding:7px 10px;line-height:1.4}
+.chat-msg b{font-size:11px;color:var(--accent-solid);display:block}
+.chat-msg.me{background:rgba(0,122,255,.12);align-self:flex-end}
+
+/* toasts */
+#toastWrap{position:fixed;left:0;right:0;bottom:calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:8px;z-index:60000;pointer-events:none}
+.toast{pointer-events:auto;background:#2c2c2e;color:#fff;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;max-width:90vw;opacity:0;transform:translateY(20px);transition:all .25s}
+.toast.show{opacity:1;transform:none}
+.toast.success{background:#1f9d45}.toast.error{background:#d63a30}
+.toast button{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:999px;padding:3px 10px;font-weight:700;font-size:12px}
+
+/* ── Exercise ────────────────────────────────────────── */
+#exScreen{position:fixed;inset:0;z-index:25000;display:none;flex-direction:column;background:var(--bg);user-select:none;-webkit-user-select:none}
+#exScreen.visible{display:flex}
+.ex-top{display:flex;align-items:center;gap:12px;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 8px}
+.ex-bar{flex:1;height:8px;border-radius:99px;background:var(--chip);overflow:hidden}
+.ex-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3ddc6a,#1f9d45);transition:width .3s}
+.ex-count{font-size:13px;font-weight:700;color:var(--muted);min-width:70px;text-align:right}
+.ex-legend{display:flex;justify-content:space-between;padding:0 22px 6px;font-size:12px;font-weight:700;letter-spacing:.3px}
+.ex-legend span:first-child{color:var(--green)}.ex-legend span:last-child{color:var(--muted)}
+.ex-stage{position:relative;flex:1;margin:4px 14px;border-radius:24px;overflow:hidden;touch-action:none;background:var(--card);box-shadow:var(--shadow);min-height:200px}
+.ex-half{position:absolute;top:0;bottom:0;width:50%}
+.ex-half.l{left:0;background:var(--green-soft)}
+.ex-half.r{right:0;background:var(--gray-soft)}
+.fc-card,.fc-ghost{position:absolute;top:50%;width:min(76%,420px);height:min(72%,380px);border-radius:24px;padding:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.fc-card.left,.fc-ghost.left{left:5%}
+.fc-card.right,.fc-ghost.right{right:5%}
+.fc-card{transform:translate(var(--dx,0px),calc(-50% + var(--dy,0px))) rotate(var(--rot,0deg));color:#fff;cursor:grab;box-shadow:0 16px 40px rgba(0,0,0,.25);z-index:3;touch-action:none}
+.fc-card.dragging{cursor:grabbing;transition:none}
+.fc-card.settle{transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.fc-card.fly{transition:transform .3s ease-in,opacity .3s ease-in;opacity:0}
+.fc-card.green{background:linear-gradient(160deg,#3ddc6a,#1f9d45)}
+.fc-card.gray{background:linear-gradient(160deg,#9d9da3,#6b6b71)}
+body.dark .fc-card.gray{background:linear-gradient(160deg,#6b6b71,#48484c)}
+.fc-card.enter{animation:cardIn .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes cardIn{from{opacity:0;transform:translate(0,calc(-50% + 24px)) scale(.94)}to{opacity:1}}
+.fc-text{font-size:clamp(18px,4.6vw,26px);font-weight:700;line-height:1.3;overflow-wrap:anywhere;max-height:100%;overflow:hidden}
+.fc-tag{position:absolute;top:14px;left:18px;right:18px;display:flex;justify-content:space-between;font-size:12px;font-weight:700;opacity:.85}
+.fc-badge{position:absolute;top:44px;padding:5px 12px;border-radius:10px;border:3px solid #fff;font-size:15px;font-weight:800;letter-spacing:.5px;opacity:0;text-transform:uppercase}
+.fc-badge.know{left:18px;transform:rotate(-10deg)}
+.fc-badge.nope{right:18px;transform:rotate(10deg)}
+.fc-ghost{transform:translateY(-50%);border:3px dashed var(--muted);opacity:.55;z-index:1;color:var(--muted);font-size:42px;font-weight:700}
+.fc-ghost.green{border-color:var(--green);color:var(--green)}
+.ex-reveal{margin:8px 14px 0;min-height:44px;border-radius:14px;padding:10px 14px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .25s;color:#fff}
+.ex-reveal.show{opacity:1}
+.ex-reveal.green{background:linear-gradient(135deg,#3ddc6a,#1f9d45)}
+.ex-reveal.gray{background:linear-gradient(135deg,#9d9da3,#6b6b71)}
+.ex-reveal small{font-size:11px;opacity:.85;display:block;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.ex-btns{display:flex;justify-content:space-between;align-items:center;padding:12px 30px calc(18px + env(safe-area-inset-bottom,0px));gap:12px}
+.ex-btn{width:68px;height:68px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-lg);color:#fff;transition:transform .12s}
+.ex-btn:active{transform:scale(.92)}
+.ex-btn .ms{font-size:34px}
+.ex-btn.know{background:linear-gradient(135deg,#3ddc6a,#1f9d45)}
+.ex-btn.nope{background:linear-gradient(135deg,#ff6259,#e0342b)}
+.ex-mid{flex:1;text-align:center;font-size:12px;color:var(--muted);line-height:1.5}
+.ex-mid button{border:none;background:var(--chip);color:var(--muted);border-radius:999px;padding:7px 14px;font-weight:600;font-size:12px;display:inline-flex;align-items:center;gap:5px;margin-bottom:4px}
+.ex-sum{flex:1;overflow-y:auto;padding:calc(20px + env(safe-area-inset-top,0px)) 20px calc(24px + env(safe-area-inset-bottom,0px))}
+.sum-wrap{max-width:560px;margin:0 auto}
+.sum-ring{display:flex;flex-direction:column;align-items:center;gap:8px;margin:6px 0 14px}
+.sum-ring svg{width:150px;height:150px;transform:rotate(-90deg)}
+.sum-ring .pct{position:absolute;font-size:34px;font-weight:800}
+.ring-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+.sum-head{text-align:center;font-size:22px;font-weight:800}
+.sum-sub{text-align:center;color:var(--muted);font-size:14px;margin-top:2px}
+.sum-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0}
+.sum-stat{background:var(--card);border-radius:14px;padding:12px 6px;text-align:center;box-shadow:var(--shadow)}
+.sum-stat b{display:block;font-size:20px}.sum-stat small{font-size:11px;color:var(--muted);font-weight:600}
+.sum-block{background:var(--card);border-radius:16px;padding:14px;margin-top:12px;box-shadow:var(--shadow)}
+.sum-block h4{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+.bar-row{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px}
+.bar-row span:first-child{width:56px;font-weight:600;flex-shrink:0}
+.bar-track{flex:1;height:10px;background:var(--chip);border-radius:99px;overflow:hidden}
+.bar-track i{display:block;height:100%;background:linear-gradient(90deg,#3ddc6a,#1f9d45);border-radius:99px}
+.bar-row em{width:62px;text-align:right;font-style:normal;color:var(--muted);font-size:12px}
+.miss{padding:9px 0;border-bottom:1px solid var(--divider);font-size:14px;line-height:1.4}
+.miss:last-child{border-bottom:none}
+.miss i{font-style:normal;display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.miss .g{background:var(--green)}.miss .y{background:#8e8e93}
+.sum-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.sum-actions .mbtn{flex:1;min-width:120px;padding:12px 16px;display:flex;align-items:center;justify-content:center;gap:6px}
+</style>
+</head>
+<body>
+
+<!-- ═════════ Recents ═════════ -->
+<div id="recentsScreen" class="visible">
+  <div class="rec-header">
+    <h1 class="rec-title">Flashcards</h1>
+    <button class="circ-btn" id="recAgentBtn" title="Agents (MCP)" onclick="openAgents()"><span class="ms">smart_toy</span><span class="badge"></span></button>
+    <button class="circ-btn" id="recThemeBtn" title="Toggle dark mode" onclick="toggleTheme()"><span class="ms">dark_mode</span></button>
+  </div>
+  <div class="rec-controls">
+    <div class="rec-search-wrap"><span class="ms">search</span><input type="text" class="rec-search" id="recSearch" placeholder="Search" oninput="recRender()"></div>
+    <button class="circ-btn" onclick="recOpenSort()" title="Sort &amp; Options"><span class="ms">tune</span></button>
+    <button class="circ-btn primary" onclick="newDeck()" title="New flashcards"><span class="ms">add</span></button>
+  </div>
+  <div class="rec-tabs">
+    <button class="rec-tab active" id="tabDecks" onclick="recTab('decks')"><span class="ms">style</span>Flashcards</button>
+    <button class="rec-tab" id="tabPractice" onclick="recTab('practice')"><span class="ms">history</span>Practices</button>
+  </div>
+  <div class="rec-body"><div id="recList"></div></div>
+</div>
+
+<div class="sheet-overlay" id="sortOverlay" onclick="recCloseSort()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-hdr"><span class="sheet-title">Sort &amp; Options</span><button class="sheet-close" onclick="recCloseSort()"><span class="ms">close</span></button></div>
+    <div class="sheet-opts" id="sortOpts"></div>
+  </div>
+</div>
+
+<!-- ═════════ Editor ═════════ -->
+<div id="editorContainer">
+  <div class="top-bar">
+    <button class="rec-open-btn" onclick="closeEditor()" title="Back to Recents"><span class="ms">chevron_left</span>Recents</button>
+    <input type="text" id="docTitle" value="Untitled flashcards" title="Click to rename" oninput="onTitleInput()">
+    <div class="top-spacer"></div>
+    <button class="icon-btn" id="edAgentBtn" title="Agents (MCP)" onclick="openAgents()"><span class="ms">smart_toy</span><span class="badge"></span></button>
+    <button class="icon-btn" id="themeBtn" title="Toggle dark mode" onclick="toggleTheme()"><span class="ms">dark_mode</span></button>
+    <button class="action-btn secondary" onclick="importPick()" title="Import deck"><span class="ms">upload_file</span>Import</button>
+    <button class="action-btn exercise" id="exerciseBtn" onclick="openExerciseSetup()" title="Practice this deck"><span class="ms">bolt</span>Exercise</button>
+    <button class="action-btn" onclick="openMdl('exportModal')"><span class="ms">download</span>Export</button>
+  </div>
+  <div class="toolbar">
+    <button class="tchip" onclick="addSetManual()"><span class="ms">add</span>Add set</button>
+    <button class="tchip" onclick="sortByMark()"><span class="ms">sort</span><span id="sortLbl">Sort by mark</span></button>
+    <button class="tchip" onclick="openHistoryForDeck()"><span class="ms">history</span>Practices</button>
+    <span class="stat-line" id="statLine"></span>
+  </div>
+  <div class="gen-banner" id="genBanner"><span class="ms">progress_activity</span><span id="genText">Generating…</span></div>
+  <div class="set-scroll"><div class="set-list" id="setList"></div></div>
+</div>
+<input type="file" id="importFile" accept=".json,.csv,.txt,.md" style="display:none" onchange="importFile(this)">
+
+<!-- ═════════ Exercise ═════════ -->
+<div id="exScreen">
+  <div id="exPlay" style="display:flex;flex-direction:column;flex:1;min-height:0">
+    <div class="ex-top">
+      <button class="icon-btn" onclick="exClose()" title="End practice"><span class="ms">close</span></button>
+      <div class="ex-bar"><i id="exBar"></i></div>
+      <div class="ex-count" id="exCount">0 / 0</div>
+    </div>
+    <div class="ex-legend"><span>LEFT · GREEN</span><span>RIGHT · GRAY</span></div>
+    <div class="ex-stage" id="exStage"><div class="ex-half l"></div><div class="ex-half r"></div></div>
+    <div class="ex-reveal" id="exReveal"></div>
+    <div class="ex-btns">
+      <button class="ex-btn" id="exBtnL" onclick="exPress('left')"><span class="ms">check</span></button>
+      <div class="ex-mid"><button onclick="exPeek()"><span class="ms">visibility</span>Peek</button><br><span id="exHint">Swipe outward: I can say the other point out loud.<br>Swipe inward: not yet.</span></div>
+      <button class="ex-btn" id="exBtnR" onclick="exPress('right')"><span class="ms">close</span></button>
+    </div>
+  </div>
+  <div class="ex-sum" id="exSum" style="display:none"></div>
+</div>
+
+<!-- ═════════ Modals ═════════ -->
+<div class="modal" id="exportModal" onclick="if(event.target===this)closeMdl('exportModal')">
+  <div class="mbox"><div class="mhdr"><span class="mtitle">Export</span><button class="mclose" onclick="closeMdl('exportModal')"><span class="ms">close</span></button></div>
+    <div class="opt-row" onclick="doExport('json')"><span class="ms">data_object</span><div><b>JSON</b><small>Whole deck with marks. Re-importable.</small></div></div>
+    <div class="opt-row" onclick="doExport('csv')"><span class="ms">table</span><div><b>CSV</b><small>card1, card2, mark</small></div></div>
+    <div class="opt-row" onclick="doExport('md')"><span class="ms">description</span><div><b>Markdown</b><small>A readable table of every set.</small></div></div>
+    <div class="opt-row" onclick="doExport('txt')"><span class="ms">notes</span><div><b>Plain text</b><small>One set per line: card 1 | card 2</small></div></div>
+  </div>
+</div>
+
+<div class="modal" id="exerciseModal" onclick="if(event.target===this)closeMdl('exerciseModal')">
+  <div class="mbox"><div class="mhdr"><span class="mtitle">Exercise</span><button class="mclose" onclick="closeMdl('exerciseModal')"><span class="ms">close</span></button></div>
+    <div class="mlabel" style="margin-top:0">Order</div>
+    <div class="seg" id="segOrder"><button data-v="ordered" class="on"><span class="ms">format_list_numbered</span>In order</button><button data-v="shuffled"><span class="ms">shuffle</span>Shuffled</button></div>
+    <div class="mlabel">Sets to practice</div>
+    <div class="seg" id="segFilter" style="flex-wrap:wrap"><button data-v="all" class="on">All</button><button data-v="3">Mark 3+</button><button data-v="4">Mark 4+</button><button data-v="weak">Missed last</button></div>
+    <div class="note" id="exInfo"></div>
+    <div class="mfooter"><button class="mbtn sec" onclick="closeMdl('exerciseModal')">Cancel</button><button class="mbtn primary" id="exStartBtn" onclick="exStartFromSetup()">Start</button></div>
+  </div>
+</div>
+
+<div class="modal" id="agentsModal" onclick="if(event.target===this)closeMdl('agentsModal')">
+  <div class="mbox wide"><div class="mhdr"><span class="mtitle">Agents · MCP</span><button class="mclose" onclick="closeMdl('agentsModal')"><span class="ms">close</span></button></div>
+    <div class="mlabel" style="margin-top:0">Relay Worker URL</div>
+    <input class="fld" id="aUrl" placeholder="https://all-agent-mcp.you.workers.dev" autocomplete="off" spellcheck="false">
+    <div class="mlabel">Connector URL (add this to your agent)</div>
+    <div class="row"><input class="fld" id="aConn" type="password" readonly autocomplete="off"><button class="mini" onclick="aToggleConn()" id="aEye"><span class="ms" style="font-size:16px">visibility</span></button><button class="mini" onclick="aCopyConn()"><span class="ms" style="font-size:16px">content_copy</span></button></div>
+    <div class="row" style="margin-top:10px;flex-wrap:wrap">
+      <button class="mini ok" id="aConnect" onclick="aDoConnect()">Connect</button>
+      <button class="mini" id="aDisconnect" onclick="bridgeStop()">Disconnect</button>
+      <button class="mini" onclick="aNewSecret()">New secret</button>
+      <span style="flex:1"></span>
+      <select class="fld" id="aJoin" style="width:auto" onchange="aSetJoin(this.value)"><option value="ask">New agents: ask me</option><option value="open">New agents: open</option><option value="locked">New agents: locked</option></select>
+    </div>
+    <div class="status-line" id="aStatus" data-s="off">Disconnected.</div>
+    <div class="mlabel">Agents</div>
+    <div id="aList"></div>
+    <div class="mlabel">Message agents</div>
+    <div class="row"><input class="fld" id="aMsg" placeholder="Tell your agent something…" onkeydown="if(event.key==='Enter')aSend()"><button class="mini ok" onclick="aSend()">Send</button></div>
+    <div class="chat-log" id="aChat"></div>
+    <div class="note">Uses the same self-hosted relay as the All Agent MCP add-on (mahi902/Oryn · all-agent-relay). Paste its URL, press Connect, then add the Connector URL in your agent (Claude: Settings → Connectors). The agent calls <b>guide</b> first. Keep this tab open while agents work, and never share the connector URL.</div>
+  </div>
+</div>
+
+<div class="modal" id="confirmModal">
+  <div class="mbox" style="max-width:380px"><div class="mhdr"><span class="mtitle" id="cfTitle">Confirm</span></div>
+    <div id="cfMsg" style="font-size:14px;line-height:1.5;color:var(--muted)"></div>
+    <div class="mfooter"><button class="mbtn sec" id="cfNo">Cancel</button><button class="mbtn danger-btn" id="cfYes">OK</button></div>
+  </div>
+</div>
+
+<div class="modal" id="practiceModal" onclick="if(event.target===this)closeMdl('practiceModal')">
+  <div class="mbox wide" style="padding:18px"><div class="mhdr"><span class="mtitle">Practice summary</span><button class="mclose" onclick="closeMdl('practiceModal')"><span class="ms">close</span></button></div>
+    <div id="practiceBody"></div>
+  </div>
+</div>
+
+<div id="toastWrap"></div>
+
+<script>
+'use strict';
+/* ═══════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+const clip = (s, n) => { s = String(s == null ? '' : s); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
+function fmtDate(t){
+  const d = new Date(t), now = new Date(), diff = now - d;
+  if (diff < 60000) return 'Just now';
+  if (diff < 3600000) return Math.floor(diff / 60000) + ' min ago';
+  if (d.toDateString() === now.toDateString()) return 'Today ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  const y = new Date(now); y.setDate(y.getDate() - 1);
+  if (d.toDateString() === y.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString([], {month:'short', day:'numeric', year: d.getFullYear() === now.getFullYear() ? undefined : 'numeric'});
+}
+function fmtDur(ms){ const s = Math.round(ms / 1000); return s >= 60 ? Math.floor(s / 60) + 'm ' + (s % 60) + 's' : s + 's'; }
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+function toast(text, type, ms, label, fn){
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || '');
+  el.innerHTML = '<span>' + esc(text) + '</span>' + (label ? '<button>' + esc(label) + '</button>' : '');
+  if (label) el.querySelector('button').onclick = () => { try { fn && fn(); } catch(e){} el.remove(); };
+  $('toastWrap').appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, ms || 2800);
+}
+function openMdl(id){ $(id).classList.add('open'); }
+function closeMdl(id){ $(id).classList.remove('open'); }
+function confirmBox(title, msg, yes, danger){
+  return new Promise(res => {
+    $('cfTitle').textContent = title; $('cfMsg').textContent = msg;
+    const y = $('cfYes'), n = $('cfNo');
+    y.textContent = yes || 'OK'; y.className = 'mbtn ' + (danger === false ? 'primary' : 'danger-btn');
+    const done = v => { closeMdl('confirmModal'); res(v); };
+    y.onclick = () => done(true); n.onclick = () => done(false);
+    openMdl('confirmModal');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   THEME  (cookie shared with the rest of the suite + #dark/#light hash)
+═══════════════════════════════════════════════════════ */
+function getCookie(n){ const m = document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]*)')); return m ? decodeURIComponent(m[1]) : ''; }
+function applyTheme(dark){
+  document.body.classList.toggle('dark', dark);
+  document.documentElement.classList.toggle('dark', dark);
+  document.querySelectorAll('#themeBtn .ms,#recThemeBtn .ms').forEach(i => i.textContent = dark ? 'light_mode' : 'dark_mode');
+}
+function toggleTheme(){
+  const d = !document.body.classList.contains('dark');
+  applyTheme(d);
+  document.cookie = 'toolsuite_theme=' + (d ? 'dark' : 'light') + ';path=/;max-age=31536000;SameSite=Lax';
+}
+(function initTheme(){
+  const h = (location.hash || '').toLowerCase();
+  if (h === '#dark') applyTheme(true);
+  else if (h === '#light') applyTheme(false);
+  else applyTheme(getCookie('toolsuite_theme') === 'dark');
+})();
+
+/* ═══════════════════════════════════════════════════════
+   STORAGE  (IndexedDB, with localStorage fallback)
+═══════════════════════════════════════════════════════ */
+const DB_NAME = 'SCFlashcardsDB', DB_VER = 1, LS_FALLBACK = 'sc_flashcards_fallback';
+let db = null;
+const store = { decks: new Map(), sessions: new Map() };
+
+function idbOpen(){
+  return new Promise(res => {
+    try {
+      if (!window.indexedDB) return res(null);
+      const rq = indexedDB.open(DB_NAME, DB_VER);
+      rq.onupgradeneeded = () => {
+        const d = rq.result;
+        if (!d.objectStoreNames.contains('decks')) d.createObjectStore('decks', {keyPath: 'id'});
+        if (!d.objectStoreNames.contains('sessions')) d.createObjectStore('sessions', {keyPath: 'id'});
+      };
+      rq.onsuccess = () => res(rq.result);
+      rq.onerror = () => res(null);
+      rq.onblocked = () => res(null);
+    } catch(e){ res(null); }
+  });
+}
+function idbAll(name){
+  return new Promise(res => {
+    try { const rq = db.transaction(name).objectStore(name).getAll(); rq.onsuccess = () => res(rq.result || []); rq.onerror = () => res([]); }
+    catch(e){ res([]); }
+  });
+}
+function lsSave(){
+  try { localStorage.setItem(LS_FALLBACK, JSON.stringify({decks: [...store.decks.values()], sessions: [...store.sessions.values()]})); } catch(e){}
+}
+async function loadAll(){
+  db = await idbOpen();
+  let decks = [], sessions = [];
+  if (db){ decks = await idbAll('decks'); sessions = await idbAll('sessions'); }
+  else { try { const o = JSON.parse(localStorage.getItem(LS_FALLBACK) || '{}'); decks = o.decks || []; sessions = o.sessions || []; } catch(e){} }
+  decks.forEach(d => store.decks.set(d.id, d));
+  sessions.forEach(s => store.sessions.set(s.id, s));
+}
+function dbPut(name, obj){
+  if (!db) return lsSave();
+  try { db.transaction(name, 'readwrite').objectStore(name).put(obj); } catch(e){ lsSave(); }
+}
+function dbDel(name, id){
+  if (!db) return lsSave();
+  try { db.transaction(name, 'readwrite').objectStore(name).delete(id); } catch(e){ lsSave(); }
+}
+function saveDeck(d){ d.modified = Date.now(); dbPut('decks', d); }
+function sessionsOf(deckId){ return [...store.sessions.values()].filter(s => !deckId || s.deckId === deckId).sort((a, b) => b.at - a.at); }
+function addSession(s){ store.sessions.set(s.id, s); dbPut('sessions', s); }
+function deleteSession(id){ store.sessions.delete(id); dbDel('sessions', id); }
+
+/* ═══════════════════════════════════════════════════════
+   DECK MODEL
+═══════════════════════════════════════════════════════ */
+let curDeck = null;
+function mkDeck(name){ return {id: uid(), name: name || 'Untitled flashcards', created: Date.now(), modified: Date.now(), sets: []}; }
+function mkSet(c1, c2, mark){ return {id: uid(), c1: String(c1 || ''), c2: String(c2 || ''), mark: clamp(parseInt(mark, 10) || 3, 1, 5)}; }
+function avgMark(d){ return d.sets.length ? d.sets.reduce((a, s) => a + s.mark, 0) / d.sets.length : 0; }
+function pctOf(s){ return s.total ? Math.round(100 * s.known / s.total) : 0; }
+function findDeck(arg){
+  if (arg == null || arg === '') return curDeck;
+  const key = String(arg).trim(), low = key.toLowerCase();
+  if (store.decks.has(key)) return store.decks.get(key);
+  const all = [...store.decks.values()];
+  return all.find(d => d.name.toLowerCase() === low) || all.find(d => d.name.toLowerCase().includes(low)) || null;
+}
+
+/* ═══════════════════════════════════════════════════════
+   RECENTS
+═══════════════════════════════════════════════════════ */
+let recTabName = 'decks', recSort = 'modified';
+const SORTS = [['modified', 'Last modified'], ['created', 'Date created'], ['name', 'Name (A–Z)'], ['sets', 'Most sets'], ['score', 'Lowest practice score']];
+function recTab(t){
+  recTabName = t;
+  $('tabDecks').classList.toggle('active', t === 'decks');
+  $('tabPractice').classList.toggle('active', t === 'practice');
+  recRender();
+}
+function lastScore(deckId){ const s = sessionsOf(deckId)[0]; return s ? pctOf(s) : null; }
+function scoreClass(p){ return p >= 80 ? 'good' : p >= 50 ? 'mid' : 'low'; }
+function recRender(){
+  const q = ($('recSearch').value || '').trim().toLowerCase();
+  const box = $('recList');
+  if (recTabName === 'decks'){
+    let list = [...store.decks.values()].filter(d => !q || d.name.toLowerCase().includes(q) || d.sets.some(s => (s.c1 + ' ' + s.c2).toLowerCase().includes(q)));
+    const cmp = {
+      modified: (a, b) => b.modified - a.modified, created: (a, b) => b.created - a.created,
+      name: (a, b) => a.name.localeCompare(b.name), sets: (a, b) => b.sets.length - a.sets.length,
+      score: (a, b) => (lastScore(a.id) == null ? 999 : lastScore(a.id)) - (lastScore(b.id) == null ? 999 : lastScore(b.id))
+    }[recSort];
+    list.sort(cmp);
+    if (!list.length){
+      box.innerHTML = '<div class="rec-empty"><span class="ms">style</span><div class="rec-empty-title">' + (q ? 'No matches' : 'No flashcards yet') + '</div><div class="rec-empty-sub">' + (q ? 'Try another search.' : 'Tap + to make a set by hand, or connect an agent and ask it to create one.') + '</div></div>';
+      return;
+    }
+    box.innerHTML = '<div class="rec-section-label">Flashcards</div><div class="rec-list">' + list.map(d => {
+      const sc = lastScore(d.id), n = sessionsOf(d.id).length;
+      return '<div class="rec-card" data-id="' + d.id + '" onclick="recOpen(\'' + d.id + '\')">' +
+        '<div class="rec-card-icon"><span class="ms">style</span></div>' +
+        '<div class="rec-card-info"><div class="rec-card-name">' + esc(d.name) + '</div><div class="rec-card-meta"><span class="rec-card-date">' + fmtDate(d.modified) + '</span><span class="chip">' + d.sets.length + ' sets</span>' +
+        (sc != null ? '<span class="chip">last ' + sc + '%</span>' : '') + (n ? '<span class="chip">' + n + (n === 1 ? ' practice' : ' practices') + '</span>' : '') + '</div></div>' +
+        '<div class="rec-card-actions"><button class="rec-card-btn" title="Rename" onclick="event.stopPropagation();recRename(\'' + d.id + '\')"><span class="ms">edit</span></button>' +
+        '<button class="rec-card-btn danger" title="Delete" onclick="event.stopPropagation();recDelete(\'' + d.id + '\')"><span class="ms">delete</span></button></div></div>';
+    }).join('') + '</div>';
+  } else {
+    let list = sessionsOf().filter(s => !q || s.deckName.toLowerCase().includes(q));
+    if (!list.length){
+      box.innerHTML = '<div class="rec-empty"><span class="ms">history</span><div class="rec-empty-title">No practices yet</div><div class="rec-empty-sub">Open a deck and tap Exercise. Every practice is saved here so you and your agents can see your progress.</div></div>';
+      return;
+    }
+    box.innerHTML = '<div class="rec-section-label">Previous practices</div><div class="rec-list">' + list.map(s => {
+      const p = pctOf(s);
+      return '<div class="rec-card" onclick="showPractice(\'' + s.id + '\')"><div class="rec-card-icon ' + scoreClass(p) + '"><span class="ms">bolt</span></div>' +
+        '<div class="rec-card-info"><div class="rec-card-name">' + esc(s.deckName) + '</div><div class="rec-card-meta"><span class="rec-card-date">' + fmtDate(s.at) + '</span><span class="chip">' + s.known + '/' + s.total + ' · ' + p + '%</span><span class="chip">' + (s.mode === 'shuffled' ? 'shuffled' : 'in order') + '</span>' + (s.partial ? '<span class="chip">ended early</span>' : '') + '</div></div>' +
+        '<div class="rec-card-actions"><button class="rec-card-btn danger" title="Delete" onclick="event.stopPropagation();delPractice(\'' + s.id + '\')"><span class="ms">delete</span></button></div></div>';
+    }).join('') + '</div>';
+  }
+}
+function recOpen(id){ openDeck(id); }
+async function recDelete(id){
+  const d = store.decks.get(id); if (!d) return;
+  if (!(await confirmBox('Delete flashcards?', '"' + d.name + '" and its ' + sessionsOf(id).length + ' saved practices will be removed.', 'Delete'))) return;
+  sessionsOf(id).forEach(s => deleteSession(s.id));
+  store.decks.delete(id); dbDel('decks', id); recRender();
+}
+function recRename(id){
+  const d = store.decks.get(id); if (!d) return;
+  const card = document.querySelector('.rec-card[data-id="' + id + '"] .rec-card-name'); if (!card) return;
+  const inp = document.createElement('input'); inp.className = 'rec-rename-input'; inp.value = d.name;
+  card.replaceWith(inp); inp.focus(); inp.select();
+  const done = ok => { if (ok && inp.value.trim()){ d.name = inp.value.trim().slice(0, 80); saveDeck(d); } recRender(); };
+  inp.onkeydown = e => { if (e.key === 'Enter') done(true); else if (e.key === 'Escape') done(false); };
+  inp.onblur = () => done(true);
+  inp.onclick = e => e.stopPropagation();
+}
+function recOpenSort(){
+  $('sortOpts').innerHTML = SORTS.map(o => '<div class="sheet-opt' + (recSort === o[0] ? ' selected' : '') + '" onclick="recSetSort(\'' + o[0] + '\')"><span>' + o[1] + '</span><span class="ms">check</span></div>').join('') +
+    '<div class="sheet-opt plain" onclick="recCloseSort();importPick()"><span>Import deck…</span><span class="ms">upload_file</span></div>' +
+    '<div class="sheet-opt plain" onclick="recCloseSort();openAgents()"><span>Agents (MCP)…</span><span class="ms">smart_toy</span></div>';
+  $('sortOverlay').classList.add('open');
+}
+function recCloseSort(){ $('sortOverlay').classList.remove('open'); }
+function recSetSort(k){ recSort = k; recCloseSort(); recTab('decks'); }
+function newDeck(){ const d = mkDeck('Untitled flashcards'); d.sets.push(mkSet('', '', 3)); store.decks.set(d.id, d); saveDeck(d); openDeck(d.id, true); }
+
+/* ═══════════════════════════════════════════════════════
+   EDITOR
+═══════════════════════════════════════════════════════ */
+let saveT = null, markDesc = true;
+function showScreen(name){
+  $('recentsScreen').classList.toggle('visible', name === 'recents');
+  $('editorContainer').classList.toggle('visible', name === 'editor');
+  $('exScreen').classList.toggle('visible', name === 'exercise');
+}
+function curScreen(){ return $('exScreen').classList.contains('visible') ? 'exercise' : $('editorContainer').classList.contains('visible') ? 'editor' : 'recents'; }
+function openDeck(id, focusNew){
+  const d = store.decks.get(id); if (!d) return false;
+  curDeck = d; showScreen('editor'); renderEditor();
+  if (focusNew){ const t = document.querySelector('.set-row .c1'); if (t) t.focus(); }
+  return true;
+}
+function closeEditor(){ flushSave(); curDeck = null; showScreen('recents'); recRender(); }
+function scheduleSave(){ clearTimeout(saveT); saveT = setTimeout(flushSave, 400); }
+function flushSave(){ clearTimeout(saveT); saveT = null; if (curDeck) saveDeck(curDeck); }
+function onTitleInput(){ if (!curDeck) return; curDeck.name = $('docTitle').value.slice(0, 80) || 'Untitled flashcards'; scheduleSave(); }
+function renderStats(){
+  if (!curDeck) return;
+  const n = sessionsOf(curDeck.id).length;
+  $('statLine').textContent = curDeck.sets.length + ' sets · avg mark ' + (curDeck.sets.length ? avgMark(curDeck).toFixed(1) : '–') + (n ? ' · ' + n + ' practices' : '');
+  const ok = curDeck.sets.some(s => s.c1.trim() && s.c2.trim());
+  $('exerciseBtn').disabled = !ok;
+}
+function rowHtml(s, i, cls){
+  const marks = [1, 2, 3, 4, 5].map(m => '<button class="mk' + (s.mark === m ? ' on' : '') + '" data-m="' + m + '" title="Mark ' + m + '">' + m + '</button>').join('');
+  return '<div class="set-row ' + (cls || '') + '" data-id="' + s.id + '"><div class="set-num">' + (i + 1) + '</div>' +
+    '<div class="set-field f1"><span class="set-label">Card 1</span><textarea class="set-text c1" rows="1" placeholder="First point" maxlength="400">' + esc(s.c1) + '</textarea></div>' +
+    '<div class="set-field f2"><span class="set-label">Card 2</span><textarea class="set-text c2" rows="1" placeholder="Second point" maxlength="400">' + esc(s.c2) + '</textarea></div>' +
+    '<div class="set-side"><div class="marks">' + marks + '</div><div class="row-actions">' +
+    '<button class="rec-card-btn" data-act="up" title="Move up"><span class="ms">arrow_upward</span></button>' +
+    '<button class="rec-card-btn" data-act="down" title="Move down"><span class="ms">arrow_downward</span></button>' +
+    '<button class="rec-card-btn danger" data-act="del" title="Delete set"><span class="ms">delete</span></button></div></div></div>';
+}
+function autosize(t){ t.style.height = 'auto'; t.style.height = (t.scrollHeight) + 'px'; }
+function renderEditor(){
+  if (!curDeck) return;
+  $('docTitle').value = curDeck.name;
+  const list = $('setList');
+  if (!curDeck.sets.length) list.innerHTML = '<div class="empty-editor"><span class="ms">style</span><b>No sets yet</b><span>Tap “Add set”, import a file, or ask a connected agent to generate one.</span></div>';
+  else list.innerHTML = curDeck.sets.map((s, i) => rowHtml(s, i)).join('');
+  list.querySelectorAll('textarea').forEach(autosize);
+  renderStats();
+}
+function renumber(){ document.querySelectorAll('#setList .set-row').forEach((r, i) => r.querySelector('.set-num').textContent = i + 1); }
+function findSet(id){ return curDeck ? curDeck.sets.find(s => s.id === id) : null; }
+$('setList').addEventListener('input', e => {
+  const t = e.target; if (!t.classList.contains('set-text')) return;
+  const s = findSet(t.closest('.set-row').dataset.id); if (!s) return;
+  if (t.classList.contains('c1')) s.c1 = t.value; else s.c2 = t.value;
+  autosize(t); scheduleSave(); renderStats();
+});
+$('setList').addEventListener('click', e => {
+  const row = e.target.closest('.set-row'); if (!row || !curDeck) return;
+  const s = findSet(row.dataset.id); if (!s) return;
+  const mk = e.target.closest('.mk');
+  if (mk){ s.mark = parseInt(mk.dataset.m, 10); row.querySelectorAll('.mk').forEach(b => b.classList.toggle('on', b === mk)); scheduleSave(); renderStats(); return; }
+  const btn = e.target.closest('[data-act]'); if (!btn) return;
+  const i = curDeck.sets.indexOf(s);
+  if (btn.dataset.act === 'up' && i > 0){ [curDeck.sets[i - 1], curDeck.sets[i]] = [curDeck.sets[i], curDeck.sets[i - 1]]; renderEditor(); scheduleSave(); }
+  else if (btn.dataset.act === 'down' && i < curDeck.sets.length - 1){ [curDeck.sets[i + 1], curDeck.sets[i]] = [curDeck.sets[i], curDeck.sets[i + 1]]; renderEditor(); scheduleSave(); }
+  else if (btn.dataset.act === 'del'){
+    const copy = {s, i}; curDeck.sets.splice(i, 1); renderEditor(); scheduleSave();
+    toast('Set deleted', '', 4500, 'Undo', () => { if (!curDeck) return; curDeck.sets.splice(Math.min(copy.i, curDeck.sets.length), 0, copy.s); renderEditor(); scheduleSave(); });
+  }
+});
+function addSetManual(){
+  if (!curDeck) return;
+  const s = mkSet('', '', 3); curDeck.sets.push(s); renderEditor(); scheduleSave();
+  const rows = document.querySelectorAll('.set-row'), r = rows[rows.length - 1];
+  if (r){ r.scrollIntoView({block: 'center', behavior: 'smooth'}); r.querySelector('.c1').focus(); }
+}
+function sortByMark(){
+  if (!curDeck) return;
+  curDeck.sets.sort((a, b) => markDesc ? b.mark - a.mark : a.mark - b.mark);
+  $('sortLbl').textContent = markDesc ? 'Marks 5 → 1' : 'Marks 1 → 5'; markDesc = !markDesc;
+  renderEditor(); scheduleSave();
+}
+function flashRow(id){
+  const r = document.querySelector('.set-row[data-id="' + id + '"]'); if (!r) return;
+  r.scrollIntoView({block: 'center', behavior: 'smooth'}); r.classList.remove('flash'); void r.offsetWidth; r.classList.add('flash');
+}
+function openHistoryForDeck(){
+  if (!curDeck) return;
+  const list = sessionsOf(curDeck.id);
+  if (!list.length){ toast('No practices for this deck yet', ''); return; }
+  showPractice(list[0].id);
+}
+
+/* live generation (used by agents) */
+let generating = 0;
+function genBanner(on, text){ generating = Math.max(0, generating + (on ? 1 : -1)); $('genBanner').classList.toggle('show', generating > 0); if (text) $('genText').textContent = text; }
+async function generateSets(deck, sets, who){
+  if (curDeck !== deck || curScreen() !== 'editor') openDeck(deck.id);
+  genBanner(true, (who || 'An agent') + ' is generating…');
+  const list = $('setList');
+  if (!deck.sets.length) list.innerHTML = '';
+  const gap = clamp(Math.floor(2400 / Math.max(1, sets.length)), 25, 140);
+  for (const raw of sets){
+    const s = mkSet(raw.c1, raw.c2, raw.mark);
+    deck.sets.push(s);
+    const tmp = document.createElement('div'); tmp.innerHTML = rowHtml(s, deck.sets.length - 1, 'gen');
+    const el = tmp.firstChild; list.appendChild(el);
+    el.querySelectorAll('textarea').forEach(autosize);
+    el.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+    $('genText').textContent = (who || 'An agent') + ' is generating… ' + deck.sets.length;
+    renderStats(); await sleep(gap);
+  }
+  genBanner(false); saveDeck(deck); renderStats();
+}
+
+/* ═══════════════════════════════════════════════════════
+   EXPORT / IMPORT
+═══════════════════════════════════════════════════════ */
+function download(name, mime, text){
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type: mime})); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function doExport(kind){
+  if (!curDeck) return; flushSave();
+  const d = curDeck, base = (d.name || 'flashcards').replace(/[^\w\- ]+/g, '').trim() || 'flashcards';
+  const csvq = v => '"' + String(v).replace(/"/g, '""') + '"';
+  if (kind === 'json') download(base + '.json', 'application/json', JSON.stringify({format: 'oryn-flashcards', version: 1, name: d.name, sets: d.sets.map(s => ({card1: s.c1, card2: s.c2, mark: s.mark})), practices: sessionsOf(d.id).map(s => ({at: s.at, mode: s.mode, total: s.total, known: s.known, ms: s.ms}))}, null, 2));
+  else if (kind === 'csv') download(base + '.csv', 'text/csv', 'card1,card2,mark\n' + d.sets.map(s => [csvq(s.c1), csvq(s.c2), s.mark].join(',')).join('\n'));
+  else if (kind === 'md') download(base + '.md', 'text/markdown', '# ' + d.name + '\n\n| # | Card 1 | Card 2 | Mark |\n|---|---|---|---|\n' + d.sets.map((s, i) => '| ' + (i + 1) + ' | ' + s.c1.replace(/\|/g, '\\|') + ' | ' + s.c2.replace(/\|/g, '\\|') + ' | ' + s.mark + ' |').join('\n') + '\n');
+  else download(base + '.txt', 'text/plain', d.sets.map(s => s.c1 + ' | ' + s.c2).join('\n'));
+  closeMdl('exportModal'); toast('Exported ' + kind.toUpperCase(), 'success');
+}
+function importPick(){ $('importFile').value = ''; $('importFile').click(); }
+function parseCSV(text){
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++){
+    const c = text[i];
+    if (q){ if (c === '"'){ if (text[i + 1] === '"'){ cur += '"'; i++; } else q = false; } else cur += c; }
+    else if (c === '"') q = true;
+    else if (c === ','){ row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r'){ if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if (cur || row.length){ row.push(cur); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim()));
+}
+function parseImport(text, filename){
+  const name = filename.replace(/\.[^.]+$/, '') || 'Imported flashcards';
+  const t = text.trim();
+  if (t[0] === '{' || t[0] === '['){
+    const j = JSON.parse(t), arr = Array.isArray(j) ? j : (j.sets || []);
+    return {name: (!Array.isArray(j) && j.name) || name, sets: arr.map(x => ({c1: x.card1 != null ? x.card1 : (x.c1 != null ? x.c1 : x.left), c2: x.card2 != null ? x.card2 : (x.c2 != null ? x.c2 : x.right), mark: x.mark}))};
+  }
+  if (/\.csv$/i.test(filename) || /^card ?1\s*,/i.test(t)){
+    let rows = parseCSV(t); if (rows.length && /^card ?1$/i.test((rows[0][0] || '').trim())) rows.shift();
+    return {name, sets: rows.map(r => ({c1: r[0], c2: r[1], mark: r[2]}))};
+  }
+  return {name, sets: t.split(/\r?\n/).map(l => l.split(/\t|\s\|\s|\|/)).filter(p => p.length >= 2 && p[0].trim()).map(p => ({c1: p[0].trim(), c2: p[1].trim(), mark: p[2]}))};
+}
+function importFile(inp){
+  const f = inp.files && inp.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const o = parseImport(String(r.result), f.name);
+      const sets = o.sets.map(s => mkSet(s.c1, s.c2, s.mark)).filter(s => s.c1.trim() || s.c2.trim());
+      if (!sets.length) throw new Error('No sets found');
+      const d = mkDeck(String(o.name).slice(0, 80)); d.sets = sets; store.decks.set(d.id, d); saveDeck(d); openDeck(d.id);
+      toast('Imported ' + sets.length + ' sets', 'success');
+    } catch(e){ toast('Could not import: ' + e.message, 'error', 4000); }
+  };
+  r.readAsText(f);
+}
+
+/* ═══════════════════════════════════════════════════════
+   EXERCISE
+═══════════════════════════════════════════════════════ */
+let exOpts = {order: 'ordered', filter: 'all'};
+let ex = null;
+function eligibleSets(deck, filter){
+  let sets = deck.sets.filter(s => s.c1.trim() && s.c2.trim());
+  if (filter === '3') sets = sets.filter(s => s.mark >= 3);
+  else if (filter === '4') sets = sets.filter(s => s.mark >= 4);
+  else if (filter === 'weak'){
+    const last = sessionsOf(deck.id)[0];
+    if (last){ const missed = new Set(last.results.filter(r => !r.known).map(r => r.setId)); sets = sets.filter(s => missed.has(s.id)); }
+  }
+  return sets;
+}
+function openExerciseSetup(){
+  if (!curDeck) return; flushSave();
+  const upd = () => {
+    const n = eligibleSets(curDeck, exOpts.filter).length;
+    $('exInfo').textContent = n + (n === 1 ? ' set' : ' sets') + ' will be practiced. Each one shows a single point on the left (green) or right (gray); swipe it outward if you can say the other point out loud, inward if not.' + (exOpts.filter === 'weak' && !sessionsOf(curDeck.id).length ? ' (No earlier practice yet, so all sets are used.)' : '');
+    $('exStartBtn').disabled = n === 0;
+  };
+  ['segOrder', 'segFilter'].forEach(id => {
+    const key = id === 'segOrder' ? 'order' : 'filter';
+    $(id).querySelectorAll('button').forEach(b => {
+      b.classList.toggle('on', b.dataset.v === exOpts[key]);
+      b.onclick = () => { exOpts[key] = b.dataset.v; $(id).querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); upd(); };
+    });
+  });
+  upd(); openMdl('exerciseModal');
+}
+function exStartFromSetup(){
+  closeMdl('exerciseModal');
+  let sets = eligibleSets(curDeck, exOpts.filter);
+  exStart(curDeck, sets, exOpts.order, exOpts.filter);
+}
+function exStart(deck, sets, order, filter){
+  if (!sets.length) return;
+  if (order === 'shuffled') sets = shuffle(sets);
+  const queue = sets.map(set => {
+    const c1Left = Math.random() < .5, promptSide = Math.random() < .5 ? 'left' : 'right';
+    const promptCard = ((promptSide === 'left') === c1Left) ? 1 : 2;
+    return {set, promptSide, promptCard};
+  });
+  ex = {deck, queue, i: 0, results: [], t0: Date.now(), cardT0: Date.now(), order, filter, peeked: false, busy: false, partialSaved: false};
+  $('exPlay').style.display = 'flex'; $('exSum').style.display = 'none';
+  showScreen('exercise'); $('exReveal').classList.remove('show'); exShowCard();
+}
+function exShowCard(){
+  const stage = $('exStage');
+  stage.querySelectorAll('.fc-card,.fc-ghost').forEach(e => e.remove());
+  if (ex.i >= ex.queue.length) return exFinish();
+  const q = ex.queue[ex.i], side = q.promptSide, other = side === 'left' ? 'right' : 'left';
+  const color = side === 'left' ? 'green' : 'gray', text = q.promptCard === 1 ? q.set.c1 : q.set.c2;
+  const ghost = document.createElement('div'); ghost.className = 'fc-ghost ' + other + ' ' + (other === 'left' ? 'green' : 'gray'); ghost.textContent = '?'; ghost.onclick = exPeek;
+  stage.appendChild(ghost);
+  const card = document.createElement('div'); card.className = 'fc-card enter ' + side + ' ' + color;
+  card.innerHTML = '<div class="fc-tag"><span>Set ' + (ex.i + 1) + '</span><span>' + '★'.repeat(q.set.mark) + '</span></div><div class="fc-badge know">I can say it</div><div class="fc-badge nope">Not yet</div><div class="fc-text">' + esc(text) + '</div>';
+  stage.appendChild(card);
+  ex.card = card; ex.peeked = false; ex.busy = false; ex.cardT0 = Date.now();
+  $('exBar').style.width = (100 * ex.i / ex.queue.length) + '%';
+  $('exCount').textContent = (ex.i + 1) + ' / ' + ex.queue.length;
+  const L = $('exBtnL'), R = $('exBtnR');
+  const knowBtn = side === 'left' ? L : R, nopeBtn = side === 'left' ? R : L;
+  knowBtn.className = 'ex-btn know'; knowBtn.innerHTML = '<span class="ms">check</span>'; knowBtn.title = 'I can say it';
+  nopeBtn.className = 'ex-btn nope'; nopeBtn.innerHTML = '<span class="ms">close</span>'; nopeBtn.title = 'Not yet';
+  bindDrag(card, side);
+}
+function bindDrag(card, side){
+  let sx = 0, sy = 0, dx = 0, active = false, t0 = 0;
+  const outSign = side === 'left' ? -1 : 1;
+  const know = card.querySelector('.fc-badge.know'), nope = card.querySelector('.fc-badge.nope');
+  const apply = (x, y) => {
+    card.style.setProperty('--dx', x + 'px'); card.style.setProperty('--dy', (y * .25) + 'px'); card.style.setProperty('--rot', (x / 18) + 'deg');
+    const p = clamp(Math.abs(x) / 110, 0, 1), out = x * outSign > 0;
+    know.style.opacity = out ? p : 0; nope.style.opacity = out ? 0 : p;
+  };
+  card.addEventListener('pointerdown', e => {
+    if (ex.busy) return; active = true; sx = e.clientX; sy = e.clientY; dx = 0; t0 = Date.now();
+    card.classList.remove('settle', 'enter'); card.classList.add('dragging'); try { card.setPointerCapture(e.pointerId); } catch(_){}
+  });
+  card.addEventListener('pointermove', e => { if (!active) return; dx = e.clientX - sx; apply(dx, e.clientY - sy); });
+  const end = () => {
+    if (!active) return; active = false; card.classList.remove('dragging');
+    const v = Math.abs(dx) / Math.max(1, Date.now() - t0);
+    if (Math.abs(dx) > 90 || (Math.abs(dx) > 40 && v > .5)) exDecide(dx * outSign > 0, dx > 0 ? 1 : -1);
+    else { card.classList.add('settle'); apply(0, 0); }
+  };
+  card.addEventListener('pointerup', end); card.addEventListener('pointercancel', end);
+}
+function exPress(btnSide){
+  if (!ex || ex.busy || !ex.queue[ex.i]) return;
+  const side = ex.queue[ex.i].promptSide, outward = btnSide === side;
+  exDecide(outward, btnSide === 'left' ? -1 : 1);
+}
+function exPeek(){
+  if (!ex || ex.busy || !ex.queue[ex.i]) return;
+  const q = ex.queue[ex.i], other = q.promptSide === 'left' ? 'right' : 'left';
+  ex.peeked = true; showReveal(q, 'Other point', other);
+}
+function showReveal(q, label, side){
+  const text = q.promptCard === 1 ? q.set.c2 : q.set.c1, r = $('exReveal');
+  r.className = 'ex-reveal show ' + (side === 'left' ? 'green' : 'gray');
+  r.innerHTML = '<div><small>' + esc(label) + '</small>' + esc(clip(text, 160)) + '</div>';
+}
+function exDecide(known, dir){
+  if (!ex || ex.busy) return; ex.busy = true;
+  const q = ex.queue[ex.i], card = ex.card, now = Date.now();
+  ex.results.push({setId: q.set.id, c1: q.set.c1, c2: q.set.c2, mark: q.set.mark, known, side: q.promptSide, promptCard: q.promptCard, peeked: ex.peeked, ms: now - ex.cardT0});
+  const w = $('exStage').clientWidth;
+  card.classList.remove('dragging', 'settle', 'enter'); card.classList.add('fly');
+  card.style.setProperty('--dx', (dir * w * 1.1) + 'px'); card.style.setProperty('--rot', (dir * 22) + 'deg');
+  showReveal(q, (known ? '✓ ' : '✗ ') + 'The other point was', q.promptSide === 'left' ? 'gray' : 'green');
+  setTimeout(() => { ex.i++; exShowCard(); }, 280);
+}
+function buildSession(partial){
+  const known = ex.results.filter(r => r.known).length;
+  return {id: uid(), deckId: ex.deck.id, deckName: ex.deck.name, at: Date.now(), mode: ex.order, filter: ex.filter, total: ex.results.length, known, ms: Date.now() - ex.t0, partial: !!partial, results: ex.results.slice()};
+}
+function exFinish(){
+  const s = buildSession(false); addSession(s); ex.partialSaved = true;
+  $('exBar').style.width = '100%';
+  $('exPlay').style.display = 'none'; const box = $('exSum'); box.style.display = 'block';
+  box.innerHTML = '<div class="sum-wrap">' + summaryHtml(s) + '<div class="sum-actions">' +
+    (s.known < s.total ? '<button class="mbtn primary" onclick="exRepeatMissed()"><span class="ms">replay</span>Practice missed</button>' : '') +
+    '<button class="mbtn sec" onclick="exAgain()"><span class="ms">refresh</span>Again</button>' +
+    '<button class="mbtn sec" onclick="exDone()"><span class="ms">done_all</span>Done</button></div></div>';
+  ex.last = s;
+}
+function summaryHtml(s){
+  const p = pctOf(s), C = 2 * Math.PI * 62, col = p >= 80 ? '#30b350' : p >= 50 ? '#ff9f0a' : '#ff3b30';
+  const msg = p === 100 ? 'Perfect run!' : p >= 80 ? 'Strong recall' : p >= 50 ? 'Getting there' : 'Keep going, it sticks with repetition';
+  const byMark = [5, 4, 3, 2, 1].map(m => { const r = s.results.filter(x => x.mark === m); if (!r.length) return ''; const k = r.filter(x => x.known).length;
+    return '<div class="bar-row"><span>Mark ' + m + '</span><div class="bar-track"><i style="width:' + Math.round(100 * k / r.length) + '%"></i></div><em>' + k + '/' + r.length + '</em></div>'; }).join('');
+  const missed = s.results.filter(r => !r.known);
+  const leftN = s.results.filter(r => r.side === 'left'), kl = leftN.filter(r => r.known).length, rightN = s.results.filter(r => r.side === 'right'), kr = rightN.filter(r => r.known).length;
+  return '<div class="sum-ring"><div class="ring-wrap"><svg viewBox="0 0 150 150"><circle cx="75" cy="75" r="62" fill="none" stroke="var(--chip)" stroke-width="14"/><circle cx="75" cy="75" r="62" fill="none" stroke="' + col + '" stroke-width="14" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - p / 100)).toFixed(1) + '"/></svg><span class="pct">' + p + '%</span></div></div>' +
+    '<div class="sum-head">' + esc(msg) + '</div><div class="sum-sub">' + esc(s.deckName) + ' · ' + (s.mode === 'shuffled' ? 'shuffled' : 'in order') + (s.partial ? ' · ended early' : '') + ' · ' + fmtDate(s.at) + '</div>' +
+    '<div class="sum-stats"><div class="sum-stat"><b style="color:var(--green)">' + s.known + '</b><small>Could say it</small></div><div class="sum-stat"><b style="color:var(--danger)">' + (s.total - s.known) + '</b><small>Not yet</small></div><div class="sum-stat"><b>' + fmtDur(s.ms) + '</b><small>Time</small></div><div class="sum-stat"><b>' + (s.total ? fmtDur(s.ms / s.total) : '–') + '</b><small>Per card</small></div></div>' +
+    (byMark ? '<div class="sum-block"><h4>By mark</h4>' + byMark + '</div>' : '') +
+    '<div class="sum-block"><h4>By side</h4><div class="bar-row"><span>Green</span><div class="bar-track"><i style="width:' + (leftN.length ? Math.round(100 * kl / leftN.length) : 0) + '%"></i></div><em>' + kl + '/' + leftN.length + '</em></div><div class="bar-row"><span>Gray</span><div class="bar-track"><i style="width:' + (rightN.length ? Math.round(100 * kr / rightN.length) : 0) + '%"></i></div><em>' + kr + '/' + rightN.length + '</em></div></div>' +
+    (missed.length ? '<div class="sum-block"><h4>To review (' + missed.length + ')</h4>' + missed.map(r => '<div class="miss"><i class="g"></i>' + esc(r.c1) + '<br><i class="y"></i>' + esc(r.c2) + '</div>').join('') + '</div>' : '');
+}
+function exRepeatMissed(){
+  const ids = new Set(ex.last.results.filter(r => !r.known).map(r => r.setId));
+  const sets = ex.deck.sets.filter(s => ids.has(s.id) && s.c1.trim() && s.c2.trim());
+  if (sets.length) exStart(ex.deck, sets, 'shuffled', 'weak');
+}
+function exAgain(){ const sets = eligibleSets(ex.deck, 'all'); exStart(ex.deck, sets, ex.order, 'all'); }
+function exDone(){ const d = ex.deck; ex = null; showScreen('editor'); curDeck = d; renderEditor(); }
+async function exClose(){
+  if (!ex) return;
+  if (ex.results.length && !ex.partialSaved){
+    if (!(await confirmBox('End practice?', 'Your ' + ex.results.length + ' answered cards will be saved as a practice.', 'End practice'))) return;
+    addSession(buildSession(true));
+  } else if (!ex.results.length && !ex.partialSaved){
+    /* nothing answered: just leave */
+  }
+  exDone();
+}
+document.addEventListener('keydown', e => {
+  if (!ex || !$('exScreen').classList.contains('visible') || $('exPlay').style.display === 'none') return;
+  if (e.key === 'ArrowLeft'){ e.preventDefault(); exPress('left'); }
+  else if (e.key === 'ArrowRight'){ e.preventDefault(); exPress('right'); }
+  else if (e.key === ' '){ e.preventDefault(); exPeek(); }
+  else if (e.key === 'Escape') exClose();
+});
+function showPractice(id){
+  const s = store.sessions.get(id); if (!s) return;
+  $('practiceBody').innerHTML = summaryHtml(s) + '<div class="sum-actions"><button class="mbtn danger-btn" onclick="delPractice(\'' + id + '\',true)"><span class="ms">delete</span>Delete</button><button class="mbtn sec" onclick="closeMdl(\'practiceModal\')">Close</button></div>';
+  openMdl('practiceModal');
+}
+async function delPractice(id, fromModal){
+  if (!(await confirmBox('Delete this practice?', 'It will no longer count toward your progress.', 'Delete'))) return;
+  deleteSession(id); if (fromModal) closeMdl('practiceModal'); recRender(); if (curDeck) renderStats();
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANALYSIS (used by agents)
+═══════════════════════════════════════════════════════ */
+function analyzeText(deck){
+  const ss = sessionsOf(deck ? deck.id : null).slice().reverse(); // oldest first
+  const scope = deck ? 'deck "' + deck.name + '"' : 'all decks';
+  if (!ss.length) return 'No practices recorded yet for ' + scope + '. Tell the user to open the deck and press Exercise first.';
+  const lines = [];
+  lines.push('PROGRESS for ' + scope + ': ' + ss.length + ' practice(s), from ' + new Date(ss[0].at).toISOString().slice(0, 10) + ' to ' + new Date(ss[ss.length - 1].at).toISOString().slice(0, 10) + '.');
+  const tot = ss.reduce((a, s) => a + s.total, 0), kn = ss.reduce((a, s) => a + s.known, 0);
+  lines.push('Overall: ' + kn + '/' + tot + ' cards answerable (' + Math.round(100 * kn / Math.max(1, tot)) + '%). Total practice time ' + fmtDur(ss.reduce((a, s) => a + s.ms, 0)) + '.');
+  lines.push('Score per practice (oldest → newest): ' + ss.map(s => pctOf(s) + '%').join(', '));
+  if (ss.length >= 2){
+    const h = Math.ceil(ss.length / 2), a = ss.slice(0, h), b = ss.slice(h), avg = x => x.reduce((q, s) => q + pctOf(s), 0) / x.length;
+    const diff = Math.round(avg(b) - avg(a));
+    lines.push('Trend: earlier half avg ' + Math.round(avg(a)) + '%, recent half avg ' + Math.round(avg(b)) + '% (' + (diff > 0 ? '+' : '') + diff + ' points → ' + (diff > 3 ? 'improving' : diff < -3 ? 'declining' : 'flat') + ').');
+  }
+  const per = new Map();
+  ss.forEach(s => s.results.forEach(r => { const k = (s.deckId) + '|' + r.setId; const o = per.get(k) || {c1: r.c1, c2: r.c2, mark: r.mark, seen: 0, known: 0, peeks: 0, ms: 0, deck: s.deckName, recent: []}; o.seen++; if (r.known) o.known++; if (r.peeked) o.peeks++; o.ms += r.ms; o.recent.push(r.known ? 1 : 0); per.set(k, o); }));
+  const arr = [...per.values()].map(o => ({...o, rate: o.known / o.seen, avgMs: o.ms / o.seen}));
+  const weak = arr.filter(o => o.rate < .6).sort((a, b) => a.rate - b.rate || b.mark - a.mark).slice(0, 12);
+  lines.push('');
+  lines.push('WEAKEST SETS (answerable < 60%):' + (weak.length ? '' : ' none, nice.'));
+  weak.forEach(o => lines.push('- [mark ' + o.mark + '] "' + clip(o.c1, 80) + '" ↔ "' + clip(o.c2, 80) + '" : ' + o.known + '/' + o.seen + ' (' + Math.round(100 * o.rate) + '%)' + (deck ? '' : ' in "' + o.deck + '"')));
+  const hi = arr.filter(o => o.mark >= 4 && o.rate < .8).sort((a, b) => a.rate - b.rate).slice(0, 8);
+  lines.push('HIGH-IMPORTANCE (mark 4–5) SETS BELOW 80%:' + (hi.length ? '' : ' none.'));
+  hi.forEach(o => lines.push('- [mark ' + o.mark + '] "' + clip(o.c1, 80) + '" ↔ "' + clip(o.c2, 80) + '" : ' + Math.round(100 * o.rate) + '%'));
+  const strong = arr.filter(o => o.seen >= 2 && o.rate === 1).slice(0, 8);
+  lines.push('SOLID SETS (always answerable, seen 2+ times): ' + (strong.length ? strong.length : 'none yet'));
+  lines.push('');
+  lines.push('BY MARK:');
+  [5, 4, 3, 2, 1].forEach(m => { const r = arr.filter(o => o.mark === m); if (r.length){ const k = r.reduce((a, o) => a + o.known, 0), n = r.reduce((a, o) => a + o.seen, 0); lines.push('- mark ' + m + ': ' + Math.round(100 * k / n) + '% over ' + r.length + ' sets'); } });
+  const all = ss.flatMap(s => s.results), L = all.filter(r => r.side === 'left'), R = all.filter(r => r.side === 'right');
+  const rt = x => x.length ? Math.round(100 * x.filter(r => r.known).length / x.length) + '%' : 'n/a';
+  lines.push('BY SIDE: green/left prompts ' + rt(L) + ', gray/right prompts ' + rt(R));
+  const c1 = all.filter(r => r.promptCard === 1), c2 = all.filter(r => r.promptCard === 2);
+  lines.push('BY DIRECTION: prompted with Card 1 → recall Card 2: ' + rt(c1) + '; prompted with Card 2 → recall Card 1: ' + rt(c2));
+  const pk = all.filter(r => r.peeked).length; lines.push('Peeks: ' + pk + ' of ' + all.length + ' cards.');
+  lines.push('Average time per card: ' + fmtDur(all.reduce((a, r) => a + r.ms, 0) / Math.max(1, all.length)) + '.');
+  lines.push('');
+  lines.push('Now explain this to the user in plain language: what is going well, what to focus on next, and offer to add or rewrite sets for the weak points.');
+  return lines.join('\n');
+}
+function historyText(deck, limit){
+  const ss = sessionsOf(deck ? deck.id : null).slice(0, limit);
+  if (!ss.length) return 'No practices recorded yet.';
+  return ss.map((s, i) => '#' + (i + 1) + ' ' + new Date(s.at).toISOString().replace('T', ' ').slice(0, 16) + 'Z · ' + s.deckName + ' · ' + s.mode + (s.filter && s.filter !== 'all' ? ' (' + s.filter + ')' : '') + (s.partial ? ' · ended early' : '') + ' · ' + s.known + '/' + s.total + ' = ' + pctOf(s) + '% · ' + fmtDur(s.ms) +
+    (s.results.some(r => !r.known) ? '\n   missed: ' + s.results.filter(r => !r.known).map(r => '"' + clip(r.c1, 50) + '" ↔ "' + clip(r.c2, 50) + '"').join('; ') : '')).join('\n');
+}
+
+/* ═══════════════════════════════════════════════════════
+   MCP BRIDGE  (same relay Worker protocol as the All Agent MCP add-on)
+═══════════════════════════════════════════════════════ */
+const CFG_KEY = 'flashcards_mcp_config';
+let cfg = (() => {
+  let c = {};
+  try { c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); } catch(e){}
+  if (!c.bridgeUrl){ try { const a = JSON.parse(localStorage.getItem('sugarcane_addon_allagent_config') || '{}'); if (a.bridgeUrl) c.bridgeUrl = a.bridgeUrl; } catch(e){} }
+  return Object.assign({bridgeUrl: '', bridgeToken: '', bridgeEnabled: false, joinMode: 'ask'}, c);
+})();
+function saveCfg(){ try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch(e){} }
+let bridgeWS = null, bridgeBeat = null, bridgeRetryT = null, bridgeTries = 0, bridgeStatus = 'off', bridgeCalls = 0, bridgeQueue = Promise.resolve();
+const agents = new Map();
+const chatLog = [];
+function newToken(){ const a = new Uint8Array(24); crypto.getRandomValues(a); return Array.from(a, b => b.toString(16).padStart(2, '0')).join(''); }
+function bBase(){ return String(cfg.bridgeUrl || '').trim().replace(/\/+$/, ''); }
+function bValid(){ return /^https?:\/\/[^\s/]+/i.test(bBase()); }
+function bSocketUrl(){ return bBase().replace(/^http/i, 'ws') + '/ws/' + cfg.bridgeToken; }
+function bConnUrl(){ return bBase() + '/mcp/' + cfg.bridgeToken; }
+function bSend(o){ try { if (bridgeWS && bridgeWS.readyState === 1) bridgeWS.send(JSON.stringify(o)); } catch(e){} }
+function agentTag(a){ return (a.name || 'Agent') + ' #' + (a.code || '?'); }
+function setStatus(s){
+  bridgeStatus = s;
+  const label = {off: 'Disconnected.', connecting: 'Connecting to the relay…', connected: 'Connected. Add the Connector URL to your agent (Claude: Settings → Connectors; ChatGPT: Settings → Connectors → Developer mode).', retry: 'Connection lost, retrying…', dropped: 'Connection lost.', badurl: 'Enter your relay Worker URL (https://…).'}[s] || s;
+  const el = $('aStatus'); el.textContent = label + (bridgeCalls ? ' Tool calls this session: ' + bridgeCalls + '.' : ''); el.dataset.s = s;
+  const st = s === 'connected' ? 'connected' : (s === 'connecting' || s === 'retry') ? 'busy' : 'off';
+  ['recAgentBtn', 'edAgentBtn'].forEach(id => { const b = $(id); b.dataset.state = st; b.title = 'Agents (MCP) · ' + (st === 'connected' ? 'connected' : st === 'busy' ? 'connecting…' : 'disconnected'); });
+  $('aConnect').disabled = s === 'connected' || s === 'connecting'; $('aDisconnect').disabled = s === 'off' || s === 'badurl';
+  renderAgentBadge();
+}
+function renderAgentBadge(){
+  const pend = [...agents.values()].filter(a => a.status === 'pending').length;
+  ['recAgentBtn', 'edAgentBtn'].forEach(id => { const b = $(id).querySelector('.badge'); b.style.display = pend ? 'flex' : 'none'; b.textContent = pend; });
+  if ($('agentsModal').classList.contains('open')) renderAgentList();
+}
+function bridgeStart(){
+  if (!bValid()){ setStatus('badurl'); return 'Enter your relay Worker URL first.'; }
+  cfg.bridgeEnabled = true; if (!cfg.bridgeToken) cfg.bridgeToken = newToken(); saveCfg(); bridgeTries = 0; bridgeConnect(); return 'Connecting…';
+}
+function bridgeStop(){ cfg.bridgeEnabled = false; saveCfg(); bridgeConnect(); }
+function bridgeConnect(){
+  clearTimeout(bridgeRetryT);
+  if (bridgeWS){ const o = bridgeWS; bridgeWS = null; o.onclose = null; try { o.close(); } catch(e){} }
+  clearInterval(bridgeBeat); bridgeBeat = null;
+  if (!cfg.bridgeEnabled){ agents.clear(); setStatus('off'); return; }
+  if (!bValid()){ setStatus('badurl'); return; }
+  if (!cfg.bridgeToken){ cfg.bridgeToken = newToken(); saveCfg(); }
+  setStatus('connecting');
+  let ws; try { ws = new WebSocket(bSocketUrl()); } catch(e){ setStatus('retry'); bridgeSchedule(); return; }
+  bridgeWS = ws;
+  ws.onopen = () => {
+    bridgeTries = 0;
+    bSend({t: 'hello', join: cfg.joinMode, tools: bridgeTools(), title: (curDeck ? curDeck.name : 'Flashcards')});
+    bridgeBeat = setInterval(() => { try { if (ws.readyState === 1) ws.send('ping'); } catch(e){} }, 25000);
+    setStatus('connected'); renderConn();
+  };
+  ws.onmessage = ev => {
+    if (ev.data === 'pong') return;
+    let m; try { m = JSON.parse(ev.data); } catch(e){ return; }
+    if (m.t === 'call') bridgeQueue = bridgeQueue.then(() => bridgeHandleCall(m)).catch(() => {});
+    else onRelayEvent(m);
+  };
+  ws.onclose = () => { if (bridgeWS !== ws) return; bridgeWS = null; clearInterval(bridgeBeat); bridgeBeat = null; agents.clear(); setStatus('retry'); bridgeSchedule(); };
+  ws.onerror = () => {};
+}
+function bridgeSchedule(){ if (!cfg.bridgeEnabled) return; clearTimeout(bridgeRetryT); bridgeRetryT = setTimeout(bridgeConnect, Math.min(30000, 1000 * Math.pow(2, Math.min(bridgeTries++, 5)))); }
+function upsertAgent(m){
+  const a = agents.get(m.id) || {id: m.id, calls: 0};
+  if (m.name) a.name = m.name; if (m.code) a.code = m.code; if (m.status) a.status = m.status; if (m.named != null) a.named = m.named;
+  agents.set(m.id, a); return a;
+}
+function onRelayEvent(m){
+  if (m.t === 'agents'){
+    const ids = new Set((m.list || []).map(x => x.id)); [...agents.keys()].forEach(id => { if (!ids.has(id)) agents.delete(id); });
+    (m.list || []).forEach(upsertAgent); renderAgentBadge();
+  } else if (m.t === 'agent'){
+    if (m.state === 'left'){ const a = agents.get(m.id); if (a && m.why !== 'kicked' && m.why !== 'denied' && !m.quiet) toast(agentTag(a) + ' disconnected'); agents.delete(m.id); renderAgentBadge(); return; }
+    const prev = agents.get(m.id), a = upsertAgent(m);
+    if (m.state === 'pending' && !a.notified){ a.notified = true; toast(agentTag(a) + ' wants to join', '', 5000); }
+    else if (m.state === 'identified' && !(prev && prev.named)) toast(agentTag(a) + ' connected', 'success');
+    renderAgentBadge();
+  } else if (m.t === 'say'){
+    const a = upsertAgent(m); chatLog.push({who: agentTag(a), text: String(m.text || '').slice(0, 4000)}); if (chatLog.length > 60) chatLog.shift();
+    toast(agentTag(a) + ': ' + clip(String(m.text || ''), 90), '', 4500); renderChat();
+  }
+}
+function renderAgentList(){
+  const list = [...agents.values()];
+  $('aList').innerHTML = list.length ? list.map(a => '<div class="agent-row"><div class="agent-av"><span class="ms">smart_toy</span></div><div class="agent-info"><b>' + esc(agentTag(a)) + '</b><small>' + (a.status === 'pending' ? 'waiting for your approval' : (a.calls || 0) + ' actions') + '</small></div>' +
+    (a.status === 'pending' ? '<button class="mini bad" data-ag="deny" data-id="' + esc(a.id) + '">Deny</button><button class="mini ok" data-ag="approve" data-id="' + esc(a.id) + '">Approve</button>' : '<button class="mini bad" data-ag="kick" data-id="' + esc(a.id) + '">Kick</button>') + '</div>').join('')
+    : '<div class="note" style="margin:0">No agents yet. Connect, add the Connector URL to your agent, and ask it to call <b>guide</b>.</div>';
+}
+$('aList').addEventListener('click', e => {
+  const b = e.target.closest('[data-ag]'); if (!b) return; const id = b.dataset.id;
+  if (b.dataset.ag === 'approve') bSend({t: 'approve', id}); else bSend({t: 'kick', ids: [id], why: b.dataset.ag === 'deny' ? 'denied' : 'kicked'});
+  if (b.dataset.ag !== 'approve') agents.delete(id); else { const a = agents.get(id); if (a) a.status = 'active'; }
+  renderAgentBadge();
+});
+function renderChat(){ $('aChat').innerHTML = chatLog.map(c => '<div class="chat-msg' + (c.me ? ' me' : '') + '"><b>' + esc(c.who) + '</b>' + esc(c.text) + '</div>').join(''); $('aChat').scrollTop = 1e9; }
+function aSend(){
+  const t = $('aMsg').value.trim(); if (!t) return;
+  if (!bridgeWS || bridgeWS.readyState !== 1){ toast('Not connected to the relay', 'error'); return; }
+  bSend({t: 'msg', mid: uid(), to: '*', text: t}); chatLog.push({who: 'You', text: t, me: true}); $('aMsg').value = ''; renderChat();
+}
+function renderConn(){ $('aConn').value = (bValid() && cfg.bridgeToken) ? bConnUrl() : ''; }
+function openAgents(){
+  $('aUrl').value = cfg.bridgeUrl || ''; $('aJoin').value = cfg.joinMode; renderConn(); renderAgentList(); renderChat(); setStatus(bridgeStatus); openMdl('agentsModal');
+}
+function aToggleConn(){ const i = $('aConn'); const show = i.type === 'password'; i.type = show ? 'text' : 'password'; $('aEye').querySelector('.ms').textContent = show ? 'visibility_off' : 'visibility'; }
+function aCopyConn(){ const v = $('aConn').value; if (!v){ toast('Press Connect first', 'error'); return; } (navigator.clipboard ? navigator.clipboard.writeText(v) : Promise.reject()).then(() => toast('Connector URL copied', 'success'), () => { $('aConn').type = 'text'; $('aConn').select(); toast('Press Ctrl+C to copy'); }); }
+function aDoConnect(){ cfg.bridgeUrl = $('aUrl').value.trim(); saveCfg(); const r = bridgeStart(); renderConn(); if (!bValid()) toast(r, 'error'); }
+async function aNewSecret(){
+  if (!(await confirmBox('Make a new secret?', 'The current Connector URL stops working. Update it in every agent.', 'New secret'))) return;
+  cfg.bridgeToken = newToken(); saveCfg(); renderConn(); if (cfg.bridgeEnabled){ bridgeTries = 0; bridgeConnect(); }
+}
+function aSetJoin(v){ cfg.joinMode = v; saveCfg(); bSend({t: 'config', join: v}); }
+$('aUrl').addEventListener('change', () => { cfg.bridgeUrl = $('aUrl').value.trim(); saveCfg(); renderConn(); if (cfg.bridgeEnabled){ bridgeTries = 0; bridgeConnect(); } });
+
+/* ── Tools offered to agents ─────────────────────────── */
+const GUIDE = [
+'FLASHCARDS: operating guide for agents',
+'',
+'You drive the Oryn Flashcards app through tools. The user sees every change live in their editor. Call `identify` first with your agent name (the relay asks for it), then follow this guide.',
+'',
+'WHAT A DECK IS',
+'A deck has a NAME and many SETS. Every set is exactly two cards: Card 1 and Card 2. When the user practices, they see ONE of the two cards (it appears on the left in green, or on the right in gray, chosen at random, and which card sits on which side is also random) and try to say the other card out loud. They swipe the card outward if they can say it, inward if they cannot.',
+'',
+'HOW TO WRITE CARDS',
+'- Each card is ONE POINT: a short, self-contained statement, term or fact. NOT a question and NOT an answer. Never write "What is…?", "Q:" or "A:".',
+'- The two points of a set belong together so that either one can cue the other. Good: "Mitochondria generate most of the cell\'s ATP" ↔ "Powerhouse of the cell: site of the Krebs cycle". Good: "Treaty of Versailles (1919)" ↔ "Ended WWI and placed blame on Germany". Bad: "What do mitochondria do?" ↔ "Make ATP".',
+'- Keep each point under about 120 characters. No numbering, no markdown, no emoji inside cards.',
+'- MARK each set from 1 to 5 (1 = easy / low priority, 3 = normal, 5 = hard or very important). The marks drive filtering ("Mark 3+", "Mark 4+") and the analysis. Default is 3.',
+'- Do not invent facts. If the topic or level is unclear, ask the user first (use `reply`).',
+'',
+'WORKFLOW',
+'1. `identify`, then `guide` (this text).',
+'2. `list_decks` to see what exists. `create_flashcards` {name, sets:[{card1, card2, mark}]} sets the deck name and then generates the sets live in the editor (up to 200 per call; use `add_sets` for more or to extend an existing deck).',
+'3. READ and REARRANGE: `read_deck`, `update_set`, `delete_set`, `move_set`, `reorder_sets`, `sort_sets`, `rename_deck`, `open_deck`. All set indices are 1-BASED. After any change call `read_deck` if you need to be sure of the order.',
+'4. The USER practices on their own with the Exercise button (next to Export): they choose shuffled or in order, then swipe cards. Every practice is stored. You cannot swipe for them.',
+'5. ANALYZE: `get_practice_history` lists past practices (what they missed), and `analyze_progress` returns aggregated statistics (trend, weakest sets, accuracy by mark / side / direction). Read the numbers, then tell the user in plain language how they are progressing, which sets need work, and offer to add, split or reword sets for the weak points.',
+'6. `get_screen` tells you which screen the user is on and whether an exercise is running.',
+'',
+'RULES',
+'- Be honest about the data: if there are no practices yet, say so instead of guessing.',
+'- Do not delete the user\'s sets unless they asked. Prefer update_set for rewording.',
+'- Keep your replies short; the deck itself is the product.'
+].join('\n');
+
+const S = (props, req) => ({type: 'object', properties: props, required: req || []});
+const DECK_P = {deck: {type: 'string', description: 'Deck id or name. Optional: defaults to the deck open in the editor.'}};
+const SETS_P = {type: 'array', maxItems: 200, description: 'Sets to add. Each set has two points and an optional 1-5 mark.', items: {type: 'object', properties: {card1: {type: 'string', description: 'First point (not a question).'}, card2: {type: 'string', description: 'Second, related point (not an answer).'}, mark: {type: 'integer', minimum: 1, maximum: 5}}, required: ['card1', 'card2']}};
+function bridgeTools(){
+  return [
+    {name: 'guide', description: 'READ THIS FIRST. How flashcards work here (two points per set, not question/answer; marks 1-5) and the full tool workflow.', inputSchema: S({})},
+    {name: 'list_decks', description: 'List all saved flashcard decks with id, set count, average mark and practice count.', inputSchema: S({})},
+    {name: 'get_screen', description: 'Which screen the user is on (recents, editor, exercise), the open deck, and exercise progress.', inputSchema: S({})},
+    {name: 'create_flashcards', description: 'Create a new deck: sets the name, then generates the sets live in the editor and opens it. Cards are two related POINTS (not question/answer). Mark each set 1-5.', inputSchema: S({name: {type: 'string', description: 'Deck name (max 80 chars).'}, sets: SETS_P}, ['name', 'sets'])},
+    {name: 'add_sets', description: 'Append more sets to a deck (live generation).', inputSchema: S(Object.assign({sets: SETS_P}, DECK_P), ['sets'])},
+    {name: 'open_deck', description: 'Open a deck in the editor.', inputSchema: S({deck: {type: 'string', description: 'Deck id or name.'}}, ['deck'])},
+    {name: 'read_deck', description: 'Read every set of a deck: numbered (1-based), card 1, card 2 and mark.', inputSchema: S(DECK_P)},
+    {name: 'update_set', description: 'Change card1, card2 and/or mark of one set (1-based index).', inputSchema: S(Object.assign({index: {type: 'integer', minimum: 1}, card1: {type: 'string'}, card2: {type: 'string'}, mark: {type: 'integer', minimum: 1, maximum: 5}}, DECK_P), ['index'])},
+    {name: 'delete_set', description: 'Delete one or more sets by 1-based index. Only when the user asked for it.', inputSchema: S(Object.assign({index: {type: 'integer', minimum: 1}, indices: {type: 'array', items: {type: 'integer', minimum: 1}}}, DECK_P))},
+    {name: 'move_set', description: 'Move one set from one position to another (1-based).', inputSchema: S(Object.assign({from: {type: 'integer', minimum: 1}, to: {type: 'integer', minimum: 1}}, DECK_P), ['from', 'to'])},
+    {name: 'reorder_sets', description: 'Rearrange all sets at once. `order` lists every current 1-based index exactly once in the new order, e.g. [3,1,2].', inputSchema: S(Object.assign({order: {type: 'array', items: {type: 'integer', minimum: 1}}}, DECK_P), ['order'])},
+    {name: 'sort_sets', description: 'Sort the sets by mark or alphabetically.', inputSchema: S(Object.assign({by: {type: 'string', enum: ['mark_desc', 'mark_asc', 'card1', 'card2']}}, DECK_P), ['by'])},
+    {name: 'rename_deck', description: 'Rename a deck.', inputSchema: S(Object.assign({name: {type: 'string'}}, DECK_P), ['name'])},
+    {name: 'get_practice_history', description: 'List the user\'s stored practices (newest first) with score, mode, time and the sets they missed.', inputSchema: S(Object.assign({limit: {type: 'integer', minimum: 1, maximum: 50, description: 'Default 10.'}, all_decks: {type: 'boolean', description: 'Include every deck (default: only the given/open deck, or all if none is open).'}}, DECK_P))},
+    {name: 'analyze_progress', description: 'Aggregated statistics over the stored practices: trend, weakest sets, high-importance sets below 80%, accuracy by mark / side / direction, peeks and timing. Use it to tell the user how they are progressing.', inputSchema: S(Object.assign({all_decks: {type: 'boolean'}}, DECK_P))}
+  ];
+}
+function parseSets(arr){
+  if (!Array.isArray(arr) || !arr.length) throw new Error('`sets` must be a non-empty array of {card1, card2, mark}.');
+  if (arr.length > 200) throw new Error('At most 200 sets per call. Split it and use add_sets.');
+  return arr.map((x, i) => {
+    const c1 = String(x && (x.card1 != null ? x.card1 : x.left) != null ? (x.card1 != null ? x.card1 : x.left) : '').trim().slice(0, 400);
+    const c2 = String(x && (x.card2 != null ? x.card2 : x.right) != null ? (x.card2 != null ? x.card2 : x.right) : '').trim().slice(0, 400);
+    if (!c1 || !c2) throw new Error('Set ' + (i + 1) + ' needs both card1 and card2.');
+    return {c1, c2, mark: x.mark};
+  });
+}
+function needDeck(arg){
+  const d = findDeck(arg);
+  if (!d) throw new Error(arg ? 'No deck matches "' + arg + '". Call list_decks.' : 'No deck is open. Pass `deck` (id or name) or call list_decks / create_flashcards.');
+  return d;
+}
+function idx(d, n){ n = parseInt(n, 10); if (!n || n < 1 || n > d.sets.length) throw new Error('Index ' + n + ' is out of range (deck has ' + d.sets.length + ' sets).'); return n - 1; }
+function afterEdit(d, flash){
+  saveDeck(d);
+  if (curDeck === d && curScreen() === 'editor'){ renderEditor(); if (flash) setTimeout(() => flashRow(flash), 30); }
+  if (curScreen() === 'recents') recRender();
+}
+function deckLine(d){ return '- ' + d.name + ' (id ' + d.id + '): ' + d.sets.length + ' sets, avg mark ' + (d.sets.length ? avgMark(d).toFixed(1) : '-') + ', ' + sessionsOf(d.id).length + ' practices'; }
+async function runTool(name, a, who){
+  switch (name){
+    case 'list_decks': { const l = [...store.decks.values()].sort((x, y) => y.modified - x.modified); return l.length ? l.map(deckLine).join('\n') : 'No decks yet. Use create_flashcards.'; }
+    case 'get_screen': {
+      const sc = curScreen(); let t = 'Screen: ' + sc + '.' + (curDeck ? ' Open deck: "' + curDeck.name + '" (id ' + curDeck.id + ', ' + curDeck.sets.length + ' sets).' : ' No deck open.');
+      if (ex && sc === 'exercise') t += ' Exercise running: card ' + Math.min(ex.i + 1, ex.queue.length) + ' of ' + ex.queue.length + ', ' + ex.results.filter(r => r.known).length + ' answerable so far.';
+      return t;
+    }
+    case 'create_flashcards': {
+      const nm = String(a.name || '').trim().slice(0, 80); if (!nm) throw new Error('`name` is required.');
+      const sets = parseSets(a.sets);
+      let final = nm, n = 2; while ([...store.decks.values()].some(d => d.name.toLowerCase() === final.toLowerCase())) final = nm + ' (' + (n++) + ')';
+      const d = mkDeck(final); store.decks.set(d.id, d); saveDeck(d);
+      curDeck = d; showScreen('editor'); renderEditor();
+      await generateSets(d, sets, who);
+      return 'Created "' + d.name + '" (id ' + d.id + ') with ' + d.sets.length + ' sets and opened it in the editor. The user can now press Exercise. Marks: ' + [1, 2, 3, 4, 5].map(m => m + '×' + d.sets.filter(s => s.mark === m).length).join(' ') + '.';
+    }
+    case 'add_sets': { const d = needDeck(a.deck), sets = parseSets(a.sets); const before = d.sets.length; await generateSets(d, sets, who); return 'Added ' + (d.sets.length - before) + ' sets to "' + d.name + '". It now has ' + d.sets.length + ' sets.'; }
+    case 'open_deck': { const d = needDeck(a.deck); openDeck(d.id); return 'Opened "' + d.name + '" (' + d.sets.length + ' sets).'; }
+    case 'read_deck': { const d = needDeck(a.deck); return '"' + d.name + '" (id ' + d.id + '), ' + d.sets.length + ' sets:\n' + (d.sets.length ? d.sets.map((s, i) => (i + 1) + '. [mark ' + s.mark + '] ' + s.c1 + '  ||  ' + s.c2).join('\n') : '(empty)'); }
+    case 'update_set': {
+      const d = needDeck(a.deck), i = idx(d, a.index), s = d.sets[i];
+      if (a.card1 != null) s.c1 = String(a.card1).slice(0, 400); if (a.card2 != null) s.c2 = String(a.card2).slice(0, 400);
+      if (a.mark != null) s.mark = clamp(parseInt(a.mark, 10) || s.mark, 1, 5);
+      afterEdit(d, s.id); return 'Updated set ' + (i + 1) + ': [mark ' + s.mark + '] ' + s.c1 + '  ||  ' + s.c2;
+    }
+    case 'delete_set': {
+      const d = needDeck(a.deck), list = (Array.isArray(a.indices) ? a.indices : [a.index]).filter(x => x != null).map(x => idx(d, x));
+      if (!list.length) throw new Error('Give `index` or `indices`.');
+      const rm = new Set(list.map(i => d.sets[i].id)); d.sets = d.sets.filter(s => !rm.has(s.id)); afterEdit(d); return 'Deleted ' + rm.size + ' set(s). The deck now has ' + d.sets.length + '.';
+    }
+    case 'move_set': { const d = needDeck(a.deck), f = idx(d, a.from), t = idx(d, a.to); const [s] = d.sets.splice(f, 1); d.sets.splice(t, 0, s); afterEdit(d, s.id); return 'Moved set ' + (f + 1) + ' to position ' + (t + 1) + '.'; }
+    case 'reorder_sets': {
+      const d = needDeck(a.deck), o = (a.order || []).map(x => parseInt(x, 10));
+      if (o.length !== d.sets.length || new Set(o).size !== o.length || o.some(x => !(x >= 1 && x <= d.sets.length))) throw new Error('`order` must list every index 1..' + d.sets.length + ' exactly once.');
+      const old = d.sets.slice(); d.sets = o.map(x => old[x - 1]); afterEdit(d); return 'Rearranged ' + d.sets.length + ' sets.';
+    }
+    case 'sort_sets': {
+      const d = needDeck(a.deck), by = a.by;
+      const fn = {mark_desc: (x, y) => y.mark - x.mark, mark_asc: (x, y) => x.mark - y.mark, card1: (x, y) => x.c1.localeCompare(y.c1), card2: (x, y) => x.c2.localeCompare(y.c2)}[by];
+      if (!fn) throw new Error('`by` must be mark_desc, mark_asc, card1 or card2.'); d.sets.sort(fn); afterEdit(d); return 'Sorted by ' + by + '.';
+    }
+    case 'rename_deck': { const d = needDeck(a.deck), nm = String(a.name || '').trim().slice(0, 80); if (!nm) throw new Error('`name` is required.'); d.name = nm; afterEdit(d); if (curDeck === d) $('docTitle').value = nm; return 'Renamed to "' + nm + '".'; }
+    case 'get_practice_history': {
+      const d = a.all_decks ? null : (a.deck ? needDeck(a.deck) : curDeck);
+      return (d ? 'Practices for "' + d.name + '":\n' : 'Practices for all decks:\n') + historyText(d, clamp(parseInt(a.limit, 10) || 10, 1, 50));
+    }
+    case 'analyze_progress': { const d = a.all_decks ? null : (a.deck ? needDeck(a.deck) : curDeck); return analyzeText(d); }
+  }
+  throw new Error('Unknown tool "' + name + '". Call `guide`.');
+}
+async function bridgeHandleCall(m){
+  bridgeCalls++; setStatus(bridgeStatus);
+  const done = (text, error) => bSend({t: 'result', id: m.id, text: String(text == null ? '' : text), error: !!error, image: null, files: null});
+  const ag = upsertAgent({id: (m.agent && m.agent.id) || 'default', name: m.agent && m.agent.name, code: m.agent && m.agent.code, status: 'active'}); ag.calls++;
+  try {
+    if (m.name === 'guide'){ done(GUIDE); return; }
+    const out = await runTool(m.name, m.args || {}, ag.name || 'An agent');
+    if (['create_flashcards', 'add_sets', 'update_set', 'delete_set', 'move_set', 'reorder_sets', 'sort_sets', 'rename_deck'].includes(m.name)) toast(agentTag(ag) + ': ' + m.name.replace(/_/g, ' '), 'success', 2200);
+    done(out);
+  } catch(e){ genBanner(false); done('Error: ' + (e && e.message ? e.message : e), true); }
+  renderAgentBadge();
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+(async function init(){
+  await loadAll();
+  recRender();
+  setStatus('off');
+  if (cfg.bridgeEnabled && bValid()) bridgeConnect();
+  const wake = () => { if (cfg.bridgeEnabled && !(bridgeWS && bridgeWS.readyState === 1)){ bridgeTries = 0; bridgeConnect(); } };
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) wake(); });
+  window.addEventListener('online', wake);
+  window.addEventListener('beforeunload', flushSave);
+})();
+</script>
+</body>
+</html>
