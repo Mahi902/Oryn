@@ -133,6 +133,8 @@ body.dark .sheet{background:#000}
 .set-row.flash{animation:flashRow 1.2s ease}
 @keyframes genIn{from{opacity:0;transform:translateY(12px) scale(.98);background:var(--green-soft)}to{opacity:1;transform:none}}
 @keyframes flashRow{0%{box-shadow:0 0 0 3px var(--accent-solid)}100%{box-shadow:var(--shadow)}}
+.set-num small.acc{display:block;font-size:10px;font-weight:700;margin-top:3px}
+.set-num small.acc.good{color:var(--green)}.set-num small.acc.mid{color:var(--orange)}.set-num small.acc.low{color:var(--danger)}
 .set-num{font-size:13px;font-weight:700;color:var(--muted);padding-top:10px;text-align:center}
 .set-field{display:flex;flex-direction:column;gap:4px;min-width:0}
 .set-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
@@ -365,7 +367,7 @@ body.dark .fc-card.gray{background:linear-gradient(160deg,#6b6b71,#48484c)}
 <div class="modal" id="exerciseModal" onclick="if(event.target===this)closeMdl('exerciseModal')">
   <div class="mbox"><div class="mhdr"><span class="mtitle">Exercise</span><button class="mclose" onclick="closeMdl('exerciseModal')"><span class="ms">close</span></button></div>
     <div class="mlabel" style="margin-top:0">Order</div>
-    <div class="seg" id="segOrder"><button data-v="ordered" class="on"><span class="ms">format_list_numbered</span>In order</button><button data-v="shuffled"><span class="ms">shuffle</span>Shuffled</button></div>
+    <div class="seg" id="segOrder"><button data-v="ordered" class="on"><span class="ms">format_list_numbered</span>In order</button><button data-v="shuffled"><span class="ms">shuffle</span>Shuffled</button><button data-v="weakest"><span class="ms">trending_down</span>Weakest first</button></div>
     <div class="mlabel">Show first</div>
     <div class="seg" id="segPrompt"><button data-v="random" class="on">Random</button><button data-v="1">Card 1</button><button data-v="2">Card 2</button></div>
     <div class="mlabel">Sets to practice</div>
@@ -433,6 +435,7 @@ function fmtDate(t){
   if (d.toDateString() === y.toDateString()) return 'Yesterday';
   return d.toLocaleDateString([], {month:'short', day:'numeric', year: d.getFullYear() === now.getFullYear() ? undefined : 'numeric'});
 }
+function modeLbl(m){ return m === 'shuffled' ? 'shuffled' : m === 'weakest' ? 'weakest first' : 'in order'; }
 function fmtDur(ms){ const s = Math.round(ms / 1000); return s >= 60 ? Math.floor(s / 60) + 'm ' + (s % 60) + 's' : s + 's'; }
 function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
@@ -594,7 +597,7 @@ function recRender(){
     box.innerHTML = '<div class="rec-section-label">Previous practices</div><div class="rec-list">' + list.map(s => {
       const p = pctOf(s);
       return '<div class="rec-card" onclick="showPractice(\'' + s.id + '\')"><div class="rec-card-icon ' + scoreClass(p) + '"><span class="ms">bolt</span></div>' +
-        '<div class="rec-card-info"><div class="rec-card-name">' + esc(s.deckName) + '</div><div class="rec-card-meta"><span class="rec-card-date">' + fmtDate(s.at) + '</span><span class="chip">' + s.known + '/' + s.total + ' · ' + p + '%</span><span class="chip">' + (s.mode === 'shuffled' ? 'shuffled' : 'in order') + '</span>' + (s.partial ? '<span class="chip">ended early</span>' : '') + '</div></div>' +
+        '<div class="rec-card-info"><div class="rec-card-name">' + esc(s.deckName) + '</div><div class="rec-card-meta"><span class="rec-card-date">' + fmtDate(s.at) + '</span><span class="chip">' + s.known + '/' + s.total + ' · ' + p + '%</span><span class="chip">' + modeLbl(s.mode) + '</span>' + (s.partial ? '<span class="chip">ended early</span>' : '') + '</div></div>' +
         '<div class="rec-card-actions"><button class="rec-card-btn danger" title="Delete" onclick="event.stopPropagation();delPractice(\'' + s.id + '\')"><span class="ms">delete</span></button></div></div>';
     }).join('') + '</div>';
   }
@@ -659,9 +662,16 @@ function renderStats(){
   const ok = curDeck.sets.some(s => s.c1.trim() && s.c2.trim());
   $('exerciseBtn').disabled = !ok;
 }
+function setAcc(deckId, setId){
+  let k = 0, n = 0;
+  sessionsOf(deckId).forEach(ss => ss.results.forEach(r => { if (r.setId === setId){ n++; if (r.known) k++; } }));
+  return n ? {k, n, p: Math.round(100 * k / n)} : null;
+}
 function rowHtml(s, i, cls){
+  const acc = curDeck ? setAcc(curDeck.id, s.id) : null;
+  const accHtml = acc ? '<small class="acc ' + scoreClass(acc.p) + '" title="Known ' + acc.k + ' of ' + acc.n + ' times in practice">' + acc.p + '%</small>' : '';
   const marks = [1, 2, 3, 4, 5].map(m => '<button class="mk' + (s.mark === m ? ' on' : '') + '" data-m="' + m + '" title="Mark ' + m + '">' + m + '</button>').join('');
-  return '<div class="set-row ' + (cls || '') + '" data-id="' + s.id + '"><div class="set-num">' + (i + 1) + '</div>' +
+  return '<div class="set-row ' + (cls || '') + '" data-id="' + s.id + '"><div class="set-num">' + (i + 1) + accHtml + '</div>' +
     '<div class="set-field f1"><span class="set-label">Card 1</span><textarea class="set-text c1" rows="1" placeholder="First point" maxlength="400">' + esc(s.c1) + '</textarea></div>' +
     '<div class="set-field f2"><span class="set-label">Card 2</span><textarea class="set-text c2" rows="1" placeholder="Second point" maxlength="400">' + esc(s.c2) + '</textarea></div>' +
     '<div class="set-side"><div class="marks">' + marks + '</div><div class="row-actions">' +
@@ -679,7 +689,7 @@ function renderEditor(){
   list.querySelectorAll('textarea').forEach(autosize);
   renderStats();
 }
-function renumber(){ document.querySelectorAll('#setList .set-row').forEach((r, i) => r.querySelector('.set-num').textContent = i + 1); }
+function renumber(){ document.querySelectorAll('#setList .set-row').forEach((r, i) => r.querySelector('.set-num').firstChild.nodeValue = i + 1); }
 function findSet(id){ return curDeck ? curDeck.sets.find(s => s.id === id) : null; }
 $('setList').addEventListener('input', e => {
   const t = e.target; if (!t.classList.contains('set-text')) return;
@@ -870,6 +880,10 @@ function exStart(deck, sets, order, filter, prompt){
   prompt = prompt || 'random';
   if (!sets.length) return;
   if (order === 'shuffled') sets = shuffle(sets);
+  else if (order === 'weakest'){
+    const sc = x => { const a = setAcc(deck.id, x.id); return a ? a.p : 50; };
+    sets = shuffle(sets).sort((a, b) => sc(a) - sc(b) || b.mark - a.mark);
+  }
   const queue = sets.map(set => {
     const c1Left = Math.random() < .5, promptSide = Math.random() < .5 ? 'left' : 'right';
     const promptCard = prompt === '1' ? 1 : prompt === '2' ? 2 : (((promptSide === 'left') === c1Left) ? 1 : 2);
@@ -973,7 +987,7 @@ function summaryHtml(s){
   const missed = s.results.filter(r => !r.known);
   const leftN = s.results.filter(r => r.side === 'left'), kl = leftN.filter(r => r.known).length, rightN = s.results.filter(r => r.side === 'right'), kr = rightN.filter(r => r.known).length;
   return '<div class="sum-ring"><div class="ring-wrap"><svg viewBox="0 0 150 150"><circle cx="75" cy="75" r="62" fill="none" stroke="var(--chip)" stroke-width="14"/><circle cx="75" cy="75" r="62" fill="none" stroke="' + col + '" stroke-width="14" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - p / 100)).toFixed(1) + '"/></svg><span class="pct">' + p + '%</span></div></div>' +
-    '<div class="sum-head">' + esc(msg) + '</div><div class="sum-sub">' + esc(s.deckName) + ' · ' + (s.mode === 'shuffled' ? 'shuffled' : 'in order') + (s.partial ? ' · ended early' : '') + ' · ' + fmtDate(s.at) + '</div>' +
+    '<div class="sum-head">' + esc(msg) + '</div><div class="sum-sub">' + esc(s.deckName) + ' · ' + modeLbl(s.mode) + (s.partial ? ' · ended early' : '') + ' · ' + fmtDate(s.at) + '</div>' +
     '<div class="sum-stats"><div class="sum-stat"><b style="color:var(--green)">' + s.known + '</b><small>Could say it</small></div><div class="sum-stat"><b style="color:var(--danger)">' + (s.total - s.known) + '</b><small>Not yet</small></div><div class="sum-stat"><b>' + fmtDur(s.ms) + '</b><small>Time</small></div><div class="sum-stat"><b>' + (s.total ? fmtDur(s.ms / s.total) : '–') + '</b><small>Per card</small></div></div>' +
     (byMark ? '<div class="sum-block"><h4>By mark</h4>' + byMark + '</div>' : '') +
     '<div class="sum-block"><h4>By side</h4><div class="bar-row"><span>Green</span><div class="bar-track"><i style="width:' + (leftN.length ? Math.round(100 * kl / leftN.length) : 0) + '%"></i></div><em>' + kl + '/' + leftN.length + '</em></div><div class="bar-row"><span>Gray</span><div class="bar-track"><i style="width:' + (rightN.length ? Math.round(100 * kr / rightN.length) : 0) + '%"></i></div><em>' + kr + '/' + rightN.length + '</em></div></div>' +
