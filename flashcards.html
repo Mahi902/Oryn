@@ -72,6 +72,7 @@ body.dark .chip{background:#2c2c2e}
 .rec-card-btn:hover{background:rgba(0,122,255,.1);color:var(--accent-solid)}
 .rec-card-btn.danger:hover{background:rgba(255,59,48,.12);color:var(--danger)}
 .rec-card-btn .ms{font-size:18px}
+.rec-card-btn.pinned{color:var(--accent-solid)}
 .rec-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;color:var(--muted);text-align:center}
 .rec-empty .ms{font-size:52px;opacity:.5}
 .rec-empty-title{font-size:16px;font-weight:600}
@@ -574,7 +575,7 @@ function recRender(){
       name: (a, b) => a.name.localeCompare(b.name), sets: (a, b) => b.sets.length - a.sets.length,
       score: (a, b) => (lastScore(a.id) == null ? 999 : lastScore(a.id)) - (lastScore(b.id) == null ? 999 : lastScore(b.id))
     }[recSort];
-    list.sort(cmp);
+    list.sort(cmp); list.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
     if (!list.length){
       box.innerHTML = '<div class="rec-empty"><span class="ms">style</span><div class="rec-empty-title">' + (q ? 'No matches' : 'No flashcards yet') + '</div><div class="rec-empty-sub">' + (q ? 'Try another search.' : 'Tap + to make a set by hand, or connect an agent and ask it to create one.') + '</div></div>';
       return;
@@ -583,9 +584,9 @@ function recRender(){
       const sc = lastScore(d.id), n = sessionsOf(d.id).length;
       return '<div class="rec-card" data-id="' + d.id + '" onclick="recOpen(\'' + d.id + '\')">' +
         '<div class="rec-card-icon"><span class="ms">style</span></div>' +
-        '<div class="rec-card-info"><div class="rec-card-name">' + esc(d.name) + '</div><div class="rec-card-meta"><span class="rec-card-date">' + fmtDate(d.modified) + '</span><span class="chip">' + d.sets.length + ' sets</span>' +
+        '<div class="rec-card-info"><div class="rec-card-name">' + esc(d.name) + '</div><div class="rec-card-meta"><span class="rec-card-date">' + fmtDate(d.modified) + '</span>' + (d.pinned ? '<span class="chip"><span class="ms fill" style="font-size:13px;vertical-align:-2px">push_pin</span></span>' : '') + '<span class="chip">' + d.sets.length + ' sets</span>' +
         (sc != null ? '<span class="chip">last ' + sc + '%</span>' : '') + (n ? '<span class="chip">' + n + (n === 1 ? ' practice' : ' practices') + '</span>' : '') + '</div></div>' +
-        '<div class="rec-card-actions"><button class="rec-card-btn" title="Duplicate" onclick="event.stopPropagation();recDuplicate(\'' + d.id + '\')"><span class="ms">content_copy</span></button><button class="rec-card-btn" title="Rename" onclick="event.stopPropagation();recRename(\'' + d.id + '\')"><span class="ms">edit</span></button>' +
+        '<div class="rec-card-actions"><button class="rec-card-btn' + (d.pinned ? ' pinned' : '') + '" title="' + (d.pinned ? 'Unpin' : 'Pin to top') + '" onclick="event.stopPropagation();recPin(\'' + d.id + '\')"><span class="ms' + (d.pinned ? ' fill' : '') + '">push_pin</span></button><button class="rec-card-btn" title="Duplicate" onclick="event.stopPropagation();recDuplicate(\'' + d.id + '\')"><span class="ms">content_copy</span></button><button class="rec-card-btn" title="Rename" onclick="event.stopPropagation();recRename(\'' + d.id + '\')"><span class="ms">edit</span></button>' +
         '<button class="rec-card-btn danger" title="Delete" onclick="event.stopPropagation();recDelete(\'' + d.id + '\')"><span class="ms">delete</span></button></div></div>';
     }).join('') + '</div>';
   } else {
@@ -603,6 +604,10 @@ function recRender(){
   }
 }
 function recOpen(id){ openDeck(id); }
+function recPin(id){
+  const d = store.decks.get(id); if (!d) return;
+  d.pinned = !d.pinned; dbPut('decks', d); recRender(); toast(d.pinned ? 'Pinned to top' : 'Unpinned');
+}
 function recDuplicate(id){
   const d = store.decks.get(id); if (!d) return;
   const c = mkDeck((d.name + ' (copy)').slice(0, 80));
@@ -710,6 +715,9 @@ $('setList').addEventListener('click', e => {
     const copy = {s, i}; curDeck.sets.splice(i, 1); renderEditor(); scheduleSave();
     toast('Set deleted', '', 4500, 'Undo', () => { if (!curDeck) return; curDeck.sets.splice(Math.min(copy.i, curDeck.sets.length), 0, copy.s); renderEditor(); scheduleSave(); });
   }
+});
+$('setList').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && e.target.classList.contains('set-text')){ e.preventDefault(); addSetManual(); }
 });
 function addSetManual(){
   if (!curDeck) return;
