@@ -212,7 +212,7 @@ body.dark .sheet{background:#000}
 .ex-top{display:flex;align-items:center;gap:12px;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 8px}
 .ex-bar{flex:1;height:8px;border-radius:99px;background:var(--chip);overflow:hidden}
 .ex-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3ddc6a,#1f9d45);transition:width .3s}
-.ex-count{font-size:13px;font-weight:700;color:var(--muted);min-width:70px;text-align:right}
+.ex-count{font-size:13px;font-weight:700;color:var(--muted);min-width:70px;text-align:right;white-space:nowrap}
 .ex-legend{display:flex;justify-content:space-between;padding:0 22px 6px;font-size:12px;font-weight:700;letter-spacing:.3px}
 .ex-legend span:first-child{color:var(--green)}.ex-legend span:last-child{color:var(--muted)}
 .ex-stage{position:relative;flex:1;margin:4px 14px;border-radius:24px;overflow:hidden;touch-action:none;background:var(--card);box-shadow:var(--shadow);min-height:200px}
@@ -320,6 +320,7 @@ body.dark .fc-card.gray{background:linear-gradient(160deg,#6b6b71,#48484c)}
   <div class="toolbar">
     <button class="tchip" onclick="addSetManual()"><span class="ms">add</span>Add set</button>
     <button class="tchip" onclick="sortByMark()"><span class="ms">sort</span><span id="sortLbl">Sort by mark</span></button>
+    <button class="tchip" onclick="cleanSets()"><span class="ms">cleaning_services</span>Clean up</button>
     <button class="tchip" onclick="shuffleSets()"><span class="ms">shuffle</span>Shuffle</button>
     <button class="tchip" onclick="swapSides()"><span class="ms">swap_horiz</span>Swap sides</button>
     <button class="tchip" onclick="openHistoryForDeck()"><span class="ms">history</span>Practices</button>
@@ -712,6 +713,20 @@ function sortByMark(){
   $('sortLbl').textContent = markDesc ? 'Marks 5 → 1' : 'Marks 1 → 5'; markDesc = !markDesc;
   renderEditor(); scheduleSave();
 }
+function cleanSets(){
+  if (!curDeck) return;
+  const before = curDeck.sets.slice(), seen = new Set();
+  const kept = before.filter(s => {
+    if (!s.c1.trim() && !s.c2.trim()) return false;
+    const k = s.c1.trim().toLowerCase() + '\u0001' + s.c2.trim().toLowerCase();
+    if (seen.has(k)) return false; seen.add(k); return true;
+  });
+  const n = before.length - kept.length;
+  if (!n){ toast('Nothing to clean up'); return; }
+  curDeck.sets = kept; renderEditor(); scheduleSave();
+  toast('Removed ' + n + (n === 1 ? ' empty or duplicate set' : ' empty or duplicate sets'), '', 6000, 'Undo', () => { curDeck.sets = before; renderEditor(); scheduleSave(); });
+}
+function exStreak(){ let n = 0; for (let i = ex.results.length - 1; i >= 0 && ex.results[i].known; i--) n++; return n; }
 function shuffleSets(){
   if (!curDeck || curDeck.sets.length < 2) return;
   const before = curDeck.sets.slice(); curDeck.sets = shuffle(curDeck.sets); renderEditor(); scheduleSave();
@@ -877,7 +892,8 @@ function exShowCard(){
   stage.appendChild(card);
   ex.card = card; ex.peeked = false; ex.busy = false; ex.cardT0 = Date.now();
   $('exBar').style.width = (100 * ex.i / ex.queue.length) + '%';
-  $('exCount').textContent = (ex.i + 1) + ' / ' + ex.queue.length;
+  const stk = exStreak();
+  $('exCount').textContent = (ex.i + 1) + ' / ' + ex.queue.length + (stk >= 3 ? ' · \uD83D\uDD25' + stk : '');
   const L = $('exBtnL'), R = $('exBtnR');
   const knowBtn = side === 'left' ? L : R, nopeBtn = side === 'left' ? R : L;
   knowBtn.className = 'ex-btn know'; knowBtn.innerHTML = '<span class="ms">check</span>'; knowBtn.title = 'I can say it';
