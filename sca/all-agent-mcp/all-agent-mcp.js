@@ -2443,6 +2443,101 @@
     return 'The sidebar is now ' + (sb.classList.contains('collapsed') ? 'hidden' : 'shown') + '.';
   });
 
+  // ── v2.0.37: Horizontal lines already in the document ─────────────────
+  const aamHrs = () => [...document.querySelectorAll('#editorArea .page-content hr')].filter(h => !h.closest('.sc-banner'));
+  const aamHrSpec = (hr) => {
+    const raw = hr.style.borderTopColor || hr.style.borderColor || '#cccccc';
+    const op = hr.style.opacity === '' ? 1 : parseFloat(hr.style.opacity);
+    return {
+      grad: hr.dataset.hrColorType === 'gradient',
+      color: (typeof rgbToHex === 'function' ? rgbToHex(raw) : raw) || '#cccccc',
+      from: hr.dataset.hrGradFrom || '', to: hr.dataset.hrGradTo || '', angle: hr.dataset.hrGradAngle || '90',
+      style: hr.dataset.hrLineStyle || hr.style.borderTopStyle || 'solid',
+      width: parseInt(hr.style.borderTopWidth, 10) || 2,
+      opacity: Math.round((isFinite(op) ? op : 1) * 100)
+    };
+  };
+
+  reg('hrs', 'none', 'info', 'List the horizontal lines (dividers) in the document: number, page, color or gradient, style (solid, dotted, dashed), thickness and opacity. Use the number with hrset, hrmove and hrremove.', () => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const out = [];
+    aamHrs().forEach((hr, i) => {
+      const pn = pageNumFromEl(hr); if(!pageAllowed(pn)) return;
+      const s = aamHrSpec(hr);
+      out.push((i + 1) + '. page ' + pn + ' ' + (s.grad ? 'gradient ' + (s.from || '?') + ' to ' + (s.to || '?') + ' at ' + s.angle + 'deg' : s.style + ' ' + s.color) + ' ' + s.width + 'px opacity:' + s.opacity + '%');
+    });
+    return out.length ? out.join('\n') : 'No horizontal lines.';
+  });
+
+  reg('hrset', 'rest', 'action', 'hrset <n> [color=#rrggbb] [style=solid|dotted|dashed] [width=1-10] [opacity=10-100] [from=#rrggbb to=#rrggbb angle=0-360] — change horizontal line n (see hrs), the same options as its right-click window. Giving from, to or angle makes it a gradient (solid only); giving color or style makes it a plain line again.', (txt) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const m = String(txt||'').trim().match(/^(\d+)\s*([\s\S]*)$/); const list = aamHrs();
+    if(!m) return 'Usage: hrset <n> [color=#rrggbb] [style=solid|dotted|dashed] [width=1-10] [opacity=10-100] [from=… to=… angle=…].';
+    const i = aamImgNear(m[1], list); if(i < 0) return 'Horizontal line ' + m[1] + ' not found. ' + aamCountMsg(list.length, 'horizontal line');
+    const hr = list[i]; const pn = pageNumFromEl(hr); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    const kv = aamKV(m[2]); const bad = kv.bad.slice(); const o = kv.o; const done = [];
+    if(!Object.keys(o).length) return 'Give at least one option, for example hrset ' + (i + 1) + ' color=#e53935 width=4 style=dashed.';
+    const spec = aamHrSpec(hr);
+    let w = spec.width;
+    if(o.width !== undefined){ const n = parseInt(o.width, 10); if(isFinite(n) && n >= 1 && n <= 10) w = n; else bad.push('width=' + o.width + ' (1-10)'); }
+    let style = spec.style;
+    if(o.style !== undefined){ const st = o.style.toLowerCase(); if(['solid','dotted','dashed'].indexOf(st) >= 0) style = st; else { bad.push('style=' + o.style + ' (solid|dotted|dashed)'); } }
+    const styleGiven = o.style !== undefined && style === o.style.toLowerCase();
+    const wantGrad = o.from !== undefined || o.to !== undefined || o.angle !== undefined;
+    if(wantGrad){
+      if(styleGiven && style !== 'solid'){ bad.push('style=' + style + ' (a gradient line is always solid)'); }
+      let from = aamHex(o.from) || spec.from || (typeof hrxAccentHex === 'function' ? hrxAccentHex() : '#1976d2');
+      let to = aamHex(o.to) || spec.to || '#cccccc';
+      if(o.from !== undefined && !aamHex(o.from)) bad.push('from=' + o.from + ' (use #rrggbb)');
+      if(o.to !== undefined && !aamHex(o.to)) bad.push('to=' + o.to + ' (use #rrggbb)');
+      let angle = spec.angle;
+      if(o.angle !== undefined){ const n = parseInt(o.angle, 10); if(isFinite(n) && n >= 0 && n <= 360) angle = String(n); else bad.push('angle=' + o.angle + ' (0-360)'); }
+      hr.dataset.hrColorType = 'gradient'; hr.dataset.hrGradFrom = from; hr.dataset.hrGradTo = to; hr.dataset.hrGradAngle = angle; hr.dataset.hrLineStyle = 'solid';
+      hr.style.borderTop = w + 'px solid ' + spec.color;
+      hr.style.borderImage = 'linear-gradient(' + angle + 'deg, ' + from + ', ' + to + ') 1';
+      done.push('gradient ' + from + ' to ' + to + ' at ' + angle + 'deg', w + 'px');
+    } else if(o.color !== undefined || styleGiven || o.width !== undefined){
+      let color = spec.color;
+      if(o.color !== undefined){ const h = aamHex(o.color); if(h) color = h; else bad.push('color=' + o.color + ' (use #rrggbb)'); }
+      if(spec.grad && o.color === undefined && !styleGiven){
+        hr.style.borderTopWidth = w + 'px'; done.push(w + 'px');
+      } else {
+        hr.dataset.hrColorType = 'solid'; hr.dataset.hrLineStyle = style;
+        hr.style.borderImage = ''; hr.style.backgroundImage = '';
+        hr.style.borderTop = w + 'px ' + style + ' ' + color; hr.style.borderColor = color;
+        done.push(style + ' ' + color + ' ' + w + 'px');
+      }
+    }
+    if(o.opacity !== undefined){ const n = parseInt(o.opacity, 10); if(isFinite(n) && n >= 10 && n <= 100){ hr.style.opacity = String(n / 100); done.push('opacity ' + n + '%'); } else bad.push('opacity=' + o.opacity + ' (10-100)'); }
+    if(done.length){ try{ scheduleAutoSave(); }catch(e){} }
+    return (done.length ? 'Updated horizontal line ' + (i + 1) + ' (' + done.join(', ') + ').' : 'Nothing changed on horizontal line ' + (i + 1) + '.') + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
+  reg('hrmove', 'words', 'action', 'hrmove <n> <up|down> — move horizontal line n (see hrs) above the previous block or below the next one, the same as Move above / Move below in its right-click window.', (n, dir) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const list = aamHrs(); const i = aamImgNear(n, list);
+    if(i < 0) return 'Horizontal line ' + n + ' not found. ' + aamCountMsg(list.length, 'horizontal line');
+    const d = String(dir||'').toLowerCase(); if(d !== 'up' && d !== 'down') return 'Usage: hrmove <n> <up|down>.';
+    const hr = list[i]; const pn = pageNumFromEl(hr); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    const skip = (x, k) => { while(x && x.nodeType === 3 && x.textContent.trim() === '') x = x[k]; return x; };
+    const parent = hr.parentNode;
+    if(d === 'up'){ const prev = skip(hr.previousSibling, 'previousSibling'); if(!prev) return 'Horizontal line ' + (i + 1) + ' is already at the top of its page.'; parent.insertBefore(hr, prev); }
+    else { const next = skip(hr.nextSibling, 'nextSibling'); if(!next) return 'Horizontal line ' + (i + 1) + ' is already at the bottom of its page.'; parent.insertBefore(hr, next.nextSibling); }
+    try{ scheduleAutoSave(); }catch(e){}
+    return 'Moved horizontal line ' + (i + 1) + ' ' + d + '.';
+  });
+
+  reg('hrremove', 'words', 'action', 'hrremove <n> — delete horizontal line n (see hrs).', (n) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const list = aamHrs(); const i = aamImgNear(n, list);
+    if(i < 0) return 'Horizontal line ' + n + ' not found. ' + aamCountMsg(list.length, 'horizontal line');
+    const hr = list[i]; const pn = pageNumFromEl(hr); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    try{ if(typeof hideHrPopup === 'function') hideHrPopup(); }catch(e){}
+    hr.remove();
+    try{ checkContent(); }catch(e){} try{ scheduleAutoSave(); }catch(e){}
+    return 'Deleted horizontal line ' + (i + 1) + ' from page ' + pn + '.';
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
