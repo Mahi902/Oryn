@@ -1664,6 +1664,144 @@
     window.echoClear(); return 'Cleared the Echo highlights.';
   });
 
+  // ── v2.0.26: Snippets and Custom Margin designs ───────────────────────
+  // Snippets: up to 10 pieces of text picked from anywhere in the document, highlighted and formatted together.
+  const aamSnip = () => (typeof SNIP !== 'undefined' && typeof addSnippetFromSelection === 'function') ? SNIP : null;
+  const aamSnipLine = (it, i) => (i + 1) + '. ' + String(it.text || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+
+  reg('snippetadd', 'none', 'action', 'Add the currently selected text as a snippet (use /select first). Up to 10 snippets can be kept; they are highlighted in the document and any formatting applied to one is mirrored onto the others.', () => {
+    const S_ = aamSnip(); if(!S_) return 'Snippets are not available in this editor version.';
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(S_.items.length >= S_.max) return 'The snippet limit (' + S_.max + ') is reached. Remove one with snippetremove or finish with snippetsdone.';
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount || sel.isCollapsed) return 'Select some text first (see /select).';
+    const n0 = sel.getRangeAt(0).startContainer; const el0 = n0.nodeType === 1 ? n0 : n0.parentElement;
+    if(!(el0 && el0.closest('.page-content,.page-header-area,.page-footer-area,[contenteditable="true"]'))) return 'The selection is not inside the document.';
+    const pn = pageNumFromEl(el0); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    const before = S_.items.length;
+    addSnippetFromSelection();
+    if(S_.items.length === before) return 'The editor did not add the snippet.';
+    return 'Added snippet ' + S_.items.length + ' of up to ' + S_.max + ': ' + aamSnipLine(S_.items[S_.items.length - 1], S_.items.length - 1).replace(/^\d+\.\s*/, '');
+  });
+
+  reg('snippets', 'none', 'info', 'List the current snippets (number and text).', () => {
+    const S_ = aamSnip(); if(!S_) return 'Snippets are not available in this editor version.';
+    if(!elAllowed('content')) return denyMsg('page content');
+    return S_.items.length ? S_.items.map(aamSnipLine).join('\n') : 'No snippets yet. Select text and run snippetadd.';
+  });
+
+  reg('snippetgo', 'words', 'action', 'snippetgo <n> — scroll to snippet n and select it, so formatting commands apply to it (and are mirrored onto the other snippets).', (n) => {
+    const S_ = aamSnip(); if(!S_) return 'Snippets are not available in this editor version.';
+    const i = parseInt(n,10) - 1; const it = S_.items[i];
+    if(!it) return 'Usage: snippetgo <n>. There ' + (S_.items.length === 1 ? 'is 1 snippet' : 'are ' + S_.items.length + ' snippets') + '.';
+    if(typeof _scFlashSnippet !== 'function') return 'Snippet navigation is not available in this editor version.';
+    _scFlashSnippet(it.wrapper); return 'Selected snippet ' + (i + 1) + '.';
+  });
+
+  reg('snippetremove', 'words', 'action', 'snippetremove <n> — drop snippet n (its text stays in the document, only the highlight goes).', (n) => {
+    const S_ = aamSnip(); if(!S_) return 'Snippets are not available in this editor version.';
+    const i = parseInt(n,10) - 1;
+    if(!S_.items[i]) return 'Usage: snippetremove <n>. There ' + (S_.items.length === 1 ? 'is 1 snippet' : 'are ' + S_.items.length + ' snippets') + '.';
+    removeSnippetItem(i); return 'Removed snippet ' + (i + 1) + '. ' + S_.items.length + ' left.';
+  });
+
+  reg('snippetsdone', 'none', 'action', 'Finish with snippets: clear every snippet highlight (the text is kept).', () => {
+    const S_ = aamSnip(); if(!S_) return 'Snippets are not available in this editor version.';
+    if(!S_.items.length) return 'There are no snippets.';
+    const n = S_.items.length; snippetPanelDone(); return 'Cleared ' + n + ' snippet' + (n === 1 ? '' : 's') + '.';
+  });
+
+  reg('snippetscopy', 'none', 'info', 'Return all snippet text, one block per snippet separated by blank lines, and put it on the clipboard when the browser allows it.', () => {
+    const S_ = aamSnip(); if(!S_) return 'Snippets are not available in this editor version.';
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(!S_.items.length) return 'There are no snippets.';
+    const text = S_.items.map(it => String(it.text || '').trim()).join('\n\n');
+    try{ navigator.clipboard.writeText(text).catch(() => {}); }catch(e){}
+    return text;
+  });
+
+  // Custom margin designs: decorative page borders from the Oryn margin library, applied to chosen pages.
+  const aamCm = () => (typeof CMARG !== 'undefined' && typeof addSelectedCmarg === 'function') ? CMARG : null;
+  const aamCmErr = () => !elAllowed('margins') ? denyMsg('margins') : '';
+  function aamCmEnable(C){
+    if(C.enabled) return;
+    const cb = document.getElementById('customMarginsEnabled'); if(cb) cb.checked = true;
+    toggleCustomMargins(true);
+  }
+
+  reg('margindesign', 'words', 'action', 'margindesign <on|off|status> — switch the Custom Margins (decorative page borders) feature on or off, or report the designs in use.', (v) => {
+    const C = aamCm(); if(!C) return 'Custom margin designs are not available in this editor version.';
+    const e = aamCmErr(); if(e) return e;
+    const a = String(v||'status').toLowerCase();
+    if(a === 'on'){ aamCmEnable(C); return 'Custom margin designs on.'; }
+    if(a === 'off'){ const cb = document.getElementById('customMarginsEnabled'); if(cb) cb.checked = false; toggleCustomMargins(false); return 'Custom margin designs off.'; }
+    if(a === 'status') return 'Custom margin designs ' + (C.enabled ? 'on' : 'off') + '. ' + C.active.length + ' design' + (C.active.length === 1 ? '' : 's') + ' applied.';
+    return 'Usage: margindesign <on|off|status>.';
+  });
+
+  reg('margindesignlist', 'rest', 'info', 'margindesignlist [search] — list the margin designs in the library (id and name), optionally filtered by a search word. The library loads from the internet the first time.', (q) => {
+    const C = aamCm(); if(!C) return 'Custom margin designs are not available in this editor version.';
+    const e = aamCmErr(); if(e) return e;
+    if(!C._libraryLoaded){ loadCmargLibrary(); return 'Loading the margin library — run margindesignlist again in a moment.'; }
+    const s = String(q||'').trim().toLowerCase();
+    const items = allCmargItems().filter(m => !s || String(m.name).toLowerCase().includes(s) || String(m.id).toLowerCase().includes(s));
+    if(!items.length) return C.library.length ? 'No margin designs match "' + s + '".' : 'The margin library could not be loaded (check the internet connection).';
+    return items.slice(0, 60).map(m => m.id + ' — ' + m.name).join('\n') + (items.length > 60 ? '\n… and ' + (items.length - 60) + ' more; narrow it with a search word.' : '');
+  });
+
+  reg('margindesignadd', 'words', 'action', 'margindesignadd <id> [color=<#hex>] [pages=<all|1,3-4>] — apply a library margin design to pages (default: all pages, blue). A page has one design, so this replaces any design already on those pages. Find ids with margindesignlist.', (...a) => {
+    const C = aamCm(); if(!C) return 'Custom margin designs are not available in this editor version.';
+    const e = aamCmErr(); if(e) return e;
+    const id = String(a.shift()||''); if(!id) return 'Usage: margindesignadd <id> [color=#hex] [pages=…].';
+    if(!C._libraryLoaded){ loadCmargLibrary(); return 'Loading the margin library — run margindesignadd again in a moment.'; }
+    const item = allCmargItems().find(m => m.id === id); if(!item) return 'No margin design with id "' + id + '". Use margindesignlist.';
+    let color = '#1976d2', pages = 'all'; const bad = [];
+    for(const x of a){
+      const m = String(x).match(/^(color|pages)=(.+)$/i); if(!m){ bad.push(x); continue; }
+      if(m[1].toLowerCase() === 'color'){ if(/^#[0-9a-f]{6}$/i.test(m[2])) color = m[2]; else bad.push('color=' + m[2] + ' (use #rrggbb)'); }
+      else { const v = m[2].toLowerCase(); const n = document.querySelectorAll('#editorArea .page').length; if(v === 'all') pages = 'all'; else { const l = aamPageList(v); if(l && l.every(k => k <= n)) pages = l.join(','); else bad.push('pages=' + m[2]); } }
+    }
+    if(bad.length) return 'Could not use: ' + bad.join(', ') + '. Nothing was applied.';
+    aamCmEnable(C);
+    const pg = document.getElementById('cmargPages'), cl = document.getElementById('cmargColor');
+    if(pg) pg.value = pages; if(cl) cl.value = color;
+    C._selectedId = id; addSelectedCmarg();
+    return 'Applied margin design "' + item.name + '" (' + color + ') to ' + (pages === 'all' ? 'all pages' : 'page' + (pages.indexOf(',') >= 0 ? 's ' : ' ') + pages) + '.';
+  });
+
+  reg('margindesigns', 'none', 'info', 'List the margin designs applied to the document: number, name, color and pages.', () => {
+    const C = aamCm(); if(!C) return 'Custom margin designs are not available in this editor version.';
+    const e = aamCmErr(); if(e) return e;
+    return C.active.length ? C.active.map((x, i) => (i + 1) + '. ' + x.name + ' (' + x.id + ') color ' + x.color + ', pages ' + (x.pages || 'all')).join('\n') : 'No margin designs applied.';
+  });
+
+  reg('margindesigncolor', 'words', 'action', 'margindesigncolor <n> <#rrggbb> — recolor applied margin design n (see margindesigns).', (n, c) => {
+    const C = aamCm(); if(!C) return 'Custom margin designs are not available in this editor version.';
+    const e = aamCmErr(); if(e) return e;
+    const i = parseInt(n,10) - 1;
+    if(!C.active[i] || !/^#[0-9a-f]{6}$/i.test(String(c||''))) return 'Usage: margindesigncolor <n> <#rrggbb>. There ' + (C.active.length === 1 ? 'is 1 design' : 'are ' + C.active.length + ' designs') + ' applied.';
+    changeCmargColor(i, c); return 'Margin design ' + (i + 1) + ' is now ' + c + '.';
+  });
+
+  reg('margindesignremove', 'words', 'action', 'margindesignremove <n> — remove applied margin design n (see margindesigns).', (n) => {
+    const C = aamCm(); if(!C) return 'Custom margin designs are not available in this editor version.';
+    const e = aamCmErr(); if(e) return e;
+    const i = parseInt(n,10) - 1;
+    if(!C.active[i]) return 'Usage: margindesignremove <n>. There ' + (C.active.length === 1 ? 'is 1 design' : 'are ' + C.active.length + ' designs') + ' applied.';
+    const nm = C.active[i].name; removeCmarg(i); return 'Removed margin design "' + nm + '".';
+  });
+
+  reg('margindesignclear', 'words', 'action', 'margindesignclear [pages=<all|1,3-4>] — remove margin designs from the given pages (default: all).', (v) => {
+    const C = aamCm(); if(!C) return 'Custom margin designs are not available in this editor version.';
+    const e = aamCmErr(); if(e) return e;
+    let pages = 'all';
+    if(v){ const m = String(v).match(/^pages=(.+)$/i); if(!m) return 'Usage: margindesignclear [pages=all|1,3-4].'; const s = m[1].toLowerCase(); const n = document.querySelectorAll('#editorArea .page').length; if(s !== 'all'){ const l = aamPageList(s); if(!l || l.some(k => k > n)) return 'Pages must be "all" or a list from 1 to ' + n + '.'; pages = l.join(','); } }
+    if(!C.active.length) return 'No margin designs applied.';
+    const pg = document.getElementById('cmargPages'); if(pg) pg.value = pages;
+    C._selectedId = '__none__'; addSelectedCmarg();
+    return 'Cleared margin designs from ' + (pages === 'all' ? 'all pages' : 'page' + (pages.indexOf(',') >= 0 ? 's ' : ' ') + pages) + '.';
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
