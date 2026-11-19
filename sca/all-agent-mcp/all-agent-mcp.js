@@ -818,6 +818,62 @@
     if(typeof toggleSpellCheck === 'function'){ toggleSpellCheck((v||'').toLowerCase() === 'on'); return 'Spellcheck ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Spellcheck function not available.';
   });
+  // ── v2.0.17: grammar, spelling and word prediction ──────────────────
+  function aamErrSpans(cls){ return Array.from(document.querySelectorAll('#editorArea .page-content .' + cls)); }
+  function aamIssueLines(spans, max){
+    return spans.slice(0, max).map((el, i) => {
+      let sug = []; try { sug = JSON.parse(el.dataset.suggestions || '[]'); } catch(e){}
+      const pc = el.closest('.page-content');
+      return (i+1) + '. page ' + (pc ? pageNumFromEl(pc) : '?') + ': "' + el.textContent + '"' + (sug.length ? ' -> ' + sug.slice(0,3).join(' | ') : ' (no suggestion)');
+    });
+  }
+  reg('grammarcheck', 'words', 'action', 'grammarcheck <on|off|status> — turn the editor\'s grammar checker (Fix grammar) on or off, or report whether it is on. Turning it on loads the engine in the background; give it a few seconds, then use grammarissues or grammarfix.', (v) => {
+    const a = String(v||'').toLowerCase();
+    if(typeof AW === 'undefined' || typeof toggleGrammarCheck !== 'function') return 'Grammar check is not available in this editor version.';
+    if(a === 'status' || !a){
+      const ready = !!(window.HarperEngine && window.HarperEngine.isLoaded);
+      return 'Grammar check is ' + (AW.grammarCheck ? 'on' : 'off') + (AW.grammarCheck ? (ready ? ' (engine ready, ' + aamErrSpans('grammar-error').length + ' issue(s) highlighted).' : ' (engine still loading).') : '.');
+    }
+    if(a !== 'on' && a !== 'off') return 'Usage: grammarcheck <on|off|status>.';
+    toggleGrammarCheck(a === 'on');
+    return a === 'on' ? 'Grammar check turned on. The engine loads in the background; check grammarcheck status.' : 'Grammar check turned off.';
+  });
+  reg('grammarissues', 'words', 'info', 'grammarissues [max] — list the grammar issues currently highlighted (page, text and top suggestions). Turn grammar check on first. Default max is 30.', (m) => {
+    const max = Math.min(200, Math.max(1, parseInt(m,10) || 30));
+    if(typeof AW === 'undefined' || !AW.grammarCheck) return 'Grammar check is off. Run grammarcheck on first.';
+    const spans = aamErrSpans('grammar-error');
+    if(!spans.length) return 'No grammar issues highlighted' + ((window.HarperEngine && window.HarperEngine.isLoaded) ? '.' : ' (the engine may still be loading).');
+    return spans.length + ' grammar issue(s):\n' + aamIssueLines(spans, max).join('\n') + (spans.length > max ? '\n…and ' + (spans.length - max) + ' more.' : '');
+  });
+  reg('grammarfix', 'none', 'action', 'Fix all grammar errors in the document (the Fix All button) using each issue\'s first suggestion. Grammar check must be on and its engine loaded; use grammarissues first if you want to review.', () => {
+    if(typeof runGrammarFixAll !== 'function') return 'Grammar fix is not available in this editor version.';
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(!window.HarperEngine || !window.HarperEngine.isLoaded) return 'The grammar engine is not loaded. Run grammarcheck on and wait a few seconds.';
+    const n = aamErrSpans('grammar-error').length;
+    if(!n) return 'No grammar issues to fix.';
+    runGrammarFixAll();
+    return 'Fixing ' + n + ' grammar issue(s)…';
+  });
+  reg('spellissues', 'words', 'info', 'spellissues [max] — list the misspelled words currently highlighted (page, word and top suggestions). Turn spellcheck on first. Default max is 30.', (m) => {
+    const max = Math.min(200, Math.max(1, parseInt(m,10) || 30));
+    if(typeof AW === 'undefined' || !AW.spellCheck) return 'Spellcheck is off. Run spellcheck on first.';
+    const spans = aamErrSpans('spell-error');
+    if(!spans.length) return AW.dictLoaded ? 'No misspelled words highlighted.' : 'No misspelled words highlighted (the dictionary may still be loading).';
+    return spans.length + ' misspelled word(s):\n' + aamIssueLines(spans, max).join('\n') + (spans.length > max ? '\n…and ' + (spans.length - max) + ' more.' : '');
+  });
+  reg('spellfix', 'none', 'action', 'Correct all misspelled words in the document (the Correct spelling Fix All button). Runs in the background.', () => {
+    if(typeof runAutoCorrectAll !== 'function') return 'Spelling correction is not available in this editor version.';
+    if(!elAllowed('content')) return denyMsg('page content');
+    runAutoCorrectAll();
+    return 'Correcting spelling across the document… (the editor shows a toast when finished).';
+  });
+  reg('wordprediction', 'words', 'action', 'wordprediction <on|off> — toggle word prediction suggestions while typing.', (v) => {
+    const a = String(v||'').toLowerCase();
+    if(typeof toggleWordPrediction !== 'function') return 'Word prediction is not available in this editor version.';
+    if(a !== 'on' && a !== 'off') return 'Usage: wordprediction <on|off>.';
+    toggleWordPrediction(a === 'on');
+    return 'Word prediction ' + (a === 'on' ? 'enabled' : 'disabled') + '.';
+  });
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
