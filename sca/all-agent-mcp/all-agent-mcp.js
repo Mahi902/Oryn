@@ -2394,6 +2394,45 @@
     return 'Exporting as ' + f.toUpperCase() + '… the browser will download the file when it is ready.';
   });
 
+  // ── v2.0.35: Crop an image already in the document ────────────────────
+  reg('imagecrop', 'rest', 'action', 'imagecrop <n> [left=0-95] [top=0-95] [right=0-95] [bottom=0-95] — trim image n (see images) by a percentage from each side of its current picture, like the crop box in Edit Image. The visible part keeps its size and a free image stays in place. Cropping is permanent for that image (a trimmed-off part cannot be brought back), and left + right or top + bottom must stay under 100.', (txt) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const m = String(txt||'').trim().match(/^(\d+)\s*([\s\S]*)$/); const list = aamImgs();
+    if(!m) return 'Usage: imagecrop <n> [left=…] [top=…] [right=…] [bottom=…] (percent trimmed from each side).';
+    const i = aamImgNear(m[1], list); if(i < 0) return 'Image ' + m[1] + ' not found. ' + aamCountMsg(list.length, 'image');
+    const img = list[i]; const pn = pageNumFromEl(img); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    if(aamImgLocked(img)) return 'Image ' + (i + 1) + ' is locked. Unlock it first with imagelock ' + (i + 1) + ' off.';
+    const kv = aamKV(m[2]); const bad = kv.bad.slice(); const o = kv.o; const t = {left: 0, top: 0, right: 0, bottom: 0};
+    if(!Object.keys(o).length) return 'Give at least one side, for example imagecrop ' + (i + 1) + ' left=10 bottom=20.';
+    Object.keys(o).forEach(k => {
+      if(!(k in t)){ bad.push(k + '= (use left, top, right or bottom)'); return; }
+      const n = parseFloat(o[k]); if(isFinite(n) && n >= 0 && n <= 95) t[k] = n; else bad.push(k + '=' + o[k] + ' (0-95)');
+    });
+    if(t.left + t.right >= 100 || t.top + t.bottom >= 100) return 'Left + right and top + bottom must each stay under 100.';
+    if(!t.left && !t.top && !t.right && !t.bottom) return 'Nothing to crop.' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+    const nw = img.naturalWidth, nh = img.naturalHeight;
+    if(!nw || !nh) return 'Image ' + (i + 1) + ' has not finished loading yet. Try again in a moment.';
+    const z = ((typeof S !== 'undefined' && S.zoom) || 100) / 100, r = img.getBoundingClientRect();
+    let W = parseFloat(img.style.width); if(!(W > 0)) W = r.width / z;
+    let H = parseFloat(img.style.height); if(!(H > 0)) H = r.height / z;
+    const sx = Math.round(nw * t.left / 100), sy = Math.round(nh * t.top / 100);
+    const sw = Math.max(1, Math.round(nw * (100 - t.left - t.right) / 100)), sh = Math.max(1, Math.round(nh * (100 - t.top - t.bottom) / 100));
+    let out;
+    try {
+      const c = document.createElement('canvas'); c.width = sw; c.height = sh;
+      c.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+      out = c.toDataURL('image/png');
+    } catch(e){ return 'Image ' + (i + 1) + ' cannot be cropped (the browser blocks editing images loaded from another site).'; }
+    const free = img.dataset.solid !== '1' && img.style.position === 'absolute';
+    const oldL = parseFloat(img.style.left) || 0, oldT = parseFloat(img.style.top) || 0;
+    img.src = out;
+    img.style.width = Math.max(8, Math.round(W * (100 - t.left - t.right) / 100)) + 'px';
+    img.style.height = Math.max(8, Math.round(H * (100 - t.top - t.bottom) / 100)) + 'px';
+    if(free){ img.style.left = Math.round(oldL + W * t.left / 100) + 'px'; img.style.top = Math.round(oldT + H * t.top / 100) + 'px'; }
+    try{ if(S.selImg === img) showResizeH(img); }catch(e){} try{ scheduleAutoSave(); }catch(e){}
+    return 'Cropped image ' + (i + 1) + ' (left ' + t.left + '%, top ' + t.top + '%, right ' + t.right + '%, bottom ' + t.bottom + '%).' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
