@@ -1667,6 +1667,67 @@
     return 'Inserting banner "' + title + '" (' + layout + ' layout).';
   });
 
+  // ── Insert shape ─────────────────────────────────────────────────────
+  function shapeAll(){
+    const out = [];
+    if(typeof SHAPE_DATA === 'undefined') return out;
+    Object.keys(SHAPE_DATA).forEach(cat => SHAPE_DATA[cat].forEach(sh => out.push({cat, id: sh.id, label: sh.l})));
+    return out;
+  }
+  reg('shapelist', 'rest', 'info', 'shapelist [filter] — the shapes insertshape can place (id — name, grouped by category). Optional filter text narrows the list.', (q) => {
+    const all = shapeAll();
+    if(!all.length) return 'Insert Shape is not available in this editor version.';
+    q = String(q||'').trim().toLowerCase();
+    const hits = all.filter(s => !q || s.id.toLowerCase().indexOf(q) >= 0 || String(s.label).toLowerCase().indexOf(q) >= 0 || s.cat.toLowerCase().indexOf(q) >= 0);
+    if(!hits.length) return 'No shapes match "' + q + '".';
+    const byCat = {};
+    hits.forEach(s => { (byCat[s.cat] = byCat[s.cat] || []).push(s.id + ' — ' + s.label); });
+    return Object.keys(byCat).map(c => c + ': ' + byCat[c].join(', ')).join('\n');
+  });
+
+  reg('insertshape', 'rest', 'action', 'insertshape <shape id or name> [stroke=#hex|none] [fill=#hex|none] [size=px] — insert a vector shape at the cursor (see shapelist). Size is the width in px (16–600, default 120). Example: insertshape circle fill=#ffcc00 stroke=none size=80', (src) => {
+    const g = insertGate(); if(g) return g;
+    if(typeof openShapeModal !== 'function' || typeof insertShape !== 'function' || typeof SHAPE_DATA === 'undefined') return 'Insert Shape is not available in this editor version.';
+    let text = String(src||'').trim();
+    const opt = {};
+    text = text.replace(/\b(stroke|fill|size)=(#[0-9a-fA-F]{3,8}|none|\d+)/g, (m, k, v) => { opt[k] = v; return ''; }).replace(/\s+/g, ' ').trim();
+    if(!text) return 'Usage: insertshape <shape id or name> [stroke=#hex|none] [fill=#hex|none] [size=px]. See shapelist.';
+    const q = text.toLowerCase();
+    const all = shapeAll();
+    const hit = all.find(s => s.id.toLowerCase() === q) || all.find(s => String(s.label).toLowerCase() === q) ||
+                all.find(s => String(s.label).toLowerCase().indexOf(q) >= 0) || all.find(s => s.id.toLowerCase().indexOf(q) >= 0);
+    if(!hit) return 'No shape matches "' + text + '". Use shapelist to browse.';
+    if(opt.size && !(parseInt(opt.size,10) >= 16 && parseInt(opt.size,10) <= 600)) return 'size must be between 16 and 600.';
+    openShapeModal();
+    (async () => {
+      try {
+        await aamSleep(120);
+        if(typeof shapeSearch === 'function') shapeSearch(hit.label);
+        await aamSleep(80);
+        const cell = document.querySelector('#shapeGrid .shape-cell[data-id="' + hit.id + '"]');
+        if(!cell) throw new Error('shape not found in the picker');
+        cell.click();
+        await aamSleep(80);
+        const colour = (inpId, noneBtnId, toggle, val) => {
+          if(val === undefined) return;
+          const btn = aamById(noneBtnId), isNone = btn && btn.classList.contains('active');
+          if(val === 'none'){ if(!isNone && typeof window[toggle] === 'function') window[toggle](); return; }
+          if(isNone && typeof window[toggle] === 'function') window[toggle]();
+          aamSetVal(aamById(inpId), val.length === 4 ? '#' + val.slice(1).split('').map(c => c + c).join('') : val);
+        };
+        colour('shapeStrokeInp', 'shapeStrokeNoneBtn', 'toggleShapeStrokeNone', opt.stroke);
+        colour('shapeFillInp', 'shapeFillNoneBtn', 'toggleShapeFillNone', opt.fill);
+        if(opt.size) aamSetVal(aamById('shapeSizeInp'), opt.size);
+        insertShape();
+        aamToast('Shape inserted', 'success');
+      } catch(e){
+        try { closeMdl('shapeMdl'); } catch(_){}
+        aamToast('Shape insert failed: ' + e.message, 'error');
+      }
+    })();
+    return 'Inserting shape "' + hit.label + '".';
+  });
+
 
   // ═══════════════════════════════════════════════════════════════════
   //  AGENT LAYER
