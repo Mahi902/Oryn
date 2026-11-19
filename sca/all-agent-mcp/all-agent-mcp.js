@@ -1620,10 +1620,10 @@
     return 'Removed placeholder [' + key + '].';
   });
 
-  reg('assistivewriting', 'words', 'action', 'assistivewriting <open|close|status> — open or close the Assistive Writing panel (spell check, word prediction, placeholders), or report which of its helpers are on. Use /spellcheck and /wordprediction to switch the helpers.', (v) => {
+  reg('assistivewriting', 'words', 'action', 'assistivewriting <open|close|status> — open or close the Assistive Writing panel (spell check, word prediction, placeholders), or report which of its helpers are on. Use /spellcheck, /wordprediction, /sentenceprediction and /offensivecheck to switch the helpers.', (v) => {
     if(typeof AW === 'undefined' || typeof toggleAssistiveWriting !== 'function') return 'Assistive Writing is not available in this editor version.';
     const a = String(v||'status').toLowerCase();
-    if(a === 'status') return 'Assistive Writing panel ' + (AW.open ? 'open' : 'closed') + '. spellCheck:' + (AW.spellCheck ? 'on' : 'off') + ' wordPrediction:' + (AW.wordPred ? 'on' : 'off') + ' placeholders:' + Object.keys(AW.placeholders || {}).length;
+    if(a === 'status') return 'Assistive Writing panel ' + (AW.open ? 'open' : 'closed') + '. spellCheck:' + (AW.spellCheck ? 'on' : 'off') + ' wordPrediction:' + (AW.wordPred ? 'on' : 'off') + ' placeholders:' + Object.keys(AW.placeholders || {}).length + ' sentencePrediction:' + ((typeof SP !== 'undefined' && SP.on) ? 'on' : 'off') + ' offensiveCheck:' + (AW.offensiveEnabled ? 'on' : 'off');
     if(a !== 'open' && a !== 'close') return 'Usage: assistivewriting <open|close|status>.';
     if((a === 'open') === !!AW.open) return 'The panel is already ' + (AW.open ? 'open' : 'closed') + '.';
     toggleAssistiveWriting(); return 'Assistive Writing panel ' + (a === 'open' ? 'opened' : 'closed') + '.';
@@ -2872,6 +2872,53 @@
     document.documentElement.classList.toggle('dark', want);
     document.cookie = 'toolsuite_theme=' + (want ? 'dark' : 'light') + ';path=/;max-age=31536000;SameSite=Lax';
     return 'Dark mode ' + (want ? 'on' : 'off') + '.';
+  });
+
+  // ── v2.0.41: Assistive Writing helpers — sentence prediction, offensive content, lazy pages ──
+  function aamSyncBox(id, on){ const cb = document.getElementById(id); if(cb && cb.checked !== on) cb.checked = on; }
+  reg('sentenceprediction', 'words', 'action', 'sentenceprediction <on|off|status> — switch Sentence Prediction (Assistive Writing) on or off, or report its state. It needs AI Features and the Sugarcane AI use case enabled in app Settings > AI, and the offline model installed in the app. Turning it on starts in the background (the model check is asynchronous), so run sentenceprediction status a few seconds later to see whether it stayed on. Once on, gray suggestions appear while typing and Tab inserts one.', (v) => {
+    if(typeof toggleSentencePrediction !== 'function' || typeof SP === 'undefined') return 'Sentence Prediction is not available in this editor version.';
+    const a = String(v||'status').toLowerCase().trim() || 'status';
+    const state = () => 'Sentence Prediction is ' + (SP.on ? (SP.ready ? 'on and ready' : 'on (model still loading)') : 'off') + '.';
+    if(a === 'status') return state();
+    if(a !== 'on' && a !== 'off') return 'Usage: sentenceprediction <on|off|status>.';
+    if(a === 'off'){
+      if(!SP.on) return state();
+      aamSyncBox('awSentPred', false);
+      try{ Promise.resolve(toggleSentencePrediction(false)).catch(()=>{}); }catch(e){}
+      return 'Sentence Prediction disabled.';
+    }
+    if(SP.on) return state();
+    if(typeof spGatingOk === 'function' && !spGatingOk()) return 'Sentence Prediction is locked: enable AI Features and AI Usecases > Sugarcane in the app Settings > AI first.';
+    aamSyncBox('awSentPred', true);
+    try{ Promise.resolve(toggleSentencePrediction(true)).catch(() => aamSyncBox('awSentPred', false)); }catch(e){ aamSyncBox('awSentPred', false); return 'Sentence Prediction could not start: ' + (e && e.message || e); }
+    return 'Sentence Prediction is starting. If the offline model is not installed in the app it switches itself back off; run sentenceprediction status in a few seconds to check.';
+  });
+  reg('offensivecheck', 'words', 'action', 'offensivecheck <on|off|status> — switch Avoid Offensive Content (Assistive Writing) on or off, or report its state. While on, offensive words in the document are highlighted and exporting is blocked until they are removed. Use offensivewords to list the ones found.', (v) => {
+    if(typeof toggleOffensiveCheck !== 'function' || typeof AW === 'undefined') return 'Avoid Offensive Content is not available in this editor version.';
+    const a = String(v||'status').toLowerCase().trim() || 'status';
+    const n = () => document.querySelectorAll('#editorArea .page-content .offensive-word').length;
+    if(a === 'status') return 'Avoid Offensive Content is ' + (AW.offensiveEnabled ? 'on (' + n() + ' flagged word(s))' : 'off') + '.';
+    if(a !== 'on' && a !== 'off') return 'Usage: offensivecheck <on|off|status>.';
+    toggleOffensiveCheck(a === 'on'); aamSyncBox('awOffensive', a === 'on');
+    return 'Avoid Offensive Content ' + (a === 'on' ? 'enabled (' + n() + ' flagged word(s)).' : 'disabled.');
+  });
+  reg('offensivewords', 'none', 'info', 'List the offensive words currently flagged in the document by Avoid Offensive Content, with their page numbers. Turn it on first with offensivecheck on.', () => {
+    if(typeof AW === 'undefined' || typeof toggleOffensiveCheck !== 'function') return 'Avoid Offensive Content is not available in this editor version.';
+    if(!AW.offensiveEnabled) return 'Avoid Offensive Content is off. Turn it on with offensivecheck on.';
+    if(typeof runOffensiveCheck === 'function') { try{ runOffensiveCheck(); }catch(e){} }
+    const els = Array.from(document.querySelectorAll('#editorArea .page-content .offensive-word'));
+    if(!els.length) return 'No offensive words found.';
+    return els.length + ' flagged word(s):\n' + els.slice(0, 100).map((el, i) => { const pc = el.closest('.page-content'); return (i+1) + '. page ' + (pc ? pageNumFromEl(pc) : '?') + ': "' + el.textContent + '"'; }).join('\n') + (els.length > 100 ? '\n… and ' + (els.length - 100) + ' more.' : '');
+  });
+  reg('lazypages', 'words', 'action', 'lazypages <on|off|status> — switch Lazy Pages on or off, or report it. Lazy Pages keeps far-away pages light so very long documents stay fast; the editor turns it on by itself above ' + ((typeof LAZY !== 'undefined' && LAZY.threshold) || 50) + ' pages. Turning it on or off here counts as your own choice, so the automatic switching stops until the document is small again.', (v) => {
+    if(typeof toggleLazyPages !== 'function' || typeof LAZY === 'undefined') return 'Lazy Pages is not available in this editor version.';
+    const a = String(v||'status').toLowerCase().trim() || 'status';
+    const state = () => 'Lazy Pages is ' + (LAZY.enabled ? 'on' : 'off') + (LAZY.enabled && !LAZY.manual ? ' (automatic)' : '') + '. Pages: ' + LAZY.pageCount() + ', waiting to load: ' + (LAZY.pend || 0) + ', automatic above ' + LAZY.threshold + ' pages.';
+    if(a === 'status') return state();
+    if(a !== 'on' && a !== 'off') return 'Usage: lazypages <on|off|status>.';
+    toggleLazyPages(a === 'on', true);
+    return 'Lazy Pages ' + (a === 'on' ? 'enabled' : 'disabled') + '. ' + state();
   });
 
   // ── Zoom / navigation ────────────────────────────────────────────────
