@@ -1966,6 +1966,73 @@
     return 'Removed banner ' + (i + 1) + ' from page ' + pn + '.';
   });
 
+  // ── v2.0.28: Custom bulleted and numbered lists ───────────────────────
+  const aamUls = () => [...document.querySelectorAll('#editorArea .page-content ul')];
+  const aamOls = () => [...document.querySelectorAll('#editorArea .page-content ol')];
+  const aamListLine = (l, i) => {
+    const pn = pageNumFromEl(l); const items = [...l.querySelectorAll(':scope > li')];
+    const prev = items.slice(0, 3).map(li => (li.innerText || '').replace(/\s+/g, ' ').trim().slice(0, 30)).filter(Boolean).join(', ');
+    const style = l.tagName === 'UL'
+      ? 'bullet:' + (l.getAttribute('data-cust-bullet') || 'default') + (l.getAttribute('data-cust-color') ? ' color:' + l.getAttribute('data-cust-color') : '')
+      : 'start:' + (l.getAttribute('start') || 1) + (l.getAttribute('data-cust-type') === 'custom' ? ' custom-digits' : ' default-digits');
+    return (i + 1) + '. page ' + pn + ' ' + items.length + ' item' + (items.length === 1 ? '' : 's') + ' ' + style + ' "' + prev + '"';
+  };
+
+  reg('lists', 'none', 'info', 'List the bulleted and numbered lists in the document, numbered separately (bulleted 1, 2 … and numbered 1, 2 …), with page, item count, bullet or start number and a preview.', () => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const u = aamUls().map((l, i) => ({l, i})).filter(o => pageAllowed(pageNumFromEl(o.l))).map(o => aamListLine(o.l, o.i));
+    const o = aamOls().map((l, i) => ({l, i})).filter(x => pageAllowed(pageNumFromEl(x.l))).map(x => aamListLine(x.l, x.i));
+    return 'Bulleted lists:\n' + (u.length ? u.join('\n') : 'none') + '\nNumbered lists:\n' + (o.length ? o.join('\n') : 'none');
+  });
+
+  reg('listbullet', 'rest', 'action', 'listbullet <n|new> [bullet=•|◦|▪|➤|–|<any character>] [color=#rrggbb] — restyle bulleted list n (see lists) with a custom bullet and bullet color, the same as the Bullet style picker. new turns the current line into a new bulleted list first.', (txt) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(typeof applyUlCustom !== 'function' || typeof _ulSelectedLists === 'undefined') return 'Custom bullets are not available in this editor version.';
+    const m = String(txt||'').trim().match(/^(\d+|new)\s*([\s\S]*)$/i);
+    if(!m) return 'Usage: listbullet <n|new> [bullet=•] [color=#rrggbb].';
+    const kv = aamKV(m[2]); const bad = kv.bad.slice();
+    if(!Object.keys(kv.o).length) return 'Give bullet=… or color=#rrggbb, for example listbullet ' + m[1] + ' bullet=➤ color=#cc0000.';
+    let bullet = (typeof _ulCustomBullet !== 'undefined') ? _ulCustomBullet : '•', color = (typeof _ulCustomColor !== 'undefined') ? _ulCustomColor : '#333333';
+    let target = null;
+    if(m[1].toLowerCase() !== 'new'){
+      const list = aamUls(); const i = aamImgNear(m[1], list);
+      if(i < 0) return 'Bulleted list ' + m[1] + ' not found. ' + aamCountMsg(list.length, 'bulleted list');
+      target = list[i]; const pn = pageNumFromEl(target); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+      bullet = target.getAttribute('data-cust-bullet') || '•'; color = target.getAttribute('data-cust-color') || '#333333';
+    }
+    if(kv.o.bullet !== undefined){ const b = Array.from(kv.o.bullet).slice(0, 3).join(''); if(b) bullet = b; else bad.push('bullet='); }
+    if(kv.o.color !== undefined){ if(/^#[0-9a-f]{6}$/i.test(kv.o.color)) color = kv.o.color.toLowerCase(); else bad.push('color=' + kv.o.color + ' (use #rrggbb)'); }
+    _ulCustomBullet = bullet; _ulCustomColor = color; _ulSelectedLists = target ? [target] : [];
+    applyUlCustom();
+    return (target ? 'Updated bulleted list ' + m[1] : 'Created a new bulleted list') + ' (bullet ' + bullet + ', color ' + color + ').' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
+  reg('listnumber', 'rest', 'action', 'listnumber <n|new> [start=<number>] [digits=<10 characters for 0123456789>|default] — restyle numbered list n (see lists): change the start number or replace the digits with your own set (for example digits=٠١٢٣٤٥٦٧٨٩), the same as the Numbered list picker. new turns the current line into a new numbered list first.', (txt) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(typeof applyOlCustom !== 'function' || typeof _olSelectedLists === 'undefined' || typeof _olCustomDigits === 'undefined') return 'Custom numbering is not available in this editor version.';
+    const m = String(txt||'').trim().match(/^(\d+|new)\s*([\s\S]*)$/i);
+    if(!m) return 'Usage: listnumber <n|new> [start=1] [digits=0123456789].';
+    const kv = aamKV(m[2]); const bad = kv.bad.slice();
+    if(!Object.keys(kv.o).length) return 'Give start=<number> or digits=<10 characters>, for example listnumber ' + m[1] + ' start=5.';
+    let target = null, start = 1, digits = {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9'};
+    if(m[1].toLowerCase() !== 'new'){
+      const list = aamOls(); const i = aamImgNear(m[1], list);
+      if(i < 0) return 'Numbered list ' + m[1] + ' not found. ' + aamCountMsg(list.length, 'numbered list');
+      target = list[i]; const pn = pageNumFromEl(target); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+      start = parseInt(target.getAttribute('start')) || 1;
+      try{ const d = JSON.parse(target.getAttribute('data-cust-digits') || '{}'); Object.keys(d).forEach(k => { digits[k] = d[k]; }); }catch(e){}
+    }
+    if(kv.o.start !== undefined){ const n = parseInt(kv.o.start, 10); if(isFinite(n) && n >= 0 && n <= 99999) start = n; else bad.push('start=' + kv.o.start + ' (0-99999)'); }
+    if(kv.o.digits !== undefined){
+      if(kv.o.digits.toLowerCase() === 'default') digits = {'0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9'};
+      else { const ch = Array.from(kv.o.digits); if(ch.length === 10) ch.forEach((c, k) => { digits[String(k)] = c; }); else bad.push('digits=' + kv.o.digits + ' (needs exactly 10 characters for 0-9, or default)'); }
+    }
+    _olCustomDigits = digits; _olSelectedLists = target ? [target] : [];
+    const field = document.getElementById('olStartNum'); if(field) field.value = start;
+    applyOlCustom();
+    return (target ? 'Updated numbered list ' + m[1] : 'Created a new numbered list') + ' (start ' + start + ').' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
