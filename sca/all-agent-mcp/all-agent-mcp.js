@@ -1505,6 +1505,67 @@
     return aamCodeInsert(type, 'bcVal', value, 'Barcode');
   });
 
+  // ── In-editor document translation ───────────────────────────────────
+  // Drives the editor's Translate tool (MyMemory), so its daily budget, progress bar,
+  // background notice and Stop button all behave exactly as when a person uses it.
+  const TR_LANGS = ['English','Bengali','Spanish','French','German','Arabic','Hindi','Chinese','Japanese','Portuguese','Russian','Turkish','Korean','Italian','Dutch','Swedish'];
+  function trLang(tok){
+    const t = String(tok||'').trim().toLowerCase();
+    return TR_LANGS.find(l => l.toLowerCase() === t) || null;
+  }
+  function trState(){ return (typeof _translateActive !== 'undefined') && _translateActive; }
+
+  reg('translate', 'words', 'action', 'translate <to> [from] [pages] — translate the document in place with the editor\'s translation tool. <to>/[from] are language names (English, Bengali, Spanish, French, German, Arabic, Hindi, Chinese, Japanese, Portuguese, Russian, Turkish, Korean, Italian, Dutch, Swedish); [from] defaults to auto-detect; [pages] is "all" (default), "2", "1,3" or "2-5". Runs in the background — use translatestatus to follow it. Example: translate French English 1-3', (...a) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(typeof doTranslateDocument !== 'function' || typeof openTranslateModal !== 'function' || !aamById('translateTo')) return 'Translation is not available in this editor version.';
+    if(trState()) return 'A translation is already running. Use translatestatus to follow it or translatecancel to stop it.';
+    if(typeof navigator !== 'undefined' && navigator.onLine === false) return 'Translation needs an internet connection and the editor is offline.';
+    const args = a.map(x => String(x).trim()).filter(Boolean);
+    const to = trLang(args.shift());
+    if(!to) return 'Usage: translate <to> [from] [pages]. Languages: ' + TR_LANGS.join(', ') + '.';
+    let from = 'auto', spec = 'all';
+    for(const t of args){
+      if(t.toLowerCase() === 'auto') { from = 'auto'; continue; }
+      const l = trLang(t);
+      if(l){ from = l; continue; }
+      if(/^[\d,\-]+$/.test(t) || t.toLowerCase() === 'all'){ spec = t.toLowerCase(); continue; }
+      return 'Could not read "' + t + '". Usage: translate <to> [from] [pages].';
+    }
+    if(from === to) return 'The source and target language are the same.';
+    const pl = pgnPageList(spec);
+    if(pl.err) return pl.err;
+    openTranslateModal();
+    aamById('translateFrom').value = from;
+    aamById('translateTo').value = to;
+    const pg = aamById('translatePages');
+    pg.value = spec === 'all' ? '' : spec;
+    pg.dispatchEvent(new Event('input', {bubbles:true}));
+    doTranslateDocument();
+    return 'Translating ' + (spec === 'all' ? 'the whole document' : 'page' + (pl.nums.length===1?' ':'s ') + spec) + ' ' + (from === 'auto' ? '' : 'from ' + from + ' ') + 'to ' + to + ' in the background. Use translatestatus to follow it.';
+  });
+
+  reg('translatestatus', 'none', 'info', 'Whether a translation is running, its progress and the status line the editor shows.', () => {
+    const st = aamById('translateStatus'), fill = aamById('translateFill');
+    const text = st ? st.textContent.trim() : '';
+    const pct = fill && fill.style.width ? fill.style.width : '';
+    if(trState()) return 'Translation running' + (pct ? ' (' + pct + ')' : '') + (text ? ': ' + text : '.');
+    return 'No translation is running.' + (text ? ' Last status: ' + text : '');
+  });
+
+  reg('translatecancel', 'none', 'action', 'Stop the running translation. Pages already translated stay translated.', () => {
+    if(typeof cancelTranslation !== 'function') return 'Translation is not available in this editor version.';
+    if(!trState()) return 'No translation is running.';
+    cancelTranslation();
+    return 'Stopping the translation.';
+  });
+
+  reg('translateusage', 'none', 'info', 'Today\'s translation budget: characters used and left. The daily budget is only enforced when the user is signed in with Google.', () => {
+    if(typeof getTranslateUsage !== 'function' || typeof TR_DAILY_LIMIT === 'undefined') return 'Translation is not available in this editor version.';
+    const u = getTranslateUsage();
+    const signed = (typeof _googleUser !== 'undefined') && !!_googleUser;
+    return 'Used ' + u.used + ' of ' + TR_DAILY_LIMIT + ' characters today (' + Math.max(0, TR_DAILY_LIMIT - u.used) + ' left).' + (signed ? '' : ' Not signed in with Google, so the daily budget is not enforced here.');
+  });
+
 
   // ═══════════════════════════════════════════════════════════════════
   //  AGENT LAYER
