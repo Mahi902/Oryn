@@ -2348,6 +2348,52 @@
     return 'Updating shape ' + (i + 1) + ' (stroke ' + stroke + ', fill ' + fill + ', ' + size + 'px).' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
   });
 
+  // ── v2.0.34: Export (PDF, DOCX, images, Markdown) and export options ──
+  const aamExpOk = () => typeof doExport === 'function' && typeof EXP !== 'undefined';
+  const aamExpChip = (key, val) => { const b = document.querySelector('[onclick^="setExpOpt(\'' + key + '\',\'' + val + '\'"]'); if(b) b.click(); else EXP[key] = val; };
+
+  reg('exportoptions', 'none', 'info', 'Show the current Export Options: PDF technology and quality, SCD and DOCX quality, TXT / Markdown choice, image format and whether images are bundled into one file. (A PDF password, if one is set, is never shown.)', () => {
+    if(!aamExpOk()) return 'Export options are not available in this editor version.';
+    return 'pdfTech: ' + EXP.pdfTech + '\npdfQuality: ' + EXP.pdfQuality + '%\nscdQuality: ' + EXP.scdQuality + '%\ndocxQuality: ' + EXP.docxQuality + '%\ntxtFmt: ' + EXP.txtFmt + '\njpgFmt: ' + EXP.jpgFmt + '\njpgBundle: ' + (EXP.jpgBundle ? 'on' : 'off') + '\npdfPassword: ' + (EXP.pdfPassword ? 'set' : 'not set');
+  });
+
+  reg('exportoption', 'words', 'action', 'exportoption <pdfTech|pdfQuality|scdQuality|docxQuality|txtFmt|jpgFmt|jpgBundle> <value> — change an Export Option. pdfTech: scanned|native|structured. Quality: 30-100. txtFmt: txt|md. jpgFmt: jpg|png|webp. jpgBundle: on|off. The PDF password can only be set by hand.', (key, val) => {
+    if(!aamExpOk()) return 'Export options are not available in this editor version.';
+    const keys = ['pdftech','pdfquality','scdquality','docxquality','txtfmt','jpgfmt','jpgbundle'];
+    const k = String(key||'').toLowerCase(); const v = String(val||'').toLowerCase();
+    if(keys.indexOf(k) < 0) return 'Unknown option "' + (key||'') + '". Options: pdfTech, pdfQuality, scdQuality, docxQuality, txtFmt, jpgFmt, jpgBundle.';
+    const name = ['pdfTech','pdfQuality','scdQuality','docxQuality','txtFmt','jpgFmt','jpgBundle'][keys.indexOf(k)];
+    const enums = {pdfTech: ['scanned','native','structured'], txtFmt: ['txt','md'], jpgFmt: ['jpg','png','webp']};
+    if(enums[name]){
+      if(enums[name].indexOf(v) < 0) return name + ' must be ' + enums[name].join(', ') + '.';
+      aamExpChip(name, v);
+    } else if(name === 'jpgBundle'){
+      if(v !== 'on' && v !== 'off') return 'jpgBundle must be on or off.';
+      EXP.jpgBundle = v === 'on'; const cb = document.getElementById('jpgBundle'); if(cb) cb.checked = EXP.jpgBundle;
+    } else {
+      const n = parseInt(v, 10); if(!isFinite(n) || n < 30 || n > 100) return name + ' must be a number from 30 to 100.';
+      const fmt = name.replace('Quality', ''); const sl = document.getElementById(name); if(sl) sl.value = n;
+      if(typeof updateQualityDisplay === 'function') updateQualityDisplay(fmt, n); else EXP[name] = n;
+    }
+    if(name === 'txtFmt' && typeof updateTxtBtnLabel === 'function') updateTxtBtnLabel();
+    if(name === 'jpgFmt' && typeof updateJpgBtnLabel === 'function') updateJpgBtnLabel();
+    return 'Export option ' + name + ' set to ' + (name.indexOf('Quality') > 0 ? parseInt(v, 10) + '%' : v) + '.';
+  });
+
+  reg('export', 'words', 'action', 'export <pdf|docx|scd|txt|md|jpg|png|webp> — export the document in that format using the current Export Options (see exportoptions). Same as the Export window: jpg, png and webp export the pages as images, md exports Markdown. The browser downloads the file.', (fmt) => {
+    if(!aamExpOk()) return 'Export is not available in this editor version.';
+    const f = String(fmt||'').toLowerCase();
+    if(['pdf','docx','scd','txt','md','jpg','png','webp'].indexOf(f) < 0) return 'Usage: export <pdf|docx|scd|txt|md|jpg|png|webp>.';
+    if(typeof _scGate === 'function' && !_scGate('openExportModal')) return 'Export is turned off for this document.';
+    if(window._exportBlocked) return 'The document contains offensive word(s), so it cannot be exported.';
+    let base = f;
+    if(f === 'md'){ aamExpChip('txtFmt', 'md'); base = 'txt'; if(typeof updateTxtBtnLabel === 'function') updateTxtBtnLabel(); }
+    else if(f === 'txt'){ aamExpChip('txtFmt', 'txt'); if(typeof updateTxtBtnLabel === 'function') updateTxtBtnLabel(); }
+    else if(f === 'png' || f === 'webp' || f === 'jpg'){ aamExpChip('jpgFmt', f); base = 'jpg'; if(typeof updateJpgBtnLabel === 'function') updateJpgBtnLabel(); }
+    Promise.resolve().then(() => doExport(base)).catch(e => aamToast('Export failed: ' + (e && e.message || e), 'error'));
+    return 'Exporting as ' + f.toUpperCase() + '… the browser will download the file when it is ready.';
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
