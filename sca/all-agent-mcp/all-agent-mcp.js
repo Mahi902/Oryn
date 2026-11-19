@@ -1177,6 +1177,72 @@
     return 'Usage: themepanel <open|close|status>.';
   });
 
+  // ── v2.0.21: Viewing options and Word goal ──────────────────────────
+  reg('viewlayout', 'words', 'action', 'viewlayout <1|2|3|4> [vertical|horizontal] — how many pages sit side by side (Viewing options > Layout). Optionally switch between pages stacked under each other (vertical) or beside each other (horizontal). Example: viewlayout 2', (n, o) => {
+    if(typeof setPageLayout !== 'function') return 'Page layout is not available in this editor version.';
+    const cols = parseInt(n,10);
+    if(!(cols >= 1 && cols <= 4)) return 'Usage: viewlayout <1|2|3|4> [vertical|horizontal].';
+    if(o){
+      const ov = String(o).toLowerCase();
+      if(!/^(v|vertical|h|horizontal)$/.test(ov)) return 'Orientation must be vertical or horizontal.';
+      if(typeof setPageOrient === 'function') setPageOrient(ov[0] === 'h' ? 'h' : 'v');
+    }
+    setPageLayout(cols);
+    return 'Showing ' + cols + ' page' + (cols > 1 ? 's' : '') + ' per row' + (o ? ' (' + (String(o)[0].toLowerCase() === 'h' ? 'horizontal' : 'vertical') + ')' : '') + '.';
+  });
+  reg('editormode', 'words', 'action', 'editormode <editing|viewing|status> — switch between Editing and Viewing (read-only) mode, or report which is active.', (m) => {
+    const a = String(m||'status').toLowerCase();
+    if(typeof setEditorMode !== 'function' || typeof VW === 'undefined') return 'Editor mode is not available in this editor version.';
+    if(a === 'status') return 'Mode: ' + VW.mode + '.';
+    if(a !== 'editing' && a !== 'viewing') return 'Usage: editormode <editing|viewing|status>.';
+    setEditorMode(a); return 'Switched to ' + a + ' mode.';
+  });
+  reg('viewstatus', 'none', 'info', 'Current viewing options: mode, zoom, pages per row, orientation, page scaling (rulers) and view preview.', () => {
+    const act = document.querySelector('#vwLayoutRow .vw-mode-btn.active'), ori = document.querySelector('#vwOrientRow .vw-mode-btn.active');
+    const sc = (typeof SCALE_STATE !== 'undefined') ? SCALE_STATE : null; const vp = document.getElementById('viewPreviewEnabled');
+    return 'mode:' + ((typeof VW !== 'undefined' && VW.mode) || '?') + ' zoom:' + ((typeof S !== 'undefined' && S.zoom) || '?') + '%'
+      + ' pagesPerRow:' + (act ? act.dataset.cols : '?') + ' orientation:' + (ori && ori.dataset.orient === 'h' ? 'horizontal' : 'vertical')
+      + ' scaling:' + (sc ? (sc.enabled ? 'on (' + sc.unit + ', every ' + sc.interval + ')' : 'off') : '?') + ' viewPreview:' + (vp ? (vp.checked ? 'on' : 'off') : '?');
+  });
+  reg('pagescaling', 'words', 'action', 'pagescaling <on|off> [unit=cm|mm|inch|px] [interval=1|2|5|10] [size=px 16–60] — turn the page rulers (Enable Scaling) on or off and choose their unit, tick interval and width. Example: pagescaling on unit=mm interval=5', (...a) => {
+    if(typeof togglePageScaling !== 'function' || typeof SCALE_STATE === 'undefined') return 'Page scaling is not available in this editor version.';
+    const onoff = String(a.shift()||'').toLowerCase();
+    if(onoff !== 'on' && onoff !== 'off') return 'Usage: pagescaling <on|off> [unit=…] [interval=…] [size=…].';
+    const bad = [];
+    for(const t of a){
+      const m = t.match(/^(unit|interval|size)=(.+)$/i); if(!m){ bad.push(t); continue; }
+      const k = m[1].toLowerCase(), v = m[2].toLowerCase();
+      if(k === 'unit'){ const b = document.querySelector('#scaleUnitChips .scale-chip[data-val="' + v + '"]'); if(b) setScaleUnit(b); else bad.push(t); }
+      else if(k === 'interval'){ const b = document.querySelector('#scaleIntervalChips .scale-chip[data-val="' + v + '"]'); if(b) setScaleInterval(b); else bad.push(t); }
+      else { const n = parseInt(v,10), el = document.getElementById('scaleRulerSize'); if(isNaN(n) || !el) bad.push(t); else { el.value = Math.min(60, Math.max(16, n)); if(typeof renderPageRulers === 'function') renderPageRulers(); } }
+    }
+    const cb = document.getElementById('scalingEnabled'); if(cb) cb.checked = onoff === 'on';
+    togglePageScaling(onoff === 'on');
+    return 'Page scaling ' + onoff + (onoff === 'on' ? ' (' + SCALE_STATE.unit + ', every ' + SCALE_STATE.interval + ')' : '') + '.' + (bad.length ? ' Could not use: ' + bad.join(' ') + '.' : '');
+  });
+  reg('viewpreview', 'words', 'action', 'viewpreview <on|off> — turn the zoom mini-map preview on or off.', (v) => {
+    const a = String(v||'').toLowerCase();
+    if(typeof toggleViewPreview !== 'function') return 'View preview is not available in this editor version.';
+    if(a !== 'on' && a !== 'off') return 'Usage: viewpreview <on|off>.';
+    const c = document.getElementById('viewPreviewEnabled'); if(c) c.checked = a === 'on';
+    toggleViewPreview(a === 'on'); return 'View preview ' + a + '.';
+  });
+
+  function aamGoal(){ try{ return Math.max(1, parseInt(localStorage.getItem('sc_ew_goal'),10) || 500); }catch(e){ return 500; } }
+  reg('wordgoal', 'words', 'action', 'wordgoal [number|status] — set your word goal (the Word Goal widget) or show progress toward it. With no argument it shows progress. Example: wordgoal 1200', (v) => {
+    if(!elAllowed('counts')) return denyMsg('word count');
+    const m = String(textOf('wordCount') || '').match(/[\d,]+/); const words = m ? parseInt(m[0].replace(/,/g,''),10) : 0;
+    if(v && String(v).toLowerCase() !== 'status'){
+      const g = parseInt(v,10);
+      if(!(g >= 1 && g <= 10000000)) return 'Usage: wordgoal [number|status]. The goal must be a positive whole number.';
+      try{ localStorage.setItem('sc_ew_goal', String(g)); }catch(e){}
+      const inp = document.querySelector('.ew-goal input[title="Word goal"]');
+      if(inp){ inp.value = g; inp.dispatchEvent(new Event('input', {bubbles:true})); }
+    }
+    const g = aamGoal(), pct = Math.min(100, Math.round(words / g * 100));
+    return 'Word goal: ' + g + ' words. Progress: ' + words + ' (' + pct + '%)' + (words >= g ? ' — goal reached.' : ', ' + (g - words) + ' to go.') + ((!document.querySelector('.ew-goal input[title="Word goal"]') && v) ? ' (The Word Goal widget is not on screen, but the goal is saved.)' : '');
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
