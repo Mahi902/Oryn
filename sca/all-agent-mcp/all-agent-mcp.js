@@ -1802,6 +1802,170 @@
     return 'Cleared margin designs from ' + (pages === 'all' ? 'all pages' : 'page' + (pages.indexOf(',') >= 0 ? 's ' : ' ') + pages) + '.';
   });
 
+  // ── v2.0.27: Images and banners already in the document ───────────────
+  // key=value parser; values may be "quoted with spaces". Returns {o:{key:value}, bad:[leftover words]}
+  function aamKV(text){
+    const o = {}, bad = []; let rest = String(text||'');
+    rest = rest.replace(/([A-Za-z]+)=(?:"([^"]*)"|'([^']*)'|(\S+))/g, (m, k, a, b, c) => { o[k.toLowerCase()] = a !== undefined ? a : (b !== undefined ? b : c); return ' '; });
+    rest.split(/\s+/).filter(Boolean).forEach(w => bad.push(w));
+    return {o, bad};
+  }
+  const aamImgs = () => [...document.querySelectorAll('#editorArea .page-content img')].filter(i => !i.closest('.sc-banner'));
+  const aamBanners = () => [...document.querySelectorAll('#editorArea .page-content .sc-banner')];
+  const aamImgLocked = (img) => !!(typeof S !== 'undefined' && S.lockedImgs && S.lockedImgs.has(img));
+  const aamImgNear = (n, list) => { const i = parseInt(n,10) - 1; return list[i] ? i : -1; };
+  const aamCountMsg = (len, what) => 'There ' + (len === 1 ? 'is 1 ' + what : 'are ' + len + ' ' + what + 's') + ' in the document.';
+
+  reg('images', 'none', 'info', 'List the images in the document: number, page, alt text, size, free/solid, locked, opacity, border radius and click action.', () => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const out = [];
+    aamImgs().forEach((img, i) => {
+      const pn = pageNumFromEl(img); if(!pageAllowed(pn)) return;
+      const r = img.getBoundingClientRect(), z = ((typeof S !== 'undefined' && S.zoom) || 100) / 100;
+      const cap = img.closest('.page-content').querySelector('[data-sc-cap]');
+      out.push((i + 1) + '. page ' + pn + ' alt:"' + (img.alt || '') + '" ' + Math.round(r.width / z) + 'x' + Math.round(r.height / z) + 'px ' + (img.dataset.solid === '1' ? 'solid' : 'free')
+        + (aamImgLocked(img) ? ' locked' : '') + ' opacity:' + Math.round((parseFloat(img.style.opacity) || 1) * 100) + '% radius:' + (parseInt(img.style.borderRadius) || 0) + '%'
+        + ' onclick:' + (img.dataset.imgOnclick || 'none'));
+    });
+    return out.length ? out.join('\n') : 'No images.';
+  });
+
+  function aamImgApply(img, o){
+    const bad = [];
+    const num = (v, lo, hi, name) => { const n = parseFloat(v); if(isFinite(n) && n >= lo && n <= hi) return n; bad.push(name + '=' + v + ' (' + lo + '-' + hi + ')'); return null; };
+    const keep = {}; ['position','left','top','zIndex','width','height'].forEach(k => { keep[k] = img.style[k]; });
+    _imgPopupTarget = img; openEditImgAttrs();
+    const $ = (id) => document.getElementById(id);
+    const chip = (grp, val, allowed, name) => { if(allowed.indexOf(val) < 0){ bad.push(name + '=' + val + ' (' + allowed.join('|') + ')'); return false; } imgChipSelById(grp, val); return true; };
+    if(o.alt !== undefined) $('imgAltText').value = o.alt.slice(0, 500);
+    if(o.opacity !== undefined){ const n = num(o.opacity, 0, 100, 'opacity'); if(n !== null){ $('imgOpacity').value = Math.round(n); $('imgOpacityVal').textContent = Math.round(n) + '%'; } }
+    if(o.radius !== undefined){ const n = num(o.radius, 0, 50, 'radius'); if(n !== null){ $('imgRadius').value = Math.round(n); $('imgRadiusVal').textContent = Math.round(n) + '%'; } }
+    if(o.border !== undefined) chip('imgBorderStyle', o.border.toLowerCase(), ['none','solid','dashed','dotted'], 'border');
+    if(o.bordersize !== undefined){ const n = num(o.bordersize, 1, 16, 'bordersize'); if(n !== null){ $('imgBorderSize').value = Math.round(n); $('imgBorderSizeVal').textContent = Math.round(n) + 'px'; } }
+    if(o.bordercolor !== undefined){ if(/^#[0-9a-f]{6}$/i.test(o.bordercolor)) $('imgBorderColor').value = o.bordercolor; else bad.push('bordercolor=' + o.bordercolor + ' (use #rrggbb)'); }
+    if(o.mode !== undefined) chip('imgProperty', o.mode.toLowerCase(), ['image','solid'], 'mode');
+    if(o.onclick !== undefined){
+      if(chip('imgOnClickType', o.onclick.toLowerCase(), ['none','link','enlarge'], 'onclick')){
+        if(o.onclick.toLowerCase() === 'link'){ if(o.link) $('imgOnClickUrl').value = o.link; if(!$('imgOnClickUrl').value.trim()){ bad.push('onclick=link needs link=<url>'); imgChipSelById('imgOnClickType', 'none'); } }
+        imgOnClickTypeChange();
+      }
+    } else if(o.link !== undefined){ $('imgOnClickUrl').value = o.link; }
+    if(o.caption !== undefined) $('imgCapText').value = o.caption.slice(0, 200);
+    if(o.captionstyle !== undefined) chip('imgCapStyle', o.captionstyle.toLowerCase(), ['plain','italic','boxed','label'], 'captionstyle');
+    if(o.captionpos !== undefined) chip('imgCapPos', o.captionpos.toLowerCase(), ['below','above'], 'captionpos');
+    if(o.captionnum !== undefined) chip('imgCapNum', o.captionnum.toLowerCase(), ['off','fig'], 'captionnum');
+    applyEditImgAttrs();
+    if(img.dataset.solid !== '1') ['position','left','top','zIndex','width','height'].forEach(k => { if(keep[k] && !img.style[k]) img.style[k] = keep[k]; });
+    if(o.x !== undefined || o.y !== undefined){
+      const x = num(o.x !== undefined ? o.x : parseFloat(img.style.left) || 0, -20000, 20000, 'x'), y = num(o.y !== undefined ? o.y : parseFloat(img.style.top) || 0, -20000, 20000, 'y');
+      if(x !== null && y !== null){
+        if(img.dataset.solid === '1'){ delete img.dataset.solid; if(img.style.display === 'inline-block') img.style.display = ''; img.style.verticalAlign = ''; }
+        img.style.position = 'absolute'; img.style.left = x + 'px'; img.style.top = y + 'px'; if(!img.style.zIndex) img.style.zIndex = '1000';
+        try{ if(S.selImg === img) showResizeH(img); }catch(e){}
+      }
+    }
+    try{ scheduleAutoSave(); }catch(e){}
+    return bad;
+  }
+
+  reg('imageset', 'rest', 'action', 'imageset <n> [alt="…"] [opacity=0-100] [radius=0-50] [border=none|solid|dashed|dotted] [bordersize=1-16] [bordercolor=#rrggbb] [mode=image|solid] [onclick=none|link|enlarge] [link=<url>] [caption="…"] [captionstyle=plain|italic|boxed|label] [captionpos=below|above] [captionnum=off|fig] [x=<px>] [y=<px>] — change the attributes of image n (see images). These are the same options as Edit Image. mode=image makes it free (draggable), mode=solid flows with the text; x/y place a free image on its page. An empty caption="" removes the caption.', (txt) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(typeof openEditImgAttrs !== 'function' || typeof applyEditImgAttrs !== 'function' || typeof _imgPopupTarget === 'undefined') return 'Editing image attributes is not available in this editor version.';
+    const m = String(txt||'').trim().match(/^(\d+)\s*([\s\S]*)$/); const list = aamImgs();
+    if(!m) return 'Usage: imageset <n> [alt="…"] [opacity=…] … (see /help imageset).';
+    const i = aamImgNear(m[1], list); if(i < 0) return 'Image ' + m[1] + ' not found. ' + aamCountMsg(list.length, 'image');
+    const img = list[i]; const pn = pageNumFromEl(img); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    if(aamImgLocked(img)) return 'Image ' + (i + 1) + ' is locked. Unlock it first with imagelock ' + (i + 1) + ' off.';
+    const kv = aamKV(m[2]); if(!Object.keys(kv.o).length) return 'Give at least one attribute, for example imageset ' + (i + 1) + ' opacity=60 radius=10.';
+    const bad = kv.bad.map(w => w).concat(aamImgApply(img, kv.o));
+    return 'Updated image ' + (i + 1) + ' (' + Object.keys(kv.o).join(', ') + ').' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
+  reg('imagemove', 'words', 'action', 'imagemove <n> <x> <y> — move free image n to x,y pixels inside its page (a solid image becomes free first). Same as the coordinate box in Edit Image.', (n, x, y) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const list = aamImgs(); const i = aamImgNear(n, list);
+    if(i < 0) return 'Image ' + n + ' not found. ' + aamCountMsg(list.length, 'image');
+    const xv = parseFloat(x), yv = parseFloat(y);
+    if(!isFinite(xv) || !isFinite(yv) || Math.abs(xv) > 20000 || Math.abs(yv) > 20000) return 'Usage: imagemove <n> <x> <y> (pixels, within 20000).';
+    const img = list[i]; const pn = pageNumFromEl(img); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    if(aamImgLocked(img)) return 'Image ' + (i + 1) + ' is locked. Unlock it first with imagelock ' + (i + 1) + ' off.';
+    if(img.dataset.solid === '1'){ delete img.dataset.solid; if(img.style.display === 'inline-block') img.style.display = ''; img.style.verticalAlign = ''; }
+    img.style.position = 'absolute'; img.style.left = xv + 'px'; img.style.top = yv + 'px'; if(!img.style.zIndex) img.style.zIndex = '1000';
+    try{ if(S.selImg === img) showResizeH(img); }catch(e){} try{ scheduleAutoSave(); }catch(e){}
+    return 'Moved image ' + (i + 1) + ' to ' + xv + ', ' + yv + ' on page ' + pn + '.';
+  });
+
+  reg('imagelock', 'words', 'action', 'imagelock <n> <on|off> — lock image n so it cannot be moved, resized or deleted, or unlock it.', (n, v) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const list = aamImgs(); const i = aamImgNear(n, list);
+    if(i < 0) return 'Image ' + n + ' not found. ' + aamCountMsg(list.length, 'image');
+    const a = String(v||'').toLowerCase(); if(a !== 'on' && a !== 'off') return 'Usage: imagelock <n> <on|off>.';
+    const img = list[i]; const pn = pageNumFromEl(img); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    if(typeof S === 'undefined' || !S.lockedImgs) return 'Image locking is not available in this editor version.';
+    if(a === 'on'){ S.lockedImgs.add(img); img.classList.add('img-locked'); } else { S.lockedImgs.delete(img); img.classList.remove('img-locked'); img.draggable = false; }
+    try{ scheduleAutoSave(); }catch(e){}
+    return 'Image ' + (i + 1) + ' ' + (a === 'on' ? 'locked' : 'unlocked') + '.';
+  });
+
+  reg('imageremove', 'words', 'action', 'imageremove <n> — delete image n (a locked image must be unlocked first). A caption paragraph next to it stays; remove it with imageset <n> caption="" before deleting if you want it gone.', (n) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const list = aamImgs(); const i = aamImgNear(n, list);
+    if(i < 0) return 'Image ' + n + ' not found. ' + aamCountMsg(list.length, 'image');
+    const img = list[i]; const pn = pageNumFromEl(img); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    if(aamImgLocked(img)) return 'Image ' + (i + 1) + ' is locked. Unlock it first with imagelock ' + (i + 1) + ' off.';
+    img.remove(); try{ checkContent(); }catch(e){} try{ if(typeof depickImg === 'function') depickImg(); }catch(e){} try{ scheduleAutoSave(); }catch(e){}
+    return 'Removed image ' + (i + 1) + ' from page ' + pn + '.';
+  });
+
+  reg('banners', 'none', 'info', 'List the banner cards in the document: number, page, title, description, layout and whether locked.', () => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const out = [];
+    aamBanners().forEach((b, i) => {
+      const pn = pageNumFromEl(b); if(!pageAllowed(pn)) return;
+      const q = (s) => ((b.querySelector(s) || {}).textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+      out.push((i + 1) + '. page ' + pn + ' title:"' + q('.sc-banner-title') + '" desc:"' + q('.sc-banner-desc') + '" layout:' + (b.dataset.bannerLayout || 'top') + (typeof isBannerLocked === 'function' && isBannerLocked(b) ? ' locked' : ''));
+    });
+    return out.length ? out.join('\n') : 'No banners.';
+  });
+
+  reg('bannerset', 'rest', 'action', 'bannerset <n> [title="…"] [desc="…"] — change the title or description text of banner n (see banners). For layout, image or link changes the user opens the banner editor.', (txt) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const m = String(txt||'').trim().match(/^(\d+)\s*([\s\S]*)$/); const list = aamBanners();
+    if(!m) return 'Usage: bannerset <n> [title="…"] [desc="…"].';
+    const i = aamImgNear(m[1], list); if(i < 0) return 'Banner ' + m[1] + ' not found. ' + aamCountMsg(list.length, 'banner');
+    const b = list[i]; const pn = pageNumFromEl(b); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    if(typeof isBannerLocked === 'function' && isBannerLocked(b)) return 'Banner ' + (i + 1) + ' is locked. Unlock it first with bannerlock ' + (i + 1) + ' off.';
+    const kv = aamKV(m[2]); const done = [];
+    const lim = (v) => typeof _bannerLimitText === 'function' ? _bannerLimitText(v) : v;
+    if(kv.o.title !== undefined){ const el = b.querySelector('.sc-banner-title'); if(el){ el.textContent = lim(kv.o.title); done.push('title'); } }
+    if(kv.o.desc !== undefined){ const el = b.querySelector('.sc-banner-desc'); if(el){ el.textContent = lim(kv.o.desc); done.push('description'); } }
+    const bad = kv.bad.concat(Object.keys(kv.o).filter(k => k !== 'title' && k !== 'desc'));
+    if(!done.length) return 'Give title="…" or desc="…". ' + (bad.length ? 'Could not use: ' + bad.join(', ') + '.' : '');
+    try{ scheduleAutoSave(); }catch(e){}
+    return 'Updated banner ' + (i + 1) + ' (' + done.join(', ') + ').' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
+  reg('bannerlock', 'words', 'action', 'bannerlock <n> <on|off> — lock banner n against editing, moving and deleting, or unlock it.', (n, v) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const list = aamBanners(); const i = aamImgNear(n, list);
+    if(i < 0) return 'Banner ' + n + ' not found. ' + aamCountMsg(list.length, 'banner');
+    const a = String(v||'').toLowerCase(); if(a !== 'on' && a !== 'off') return 'Usage: bannerlock <n> <on|off>.';
+    const pn = pageNumFromEl(list[i]); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    if(typeof setBannerLocked !== 'function') return 'Banner locking is not available in this editor version.';
+    setBannerLocked(list[i], a === 'on'); return 'Banner ' + (i + 1) + ' ' + (a === 'on' ? 'locked' : 'unlocked') + '.';
+  });
+
+  reg('bannerremove', 'words', 'action', 'bannerremove <n> — delete banner n (a locked banner must be unlocked first).', (n) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const list = aamBanners(); const i = aamImgNear(n, list);
+    if(i < 0) return 'Banner ' + n + ' not found. ' + aamCountMsg(list.length, 'banner');
+    const b = list[i]; const pn = pageNumFromEl(b); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    if(typeof isBannerLocked === 'function' && isBannerLocked(b)) return 'Banner ' + (i + 1) + ' is locked. Unlock it first with bannerlock ' + (i + 1) + ' off.';
+    const host = b.parentElement && b.parentElement.classList.contains('sc-banner-shield') ? b.parentElement : b;
+    host.remove(); try{ checkContent(); }catch(e){} try{ scheduleAutoSave(); }catch(e){}
+    return 'Removed banner ' + (i + 1) + ' from page ' + pn + '.';
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
