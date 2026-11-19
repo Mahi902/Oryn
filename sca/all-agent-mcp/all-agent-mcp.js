@@ -2950,6 +2950,25 @@
     return 'Indent style "' + st + '" applied.';
   });
 
+  // ── v2.0.43: Page Certificate — read-only certification status per page ──
+  reg('pagecertificate', 'words', 'info', 'pagecertificate [<page>|all] — show the Page Certificate details (the same as the page manager\'s certificate window): the authenticity ID stored on the page, whether it is Certified or Uncertified, and when the certificates were last reset. With a page number it reports that page; with all (or nothing) it gives a one-line status per page. Read-only.', (v) => {
+    if(typeof CERT === 'undefined' || !CERT || !Array.isArray(CERT.list)) return 'Page Certificates are not available in this editor version.';
+    const pages = Array.from(document.querySelectorAll('#editorArea .page'));
+    if(!pages.length) return 'The document has no pages.';
+    const a = String(v||'all').toLowerCase().trim() || 'all';
+    const info = (el) => { const id = el.getAttribute('data-auth') || ''; return { id: id, ok: !!id && CERT.list.indexOf(id) >= 0 }; };
+    const reset = CERT.lastReset ? new Date(CERT.lastReset).toLocaleString() : 'Unknown';
+    if(a === 'all'){
+      const rows = pages.map((el, i) => { const c = info(el); return 'Page ' + (i+1) + ': ' + (c.ok ? 'Certified' : 'Uncertified') + ' (ID: ' + (c.id || 'None') + ')'; });
+      const good = pages.filter((el) => info(el).ok).length;
+      return good + ' of ' + pages.length + ' page(s) certified. Last reset: ' + reset + '.\n' + rows.slice(0, 200).join('\n') + (rows.length > 200 ? '\n… and ' + (rows.length - 200) + ' more.' : '');
+    }
+    const n = parseInt(a, 10);
+    if(!(n >= 1 && n <= pages.length)) return 'Usage: pagecertificate [<page 1-' + pages.length + '>|all].';
+    const c = info(pages[n-1]);
+    return 'Page ' + n + ': ' + (c.ok ? 'Certified' : 'Uncertified') + '. Authenticity ID: ' + (c.id || 'None') + '. Last reset: ' + reset + '.';
+  });
+
   // ── Zoom / navigation ────────────────────────────────────────────────
   reg('zoomin', 'none', 'action', 'Zoom the document in by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(10); return 'Zoomed in.'; } return 'Zoom function not available.'; });
   reg('zoomout', 'none', 'action', 'Zoom the document out by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(-10); return 'Zoomed out.'; } return 'Zoom function not available.'; });
