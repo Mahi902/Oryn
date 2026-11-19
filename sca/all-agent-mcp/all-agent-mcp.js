@@ -1447,6 +1447,80 @@
     return 'Slides zoom: ' + (a === 'fit' ? 'fit to screen' : a + '%') + '.';
   });
 
+  // ── v2.0.24: inkTrace (animated pen-drawing of the pages) ──────────────
+  const aamIt = () => (typeof IT !== 'undefined' && typeof inkTraceLaunch === 'function') ? IT : null;
+  const aamItOpen = () => { const o = document.getElementById('inkTraceOverlay'); return !!(o && o.classList.contains('open')); };
+  const aamItGallery = () => { const g = document.getElementById('inkTraceGallery'); return !!(g && g.classList.contains('open')); };
+  let aamItBusy = false;
+  // Reads speed=<1-100> and pen=<1-8> words; returns {speed, pen, bad[]}
+  function aamItOpts(words){
+    const o = {bad: []};
+    for(const x of words){
+      const m = String(x).match(/^(speed|pen)=(\d+(?:\.\d+)?)$/i); if(!m){ o.bad.push(x); continue; }
+      const k = m[1].toLowerCase(), n = parseFloat(m[2]);
+      if(k === 'speed'){ if(Number.isInteger(n) && n >= 1 && n <= 100) o.speed = n; else o.bad.push(x + ' (speed is 1-100)'); }
+      else { if(n >= 1 && n <= 8 && Math.round(n * 2) === n * 2) o.pen = n; else o.bad.push(x + ' (pen size is 1-8 in steps of 0.5)'); }
+    }
+    return o;
+  }
+
+  reg('inktrace', 'words', 'action', 'inktrace <start|stop|pause|resume> [speed=<1-100>] [pen=<1-8>] — start inkTrace (watch every page being drawn stroke by stroke with an animated pen), pause or resume it, or stop it. Speed and pen size apply to start; defaults are speed 8, pen 1.5. When it finishes a gallery of the traced pages opens; stop closes that too.', (...a) => {
+    const I = aamIt(); if(!I) return 'inkTrace is not available in this editor version.';
+    const act = String(a.shift()||'').toLowerCase();
+    if(act === 'start'){
+      if(aamItOpen() || I.running) return 'inkTrace is already running. Use inktrace stop first.';
+      if(aamItBusy) return 'inkTrace is already being prepared.';
+      const o = aamItOpts(a);
+      I.speed = o.speed || 8; I.penSize = o.pen || 1.5; I.threshold = 128; I.showPen = true; I.dynamicColor = true; I.dynamicSize = true;
+      aamItBusy = true;
+      Promise.resolve().then(() => inkTraceLaunch()).catch(() => {}).then(() => { aamItBusy = false; });
+      return 'Preparing inkTrace (speed ' + I.speed + ', pen ' + I.penSize + ') — the pages are being captured. Use inktracestatus to follow it.' + (o.bad.length ? ' Could not use: ' + o.bad.join(', ') + '.' : '');
+    }
+    if(act === 'stop'){
+      if(aamItOpen() || I.running){ inkTraceClose(); return 'Stopped inkTrace.'; }
+      if(aamItGallery()){ inkTraceGalleryClose(); return 'Closed the inkTrace gallery.'; }
+      return 'inkTrace is not running.';
+    }
+    if(act === 'pause' || act === 'resume'){
+      if(!aamItOpen() || !I.running) return 'inkTrace is not running.';
+      if(act === 'pause' && I.paused) return 'inkTrace is already paused.';
+      if(act === 'resume' && !I.paused) return 'inkTrace is not paused.';
+      inkTracePauseResume(); return act === 'pause' ? 'Paused inkTrace.' : 'Resumed inkTrace.';
+    }
+    return 'Usage: inktrace <start|stop|pause|resume> [speed=…] [pen=…].';
+  });
+
+  reg('inktracestatus', 'none', 'info', 'Report inkTrace: whether it is preparing, running, paused or finished, the page being drawn, and the speed and pen size.', () => {
+    const I = aamIt(); if(!I) return 'inkTrace is not available in this editor version.';
+    if(aamItBusy && !aamItOpen()) return 'inkTrace is being prepared.';
+    if(aamItOpen()) return 'inkTrace ' + (I.paused ? 'paused' : 'running') + ' on page ' + (I.currentPage + 1) + ' of ' + I.pages.length + '. speed:' + I.speed + ' pen:' + I.penSize;
+    if(aamItGallery()) return 'inkTrace finished; the gallery of ' + I.renderedCanvases.length + ' traced page' + (I.renderedCanvases.length === 1 ? ' is' : 's are') + ' open.';
+    return 'inkTrace is not running. Defaults: speed ' + I.speed + ', pen ' + I.penSize + '.';
+  });
+
+  reg('inktracesettings', 'words', 'action', 'inktracesettings [speed=<1-100>] [pen=<1-8>] — change the speed or pen size of inkTrace while it is running (the same sliders as its options panel). With no arguments it just reports them.', (...a) => {
+    const I = aamIt(); if(!I) return 'inkTrace is not available in this editor version.';
+    if(!a.length) return 'inkTrace settings: speed ' + I.speed + ', pen ' + I.penSize + '.';
+    if(!aamItOpen()) return 'inkTrace is not running. Start it with inktrace start speed=… pen=…';
+    const o = aamItOpts(a);
+    if(o.speed) I.speed = o.speed;
+    if(o.pen) I.penSize = o.pen;
+    if(typeof _itSyncPanel === 'function') _itSyncPanel();
+    return 'inkTrace settings: speed ' + I.speed + ', pen ' + I.penSize + '.' + (o.bad.length ? ' Could not use: ' + o.bad.join(', ') + '.' : '');
+  });
+
+  reg('inktracepanel', 'words', 'action', 'inktracepanel <open|close> — show or hide the inkTrace options panel (only while inkTrace is running).', (v) => {
+    const I = aamIt(); if(!I) return 'inkTrace is not available in this editor version.';
+    if(!aamItOpen()) return 'inkTrace is not running.';
+    const a = String(v||'').toLowerCase();
+    if(a !== 'open' && a !== 'close') return 'Usage: inktracepanel <open|close>.';
+    const panel = document.getElementById('inkTracePanel');
+    const isOpen = !!(panel && panel.classList.contains('open'));
+    if(a === 'open' && isOpen) return 'The panel is already open.';
+    if(a === 'close' && !isOpen) return 'The panel is already closed.';
+    toggleInkTracePanel(); return 'inkTrace panel ' + (a === 'open' ? 'opened' : 'closed') + '.';
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
