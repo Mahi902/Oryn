@@ -3212,6 +3212,92 @@
     pedResetAll(); return 'Photo Editor reset to the original image.';
   });
 
+  // ── v2.0.48: Photo Editor — rotate, flip, straighten, resize, crop, frame, effects ──
+  const AAM_PED_FX = ['auto', 'pixelate', 'sharpen', 'smooth', 'emboss', 'edges', 'sketch', 'posterize', 'noise', 'threshold'];
+  function aamPedGate(){
+    if(!elAllowed('content')) return denyMsg('content');
+    if(!aamPedOk()) return 'The Photo Editor is not available in this editor version.';
+    if(!aamPedOpen()) return AAM_PED_NEED;
+    return '';
+  }
+  function aamPedSize(){ return PED.base.width + 'x' + PED.base.height + ' px'; }
+  reg('photorotate', 'words', 'action', 'photorotate <90|-90|180> — rotate the Photo Editor image by 90 degrees clockwise (90), counter-clockwise (-90) or 180 degrees. This is one undo step (photoundo).', (v) => {
+    const g = aamPedGate(); if(g) return g;
+    const d = parseInt(v, 10);
+    if([90, -90, 180, -180].indexOf(d) < 0) return 'Usage: photorotate <90|-90|180>.';
+    pedRotate(d === -180 ? 180 : d);
+    return 'Rotated ' + d + ' degrees. Image is now ' + aamPedSize() + '.';
+  });
+  reg('photoflip', 'words', 'action', 'photoflip <h|v> — flip the Photo Editor image horizontally (h, mirror left-right) or vertically (v, upside down).', (v) => {
+    const g = aamPedGate(); if(g) return g;
+    const d = String(v||'').toLowerCase().trim();
+    if(d !== 'h' && d !== 'v') return 'Usage: photoflip <h|v>.';
+    pedFlip(d);
+    return 'Flipped ' + (d === 'h' ? 'horizontally' : 'vertically') + '.';
+  });
+  reg('photostraighten', 'words', 'action', 'photostraighten <degrees> — rotate the image by a small angle from -45 to 45 to level a crooked photo (the Transform tab\'s Straighten). The canvas grows to hold the rotated image.', (v) => {
+    const g = aamPedGate(); if(g) return g;
+    const n = Number(String(v||'').trim());
+    if(String(v||'').trim() === '' || isNaN(n) || n < -45 || n > 45) return 'Usage: photostraighten <-45 to 45>.';
+    if(n === 0) return 'An angle of 0 changes nothing.';
+    PED.o.ang = n; const s = document.getElementById('ped_ang'); if(s) s.value = n;
+    pedStraighten();
+    return 'Straightened by ' + n + ' degrees. Image is now ' + aamPedSize() + '.';
+  });
+  reg('photoresize', 'words', 'action', 'photoresize <width> <height> — resize the Photo Editor image to an exact size in pixels (1-8000 each). To keep the shape, use photoscale instead.', (w, h) => {
+    const g = aamPedGate(); if(g) return g;
+    const W = parseInt(w, 10), H = parseInt(h, 10);
+    if(!(W >= 1 && W <= 8000 && H >= 1 && H <= 8000)) return 'Usage: photoresize <width 1-8000> <height 1-8000>.';
+    const a = document.getElementById('ped_rw'), b = document.getElementById('ped_rh');
+    if(!a || !b) return 'The resize fields are not available in this editor version.';
+    a.value = W; b.value = H; pedResize();
+    return 'Resized to ' + aamPedSize() + '.';
+  });
+  reg('photoscale', 'words', 'action', 'photoscale <factor> — scale the Photo Editor image keeping its shape, e.g. 0.5 for half size or 2 for double (0.05 to 8, and no side may pass 8000 px).', (v) => {
+    const g = aamPedGate(); if(g) return g;
+    const f = Number(String(v||'').trim());
+    if(isNaN(f) || f < 0.05 || f > 8) return 'Usage: photoscale <0.05 to 8>.';
+    if(Math.max(PED.base.width, PED.base.height) * f > 8000) return 'That would pass 8000 px on a side.';
+    if(!document.getElementById('ped_rw')) return 'The resize fields are not available in this editor version.';
+    pedScaleBy(f);
+    return 'Scaled by ' + f + '. Image is now ' + aamPedSize() + '.';
+  });
+  reg('photocrop', 'words', 'action', 'photocrop <x> <y> <width> <height> — crop the Photo Editor image to a box given in image pixels from the top-left corner. The box must lie inside the image and be smaller than it. Check the size with photoeditor first.', (x, y, w, h) => {
+    const g = aamPedGate(); if(g) return g;
+    const X = Math.round(Number(x)), Y = Math.round(Number(y)), W = Math.round(Number(w)), H = Math.round(Number(h));
+    if([X, Y, W, H].some((n) => isNaN(n))) return 'Usage: photocrop <x> <y> <width> <height> (pixels).';
+    const b = PED.base;
+    if(X < 0 || Y < 0 || W < 2 || H < 2 || X + W > b.width || Y + H > b.height) return 'The crop box must lie inside the image (' + aamPedSize() + ') and be at least 2 px wide and tall.';
+    if(W >= b.width && H >= b.height) return 'That box is the whole image, so nothing would be cropped.';
+    pedTool('transform'); PED.crop = { x: X, y: Y, w: W, h: H };
+    pedApplyCrop();
+    return 'Cropped. Image is now ' + aamPedSize() + '.';
+  });
+  reg('photoframe', 'words', 'action', 'photoframe [thickness] [#rrggbb] — add a solid frame around the Photo Editor image. Thickness is 1-100 (scaled for large images), default is the editor\'s current value; colour is a hex code such as #ffffff.', (t, c) => {
+    const g = aamPedGate(); if(g) return g;
+    if(String(t||'').trim() !== ''){
+      const n = parseInt(t, 10); if(!(n >= 1 && n <= 100)) return 'Thickness must be 1 to 100.';
+      PED.o.frame = n;
+    }
+    if(String(c||'').trim() !== ''){
+      c = String(c).trim(); if(!/^#[0-9a-fA-F]{6}$/.test(c)) return 'Colour must be a hex code like #ffffff.';
+      PED.o.fcol = c.toLowerCase();
+    }
+    pedFrame();
+    return 'Frame added (' + PED.o.frame + ', ' + PED.o.fcol + '). Image is now ' + aamPedSize() + '.';
+  });
+  reg('photoeffects', 'none', 'info', 'List the Photo Editor effects that photoeffect accepts.', () => {
+    if(!aamPedOk()) return 'The Photo Editor is not available in this editor version.';
+    return 'Effects: ' + AAM_PED_FX.join(', ') + '. Each one is applied to the whole image as one undo step.';
+  });
+  reg('photoeffect', 'words', 'action', 'photoeffect <auto|pixelate|sharpen|smooth|emboss|edges|sketch|posterize|noise|threshold> — apply an Effects-tab effect to the whole Photo Editor image (auto = auto levels). Each is one undo step, so photoundo reverses it. See photoeffects.', (v) => {
+    const g = aamPedGate(); if(g) return g;
+    const n = String(v||'').toLowerCase().trim();
+    if(AAM_PED_FX.indexOf(n) < 0) return 'Usage: photoeffect <' + AAM_PED_FX.join('|') + '>.';
+    pedFx(n);
+    return 'Effect ' + n + ' applied.';
+  });
+
   // ── Zoom / navigation ────────────────────────────────────────────────
   reg('zoomin', 'none', 'action', 'Zoom the document in by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(10); return 'Zoomed in.'; } return 'Zoom function not available.'; });
   reg('zoomout', 'none', 'action', 'Zoom the document out by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(-10); return 'Zoomed out.'; } return 'Zoom function not available.'; });
