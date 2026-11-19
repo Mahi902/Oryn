@@ -2969,6 +2969,70 @@
     return 'Page ' + n + ': ' + (c.ok ? 'Certified' : 'Uncertified') + '. Authenticity ID: ' + (c.id || 'None') + '. Last reset: ' + reset + '.';
   });
 
+  // ── v2.0.44: Markdown Renderer — auto render, convert and its options ──
+  const AAM_MD_GROUPS = {
+    when: { prefix: 'mdw_', label: 'When it renders', keys: ['paste', 'insert', 'type'] },
+    element: { prefix: 'mdo_', label: 'Elements', keys: ['size', 'bold', 'italic', 'strike', 'code', 'fence', 'link', 'hr', 'ul', 'ol', 'task', 'image', 'quote', 'table'] },
+    special: { prefix: 'mds_', label: 'Special tags', keys: ['size', 'color', 'hl', 'align', 'tags'] }
+  };
+  function aamMdOk(){ return typeof SCMarkdown !== 'undefined' && SCMarkdown && typeof SCMarkdown.convert === 'function'; }
+  function aamMdBox(id){ return document.getElementById(id); }
+  function aamMdSet(id, on){
+    const cb = aamMdBox(id); if(!cb) return false;
+    if(cb.checked !== on){ cb.checked = on; cb.dispatchEvent(new Event('change', { bubbles: true })); }
+    return true;
+  }
+  function aamMdLine(g){
+    const G = AAM_MD_GROUPS[g];
+    return G.label + ': ' + G.keys.map((k) => { const cb = aamMdBox(G.prefix + k); return k + '=' + (cb ? (cb.checked ? 'on' : 'off') : '?'); }).join(' ');
+  }
+  reg('markdownrenderer', 'none', 'info', 'Show the Markdown Renderer state: whether Auto is on, when it renders (pasted, inserted, typed), which elements it converts (text size, bold, italic, strikethrough, code, code blocks, links, horizontal line, bullet and numbered lists, tasks, images, quotes, tables), the special tags (size, color, highlight, align, tags) and line breaks. Change things with markdownauto, markdownconvert, markdownoption, markdownall and markdownreset.', () => {
+    if(!aamMdOk()) return 'The Markdown Renderer is not available in this editor version.';
+    const br = aamMdBox('mdBreaks');
+    return 'Markdown Renderer: Auto ' + (SCMarkdown.isAuto() ? 'on' : 'off') + '\n' + aamMdLine('when') + '\n' + aamMdLine('element') + '\n' + aamMdLine('special') + '\nLine breaks: ' + (br ? (br.checked ? 'on' : 'off') : '?');
+  });
+  reg('markdownauto', 'words', 'action', 'markdownauto <on|off|status> — switch the Markdown Renderer\'s Auto mode on or off, or report it. While on, Markdown that is pasted, inserted or typed (as chosen in markdownoption) is rendered by itself.', (v) => {
+    if(!aamMdOk()) return 'The Markdown Renderer is not available in this editor version.';
+    const a = String(v||'status').toLowerCase().trim() || 'status';
+    if(a === 'status') return 'Auto Markdown is ' + (SCMarkdown.isAuto() ? 'on' : 'off') + '.';
+    if(a !== 'on' && a !== 'off') return 'Usage: markdownauto <on|off|status>.';
+    SCMarkdown.setAuto(a === 'on');
+    return 'Auto Markdown ' + (a === 'on' ? 'enabled' : 'disabled') + '.';
+  });
+  reg('markdownconvert', 'none', 'action', 'Convert Markdown to formatted text now (the Markdown Renderer\'s Convert Markdown button): the selected text if something is selected, otherwise the whole document. It uses the elements chosen in markdownoption. To insert new Markdown instead, use insertmarkdown.', () => {
+    if(!elAllowed('content')) return denyMsg('content');
+    if(!aamMdOk()) return 'The Markdown Renderer is not available in this editor version.';
+    const before = (document.getElementById('editorArea') || {}).innerHTML;
+    SCMarkdown.convert();
+    const after = (document.getElementById('editorArea') || {}).innerHTML;
+    try{ scheduleAutoSave(); }catch(e){}
+    return before !== after ? 'Markdown converted.' : 'No Markdown found to convert (or conversion is blocked in this mode).';
+  });
+  reg('markdownoption', 'words', 'action', 'markdownoption <when|element|special|breaks> <key> <on|off> — change one Markdown Renderer option (the Configure Markdown Renderer window). when keys: paste, insert, type. element keys: size, bold, italic, strike, code, fence, link, hr, ul, ol, task, image, quote, table. special keys: size, color, hl, align, tags. For breaks there is no key: markdownoption breaks <on|off>. Example: markdownoption element image off. See markdownrenderer for the current values.', (g, k, v) => {
+    if(!aamMdOk()) return 'The Markdown Renderer is not available in this editor version.';
+    g = String(g||'').toLowerCase().trim();
+    if(g === 'breaks'){ v = k; k = ''; }
+    v = String(v||'').toLowerCase().trim();
+    if(g !== 'breaks' && !AAM_MD_GROUPS[g]) return 'Usage: markdownoption <when|element|special|breaks> <key> <on|off>.';
+    if(v !== 'on' && v !== 'off') return 'Usage: markdownoption ' + (g === 'breaks' ? 'breaks <on|off>.' : g + ' <key> <on|off>.');
+    if(g === 'breaks') return aamMdSet('mdBreaks', v === 'on') ? 'Line breaks ' + v + '.' : 'That option is not in this editor version.';
+    k = String(k||'').toLowerCase().trim();
+    if(AAM_MD_GROUPS[g].keys.indexOf(k) < 0) return 'Unknown ' + g + ' key "' + k + '". Keys: ' + AAM_MD_GROUPS[g].keys.join(', ') + '.';
+    return aamMdSet(AAM_MD_GROUPS[g].prefix + k, v === 'on') ? g + ' ' + k + ' ' + v + '.' : 'That option is not in this editor version.';
+  });
+  reg('markdownall', 'words', 'action', 'markdownall <on|off> — switch every Markdown Renderer element (bold, italic, lists, tables and so on) on or off at once, like the window\'s select-all / clear-all. Auto mode and the when / breaks options are not changed.', (v) => {
+    if(!aamMdOk() || typeof SCMarkdown.setAll !== 'function') return 'The Markdown Renderer is not available in this editor version.';
+    v = String(v||'').toLowerCase().trim();
+    if(v !== 'on' && v !== 'off') return 'Usage: markdownall <on|off>.';
+    SCMarkdown.setAll(v === 'on');
+    return 'All Markdown elements turned ' + v + '.';
+  });
+  reg('markdownreset', 'none', 'action', 'Reset the Markdown Renderer options (when, elements, special tags, line breaks) to their defaults. Auto mode is kept as it is.', () => {
+    if(!aamMdOk() || typeof SCMarkdown.reset !== 'function') return 'The Markdown Renderer is not available in this editor version.';
+    SCMarkdown.reset();
+    return 'Markdown Renderer options reset to defaults.';
+  });
+
   // ── Zoom / navigation ────────────────────────────────────────────────
   reg('zoomin', 'none', 'action', 'Zoom the document in by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(10); return 'Zoomed in.'; } return 'Zoom function not available.'; });
   reg('zoomout', 'none', 'action', 'Zoom the document out by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(-10); return 'Zoomed out.'; } return 'Zoom function not available.'; });
