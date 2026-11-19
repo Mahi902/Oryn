@@ -7,7 +7,7 @@
 <title>Sugarcane Editor</title>
 <meta name="description" content="Sugarcane Editor: a powerful all-in-one online editor from the Oryn suite. Write, design and edit with add-ons and extensions.">
 <meta name="keywords" content="Sugarcane Editor, SCEditor, DocuWrite Pro, sugarcane, sca add-ons, editor add-ons, extensions, online editor, document editor, online document editor, free document editor, Word alternative, Google Docs alternative, WYSIWYG editor, rich text editor, text editor, write documents online, A4 editor, docs, office, word processor, online word processor, create documents, edit documents, format documents, export document, export PDF, export DOCX, export HTML, print document, page layout, headings, fonts, tables, lists, templates, document templates, resume maker, letter writer, report writer, essay writer, Oryn, Oryn app, Oryn online, Mohtadi Azad Mahi, Education By Mohtadi Azad, mahi902, free online tools, online tools, web tools, browser tools, no signup, no login, no ads, no credit card, free forever, works in browser, client-side, privacy friendly, offline friendly, PWA, progressive web app, productivity tools, productivity suite, document suite, all-in-one workspace, online workspace, Android app, mobile friendly, dark mode, open source, GitHub Pages, Toolstructer, instant, fast, easy to use, secure, no installation, no server upload">
-<meta name="sceditor-version" content="251">
+<meta name="sceditor-version" content="252">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -7642,6 +7642,14 @@ body #ulBulletChips .olcust-chip.active,body.dark #ulBulletChips .olcust-chip.ac
             <button type="button" class="exp-chip" id="pdfPwToggle" title="Show / hide password" onclick="var i=document.getElementById('pdfPassword');var h=i.type==='password';i.type=h?'text':'password';this.textContent=h?'Hide':'Show'">Show</button>
           </div>
         </div>
+        <div class="exp-opt-row">
+          <div class="exp-opt-label">Expiration Date <span style="opacity:.6;font-weight:400">(optional)</span></div>
+          <div style="display:flex;gap:6px;align-items:center;width:100%">
+            <input type="text" class="scf-input" id="pdfExpiry" placeholder="Leave empty for no expiration date" autocomplete="off" onfocus="this.type='datetime-local';try{this.showPicker()}catch(e){}" onblur="if(!this.value)this.type='text'" oninput="EXP.pdfExpiry=this.value" onchange="EXP.pdfExpiry=this.value" style="padding:8px 12px"/>
+            <button type="button" class="exp-chip" id="pdfExpClear" title="Clear expiration" onclick="var i=document.getElementById('pdfExpiry');i.value='';i.type='text';EXP.pdfExpiry=''">Clear</button>
+          </div>
+          
+        </div>
         <button class="exp-do-btn" onclick="doExportWithOpts('pdf')"><span class="material-symbols-outlined">picture_as_pdf</span>Export PDF</button>
       </div>
 
@@ -9464,7 +9472,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 251; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 252; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -20890,6 +20898,7 @@ const EXP = {
   pdfTech: 'scanned',    // 'scanned' | 'native' | 'structured'
   pdfQuality: 100,
   pdfPassword: '',       // optional; empty = no password
+  pdfExpiry: '',         // optional datetime-local string; empty = never expires
   scdQuality: 100,
   docxQuality: 100,
   txtFmt: 'txt',         // 'txt' | 'md'
@@ -21075,18 +21084,52 @@ async function encryptPdfBytes(bytes, password) {
   ctx.trailerInfo.ID = ctx.obj([PDFHexString.of(hex(id)), PDFHexString.of(hex(id))]);
   return await doc.save({ useObjectStreams: false });
 }
+/* ── Optional PDF expiration (OpenAction JavaScript) ─────────────────────
+   Embeds a script that runs on open: if now > expiry it alerts "expired"
+   and closes the document. Runs before encryption so it is encrypted too. */
+async function applyPdfExpiry(bytes, expMs) {
+  const PDFLib = window.PDFLib;
+  if (!PDFLib) throw new Error('pdf-lib failed to load');
+  const { PDFDocument, PDFName, PDFString } = PDFLib;
+  const doc = await PDFDocument.load(bytes, { updateMetadata: false });
+  const ctx = doc.context;
+  const when = new Date(expMs).toString().replace(/[\\'"\r\n]/g, ' ');
+  const js =
+    "var __x=" + Math.floor(expMs) + ";" +
+    "var __n=new Date().getTime();" +
+    "if(__n>__x){" +
+      "try{app.alert({cType:0,nIcon:0,cTitle:'Document expired',cMsg:'This PDF expired on " + when + " and can no longer be opened.'});}catch(e){}" +
+      "try{this.closeDoc(true);}catch(e){}" +
+    "}";
+  const action = { Type: 'Action', S: 'JavaScript', JS: PDFString.of(js) };
+  const cat = doc.catalog;
+  const prev = cat.get(PDFName.of('OpenAction'));
+  if (prev) action.Next = prev;
+  cat.set(PDFName.of('OpenAction'), ctx.register(ctx.obj(action)));
+  return await doc.save({ useObjectStreams: false });
+}
 async function _pdfApplyPassword() {
   const pw = window._pdfPwd;
-  if (!pw || !S.pdfBlob) return;
+  const expMs = window._pdfExpMs;
+  if ((!pw && !expMs) || !S.pdfBlob) return;
   try {
-    document.getElementById('pdfStatus').textContent = 'Encrypting with password\u2026';
-    await delay(20);
-    const raw = new Uint8Array(await S.pdfBlob.arrayBuffer());
-    const enc = await encryptPdfBytes(raw, pw);
-    S.pdfBlob = new Blob([enc], { type: 'application/pdf' });
+    let raw = new Uint8Array(await S.pdfBlob.arrayBuffer());
+    if (expMs) {
+      document.getElementById('pdfStatus').textContent = 'Setting expiration\u2026';
+      await delay(20);
+      try { raw = await applyPdfExpiry(raw, expMs); }
+      catch (e) { console.error(e); showToast('Expiration failed — PDF exported without an expiration date', 'error'); }
+    }
+    if (pw) {
+      document.getElementById('pdfStatus').textContent = 'Encrypting with password\u2026';
+      await delay(20);
+      try { raw = await encryptPdfBytes(raw, pw); }
+      catch (e) { console.error(e); showToast('Password protection failed — PDF exported without a password', 'error'); }
+    }
+    S.pdfBlob = new Blob([raw], { type: 'application/pdf' });
   } catch (e) {
     console.error(e);
-    showToast('Password protection failed — PDF exported without a password', 'error');
+    showToast('PDF post-processing failed', 'error');
   }
 }
 
@@ -21096,6 +21139,13 @@ async function doExportWithOpts(fmt) {
   await scEnlargePrep();
   if (fmt === 'pdf') {
     window._pdfPwd = (EXP.pdfPassword || '');
+    window._pdfExpMs = 0;
+    if (EXP.pdfExpiry) {
+      const t = new Date(EXP.pdfExpiry).getTime();
+      if (isNaN(t)) { showToast('Invalid expiration date', 'error'); window._pdfPwd = ''; return; }
+      if (t <= Date.now()) { showToast('Expiration must be in the future', 'error'); window._pdfPwd = ''; return; }
+      window._pdfExpMs = t;
+    }
     try {
       if (EXP.pdfTech === 'native') {
         await exportPDFNative();
@@ -21104,7 +21154,7 @@ async function doExportWithOpts(fmt) {
       } else {
         await exportPDF();
       }
-    } finally { window._pdfPwd = ''; }
+    } finally { window._pdfPwd = ''; window._pdfExpMs = 0; }
   } else if (fmt === 'scd') {
     exportSCDWithOpts();
   } else if (fmt === 'docx') {
