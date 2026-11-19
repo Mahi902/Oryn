@@ -1273,6 +1273,164 @@
     return 'Inserting a map of "' + q + '" — a toast or the map appearing confirms it.';
   });
 
+  // ── Insert graph / geometry / mind map ───────────────────────────────
+  // Like the media inserts above these drive the editor's own modals and return at once;
+  // a toast (or the object appearing) confirms the insert.
+  function aamSleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+  function aamSetVal(el, v){
+    el.value = v;
+    el.dispatchEvent(new Event('input', {bubbles:true}));
+    el.dispatchEvent(new Event('change', {bubbles:true}));
+  }
+  function aamSetCheck(el, on){
+    if(!el || el.checked === on) return;
+    el.checked = on;
+    el.dispatchEvent(new Event('change', {bubbles:true}));
+  }
+
+  reg('insertgraph', 'words', 'action', 'insertgraph <x,y> <x,y> … [connect] [fill] [labels] — insert a coordinate graph with those points at the cursor. connect joins the points with a line, fill shades the shape, labels prints each point\'s coordinates. Example: insertgraph 0,0 2,4 4,16 connect', (...a) => {
+    const g = insertGate(); if(g) return g;
+    if(typeof openGraphModal !== 'function' || !aamById('gmAdd')) return 'Insert Graph is not available in this editor version.';
+    const pts = [], flags = {};
+    for(const raw of a){
+      const t = String(raw).replace(/[()]/g, '').trim().toLowerCase();
+      if(!t) continue;
+      if(t === 'connect' || t === 'fill' || t === 'labels'){ flags[t] = true; continue; }
+      const m = t.match(/^(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)$/);
+      if(!m) return 'Could not read "' + raw + '". Usage: insertgraph <x,y> <x,y> … [connect] [fill] [labels]';
+      pts.push([m[1], m[2]]);
+    }
+    if(!pts.length) return 'Usage: insertgraph <x,y> <x,y> … [connect] [fill] [labels]';
+    if(pts.length > 200) return 'Too many points (max 200).';
+    openGraphModal();
+    (async () => {
+      try {
+        await aamSleep(250);
+        pts.forEach(p => { aamById('gmX').value = p[0]; aamById('gmY').value = p[1]; aamById('gmAdd').click(); });
+        aamSetCheck(aamById('gmConn'), !!flags.connect);
+        aamSetCheck(aamById('gmFill'), !!flags.fill);
+        aamSetCheck(aamById('gmPtLbl'), !!flags.labels);
+        aamById('gmFit').click();
+        await aamSleep(150);
+        aamById('gmInsert').click();
+        aamToast('Graph inserted', 'success');
+      } catch(e){ aamToast('Graph insert failed: ' + e.message, 'error'); }
+    })();
+    return 'Inserting a graph with ' + pts.length + ' point' + (pts.length===1?'':'s') + '.';
+  });
+
+  const GEO_SHAPES = {
+    rectangle:     ['w','h','d','A','P'],
+    square:        ['s','d','A','P'],
+    parallelogram: ['a','b','t','h','d1','d2','A','P'],
+    rhombus:       ['s','t','d1','d2','h','A','P'],
+    trapezium:     ['a','b','c','d','h','al','be','m','A','P']
+  };
+  reg('insertgeometry', 'words', 'action', 'insertgeometry <shape> <key=value> … — insert a solved geometry figure at the cursor. Give just enough values and the rest is worked out. Shapes and keys: rectangle (w h d A P) · square (s d A P) · parallelogram (a b t h d1 d2 A P) · rhombus (s t d1 d2 h A P) · trapezium (a b c d h al be m A P). Lengths in cm, angles in degrees, A = area, P = perimeter. Example: insertgeometry rectangle w=6 h=4', (...a) => {
+    const g = insertGate(); if(g) return g;
+    if(typeof openGeometryModal !== 'function' || typeof openGeoShape !== 'function') return 'Insert Geometry is not available in this editor version.';
+    const args = a.map(x => String(x).trim()).filter(Boolean);
+    const shape = (args.shift() || '').toLowerCase();
+    if(!GEO_SHAPES[shape]) return 'Unknown shape "' + shape + '". Shapes: ' + Object.keys(GEO_SHAPES).join(', ') + '.';
+    const vals = {};
+    for(const t of args){
+      const m = t.match(/^([A-Za-z0-9]+)=(-?\d+(?:\.\d+)?)$/);
+      if(!m || GEO_SHAPES[shape].indexOf(m[1]) < 0) return 'Could not use "' + t + '". ' + shape + ' keys: ' + GEO_SHAPES[shape].join(' ') + ' (write key=value).';
+      vals[m[1]] = m[2];
+    }
+    if(!Object.keys(vals).length) return 'Give at least one value, e.g. insertgeometry ' + shape + ' ' + GEO_SHAPES[shape][0] + '=5';
+    openGeometryModal();
+    openGeoShape(shape);
+    (async () => {
+      try {
+        for(const k of Object.keys(vals)){
+          const inp = aamById('geo_' + k);
+          if(inp) aamSetVal(inp, vals[k]);
+        }
+        const ok = await aamWait(() => { const b = aamById('geoInsBtn'); return b && !b.disabled; }, 8000);
+        if(!ok){ try { closeMdl('geoMdl'); } catch(e){} aamToast('Those values do not make a valid ' + shape + '.', 'error'); return; }
+        aamById('geoInsBtn').click();
+        aamToast('Geometry inserted', 'success');
+      } catch(e){ aamToast('Geometry insert failed: ' + e.message, 'error'); }
+    })();
+    return 'Inserting a ' + shape + ' (' + Object.keys(vals).map(k => k + '=' + vals[k]).join(', ') + ').';
+  });
+
+  // Outline text → flat list of {t, depth}. A line's depth is its leading "-" count
+  // (or 2 spaces / one tab per level). Lines are separated by newlines or ";".
+  function mmParseOutline(src){
+    const out = [];
+    String(src||'').split(/\n|;/).forEach(line => {
+      if(!line.trim()) return;
+      let depth = 0, rest = line;
+      const dm = rest.match(/^\s*(-+)\s*/);
+      if(dm){ depth = dm[1].length; rest = rest.slice(dm[0].length); }
+      else { const ws = rest.match(/^[ \t]*/)[0]; depth = Math.floor(ws.replace(/\t/g, '  ').length / 2); rest = rest.trim(); }
+      rest = rest.trim();
+      if(!rest) return;
+      if(!out.length) depth = 0;
+      else depth = Math.max(1, Math.min(depth, out[out.length-1].depth + 1));
+      out.push({t: rest.slice(0, 80), depth});
+    });
+    return out;
+  }
+  reg('insertmindmap', 'rest', 'action', 'insertmindmap <outline> — insert a mind map at the cursor. Separate nodes with ";" (or new lines). The first node is the central idea; start a line with "-" for a child, "--" for a grandchild. Example: insertmindmap Fruit; - Citrus; -- Lemon; -- Orange; - Berries', (src) => {
+    const g = insertGate(); if(g) return g;
+    if(typeof openMindmapOverlay !== 'function' || !aamById('mindmapOverlay')) return 'Insert Mind map is not available in this editor version.';
+    const nodes = mmParseOutline(src);
+    if(!nodes.length) return 'Usage: insertmindmap <central idea>; - <child>; -- <grandchild> …';
+    if(nodes.length > 60) return 'Too many nodes (max 60).';
+    // parent index of each node, from depths
+    const parent = [], stack = [];
+    nodes.forEach((n, i) => { while(stack.length && nodes[stack[stack.length-1]].depth >= n.depth) stack.pop(); parent[i] = stack.length ? stack[stack.length-1] : -1; stack.push(i); });
+    openMindmapOverlay();
+    (async () => {
+      const ov = aamById('mindmapOverlay');
+      const tool = a => ov.querySelector('[data-a="' + a + '"]');
+      const typeInto = async (text) => {
+        const ok = await aamWait(() => ov.querySelector('.mm-input'), 1500, 50);
+        if(!ok) throw new Error('the node editor did not open');
+        const inp = ov.querySelector('.mm-input');
+        inp.value = text;
+        inp.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', bubbles:true}));
+        await aamSleep(60);
+      };
+      const selectNode = async (id) => {
+        const g = ov.querySelector('g[data-id="' + id + '"]');
+        if(!g) throw new Error('node ' + id + ' not found');
+        const svg = g.ownerSVGElement, r = g.getBoundingClientRect();
+        const o = {bubbles:true, cancelable:true, pointerId:41, pointerType:'mouse', clientX: r.left + r.width/2, clientY: r.top + r.height/2};
+        svg.setPointerCapture = function(){}; // synthetic pointers cannot be captured
+        try { svg.dispatchEvent(new PointerEvent('pointerdown', o)); svg.dispatchEvent(new PointerEvent('pointerup', o)); }
+        finally { delete svg.setPointerCapture; }
+        await aamSleep(400); // longer than the editor's double-tap window, so this never opens the editor
+      };
+      const realConfirm = window.confirm;
+      try {
+        await aamSleep(300);
+        if(ov.querySelectorAll('g[data-id]').length > 1){ window.confirm = () => true; try { aamById('mmClear').click(); } finally { window.confirm = realConfirm; } await aamSleep(200); }
+        // root
+        tool('edit').click(); await typeInto(nodes[0].t);
+        let cur = 0;
+        for(let i = 1; i < nodes.length; i++){
+          const p = parent[i];
+          if(cur === p) tool('child').click();
+          else if(parent[cur] === p) tool('sib').click();
+          else { await selectNode('n' + (p + 1)); tool('child').click(); }
+          await typeInto(nodes[i].t);
+          cur = i;
+        }
+        await aamSleep(150);
+        aamById('mmInsert').click();
+        aamToast('Mind map inserted', 'success');
+      } catch(e){
+        window.confirm = realConfirm;
+        aamToast('Mind map insert failed: ' + e.message, 'error');
+      }
+    })();
+    return 'Inserting a mind map with ' + nodes.length + ' node' + (nodes.length===1?'':'s') + ' — a toast confirms when it is in the document.';
+  });
+
 
   // ═══════════════════════════════════════════════════════════════════
   //  AGENT LAYER
