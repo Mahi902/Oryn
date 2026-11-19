@@ -2107,7 +2107,6 @@
 
   // ── v2.0.30: Table attributes and cell styles (Edit Table) ────────────
   const aamTblOk = () => typeof _readTableBorderModeFromDOM === 'function' && typeof _readCellStyleFromDOM === 'function';
-  const aamHex = (v) => /^#[0-9a-f]{6}$/i.test(v || '');
 
   reg('tablestyle', 'words', 'info', 'tablestyle <table id> — show a table\'s border mode (default, noborder, nodivider or custom) with border colors and widths, and which cells have a fill color or their own border.', (id) => {
     if(!elAllowed('tables')) return denyMsg('tables');
