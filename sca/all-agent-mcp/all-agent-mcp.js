@@ -2680,6 +2680,103 @@
     return 'Deleted text box ' + (i + 1) + ' from page ' + pn + '.';
   });
 
+  // ── v2.0.39: Voice — dictation, Magic Typing and read aloud ───────────
+  const aamOnOff = (v) => { v = String(v == null ? '' : v).toLowerCase(); return ['on','true','yes','1'].indexOf(v) >= 0 ? true : (['off','false','no','0'].indexOf(v) >= 0 ? false : null); };
+  const aamBoxChk = (id) => { const el = document.getElementById(id); return el ? !!el.checked : null; };
+  const aamSetChk = (id, on) => { const el = document.getElementById(id); if(!el) return false; if(el.checked !== on){ el.checked = on; el.dispatchEvent(new Event('change', {bubbles:true})); } return true; };
+  const aamSetSel = (id, v) => { const el = document.getElementById(id); if(!el) return null; const opts = [...el.options].map(o => o.value); const hit = opts.find(x => x.toLowerCase() === String(v).toLowerCase()); if(hit === undefined) return {bad:true, opts}; el.value = hit; el.dispatchEvent(new Event('change', {bubbles:true})); return {bad:false, value:hit}; };
+  const aamVoiceState = (name, api, chkId) => {
+    if(typeof window[api] === 'undefined') return name + ': not available in this editor version.';
+    const en = aamBoxChk(chkId); let act = false; try{ act = !!window[api].isActive(); }catch(e){}
+    return name + ': ' + (en === null ? 'unknown' : (en ? 'on' : 'off')) + (act ? ', running now' : '');
+  };
+  const aamSpeechInOk = () => !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+
+  reg('voice', 'none', 'info', 'Show whether Dictation, Magic Typing and Read Aloud are switched on (Assistive Writing) and whether any is running now. See dictation, magictyping and readaloud.', () => {
+    return [aamVoiceState('Dictation', 'SCDictate', 'awDictation'), aamVoiceState('Magic Typing', 'SCMagic', 'awMagic'), aamVoiceState('Read aloud', 'SCTranscribe', 'awTranscription')].join('\n');
+  });
+
+  reg('dictation', 'words', 'action', 'dictation <status|enable|disable|start|stop|mic> — voice dictation (Assistive Writing > Dictation, Ctrl+Alt+D). enable / disable switch the feature; start needs it enabled, an internet connection, Editing mode and a cursor in the document (use placecursor); the person speaks and the words are typed at the cursor. mic asks the browser for microphone access, which the person has to allow. See dictationset for language and options.', (a) => {
+    const api = window.SCDictate; if(!api) return 'Dictation is not available in this editor version.';
+    a = String(a||'status').toLowerCase();
+    if(a === 'status') return aamVoiceState('Dictation', 'SCDictate', 'awDictation');
+    if(a === 'enable' || a === 'disable'){ api.setEnabled(a === 'enable'); return 'Dictation is now ' + (a === 'enable' ? 'on' : 'off') + '.'; }
+    if(a === 'mic'){ api.requestMic(); return 'Asked the browser for microphone access. The person must allow it in the browser prompt; the editor shows the result in a toast.'; }
+    if(a === 'stop'){ if(!api.isActive()) return 'Dictation is not running.'; api.stop(); return 'Dictation stopped.'; }
+    if(a === 'start'){
+      if(!elAllowed('content')) return denyMsg('page content');
+      if(api.isActive()) return 'Dictation is already running.';
+      if(aamBoxChk('awDictation') === false) return 'Dictation is off. Run dictation enable first.';
+      if(!navigator.onLine) return 'Dictation needs an internet connection.';
+      if(!aamSpeechInOk()) return 'Voice dictation is not supported in this browser (use Chrome, Edge or Safari).';
+      api.start();
+      return api.isActive() ? 'Dictation started. Words the person speaks are typed at the cursor; run dictation stop when done.' : 'Dictation did not start. It needs Editing mode and a cursor in the document (try placecursor first); the editor shows the exact reason in a toast.';
+    }
+    return 'Usage: dictation <status|enable|disable|start|stop|mic>.';
+  });
+
+  reg('dictationset', 'rest', 'action', 'dictationset [lang=<code>] [toolbar=on|off] [commands=on|off] [capitalize=on|off] [keep=on|off] — dictation options: speech language (for example en-US), show the toolbar button, spoken punctuation / editing commands (English only), auto-capitalize, and keep listening through pauses. Dictation must be enabled first.', (txt) => {
+    if(!window.SCDictate) return 'Dictation is not available in this editor version.';
+    if(!document.getElementById('sdLangSel')) return 'Dictation options are not available in this editor version.';
+    const kv = aamKV(txt); const bad = kv.bad.slice(); const o = kv.o; const done = [];
+    if(!Object.keys(o).length) return 'Give at least one option, for example dictationset lang=en-US keep=on.';
+    const flags = {toolbar:'sdTb', commands:'sdCmd', capitalize:'sdCap', keep:'sdKeep'};
+    Object.keys(o).forEach(k => {
+      if(k === 'lang'){ const r = aamSetSel('sdLangSel', o[k]); if(r && !r.bad) done.push('language ' + r.value); else bad.push('lang=' + o[k] + (r ? ' (use one of: ' + r.opts.join(', ') + ')' : '')); }
+      else if(flags[k]){ const v = aamOnOff(o[k]); if(v === null) bad.push(k + '=' + o[k] + ' (on|off)'); else if(aamSetChk(flags[k], v)) done.push(k + ' ' + (v ? 'on' : 'off')); else bad.push(k); }
+      else bad.push(k + '=' + o[k]);
+    });
+    return (done.length ? 'Dictation options updated (' + done.join(', ') + ').' : 'Nothing changed.') + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
+  reg('magictyping', 'words', 'action', 'magictyping <status|enable|disable|start|stop> — Magic Typing (Assistive Writing, Ctrl+Alt+M): the person writes by hand and it becomes typed text at the cursor. enable / disable switch the feature; start opens the writing pad in Editing mode. See magictypingset for options.', (a) => {
+    const api = window.SCMagic; if(!api) return 'Magic Typing is not available in this editor version.';
+    a = String(a||'status').toLowerCase();
+    if(a === 'status') return aamVoiceState('Magic Typing', 'SCMagic', 'awMagic');
+    if(a === 'enable' || a === 'disable'){ api.setEnabled(a === 'enable'); return 'Magic Typing is now ' + (a === 'enable' ? 'on' : 'off') + '.'; }
+    if(a === 'stop'){ if(!api.isActive()) return 'Magic Typing is not running.'; api.stop(); return 'Magic Typing stopped.'; }
+    if(a === 'start'){
+      if(!elAllowed('content')) return denyMsg('page content');
+      if(api.isActive()) return 'Magic Typing is already running.';
+      if(aamBoxChk('awMagic') === false) return 'Magic Typing is off. Run magictyping enable first.';
+      api.start();
+      return api.isActive() ? 'Magic Typing started: the writing pad is open for the person to write by hand. Run magictyping stop to close it.' : 'Magic Typing did not start (it needs Editing mode); the editor shows the reason in a toast.';
+    }
+    return 'Usage: magictyping <status|enable|disable|start|stop>.';
+  });
+
+  reg('magictypingset', 'rest', 'action', 'magictypingset [smart=on|off] [font=on|off] [dynamic=on|off] [toolbar=on|off] [lang=<code>] [delay=<ms>] — Magic Typing options: smart word correction, match the document font, dynamic pen, toolbar button, recognition language and how long to wait after the person stops writing.', (txt) => {
+    if(!window.SCMagic) return 'Magic Typing is not available in this editor version.';
+    if(!document.getElementById('mgSmart')) return 'Magic Typing options are not available in this editor version.';
+    const kv = aamKV(txt); const bad = kv.bad.slice(); const o = kv.o; const done = [];
+    if(!Object.keys(o).length) return 'Give at least one option, for example magictypingset smart=on delay=1200.';
+    const flags = {smart:'mgSmart', font:'mgFont', dynamic:'mgDyn', toolbar:'mgTb'};
+    Object.keys(o).forEach(k => {
+      if(k === 'lang' || k === 'delay'){ const r = aamSetSel(k === 'lang' ? 'mgLang' : 'mgDelay', o[k]); if(r && !r.bad) done.push(k + ' ' + r.value); else bad.push(k + '=' + o[k] + (r ? ' (use one of: ' + r.opts.join(', ') + ')' : '')); }
+      else if(flags[k]){ const v = aamOnOff(o[k]); if(v === null) bad.push(k + '=' + o[k] + ' (on|off)'); else if(aamSetChk(flags[k], v)) done.push(k + ' ' + (v ? 'on' : 'off')); else bad.push(k); }
+      else bad.push(k + '=' + o[k]);
+    });
+    return (done.length ? 'Magic Typing options updated (' + done.join(', ') + ').' : 'Nothing changed.') + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
+  reg('readaloud', 'words', 'action', 'readaloud <status|enable|disable|start|selection|pause|stop> — read aloud / transcription (Assistive Writing): the browser speaks the document. enable / disable switch the feature; start reads the whole document, selection reads only the selected text; pause pauses or resumes; stop stops. Audio plays on the person\'s device.', (a) => {
+    const api = window.SCTranscribe; if(!api) return 'Read aloud is not available in this editor version.';
+    a = String(a||'status').toLowerCase();
+    if(a === 'status') return aamVoiceState('Read aloud', 'SCTranscribe', 'awTranscription');
+    if(a === 'enable' || a === 'disable'){ api.setEnabled(a === 'enable'); return 'Read aloud is now ' + (a === 'enable' ? 'on' : 'off') + '.'; }
+    if(a === 'stop'){ if(!api.isActive()) return 'Read aloud is not running.'; api.stop(); return 'Stopped reading.'; }
+    if(a === 'pause'){ if(!api.isActive()) return 'Read aloud is not running.'; api.pause(); return 'Toggled pause on read aloud.'; }
+    if(a === 'start' || a === 'selection'){
+      if(!elAllowed('content')) return denyMsg('page content');
+      if(aamBoxChk('awTranscription') === false) return 'Read aloud is off. Run readaloud enable first.';
+      if(!window.speechSynthesis || !window.SpeechSynthesisUtterance) return 'Read aloud is not supported on this device.';
+      if(api.isActive()) return 'Already reading. Run readaloud stop first.';
+      api.start(a === 'selection');
+      return api.isActive() ? 'Reading ' + (a === 'selection' ? 'the selected text' : 'the document') + ' aloud. Run readaloud stop to stop.' : 'Nothing was read (' + (a === 'selection' ? 'select some text first' : 'the document may be empty') + '); the editor shows the reason in a toast.';
+    }
+    return 'Usage: readaloud <status|enable|disable|start|selection|pause|stop>.';
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
