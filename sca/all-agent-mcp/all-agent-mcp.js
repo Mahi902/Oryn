@@ -3395,6 +3395,35 @@
     return 'Context Expansion started on the selection. It runs in the background; read_selection or toasts show the result.';
   });
 
+  // ── v2.0.51: Document library — list the saved documents (Recents) and the current document ID ──
+  let aamDocCache = null, aamDocBusy = false;
+  function aamDocRefresh(){
+    if(aamDocBusy || typeof dbGetAll !== 'function') return;
+    aamDocBusy = true;
+    Promise.resolve(dbGetAll()).then((rows) => { aamDocCache = { at: Date.now(), rows: rows || [] }; }).catch(() => {}).then(() => { aamDocBusy = false; });
+  }
+  reg('documents', 'rest', 'info', 'documents [filter] — list the documents saved on this device (the Recents screen): title, last edited, size and which ones are pinned, newest first. An optional filter keeps titles containing that text. The list loads in the background, so the first call may ask you to run it again; later calls show the list from a moment ago while a fresh one loads.', (q) => {
+    if(!elAllowed('content')) return denyMsg('content');
+    if(typeof dbGetAll !== 'function') return 'The document library is not available in this editor version.';
+    aamDocRefresh();
+    if(!aamDocCache) return 'Loading the document list. Run documents again in a moment.';
+    q = String(q||'').toLowerCase().trim();
+    let rows = aamDocCache.rows.slice();
+    if(q) rows = rows.filter((d) => String(d.title||'').toLowerCase().indexOf(q) >= 0);
+    const pinned = (typeof _recPinned !== 'undefined' && _recPinned && typeof _recPinned.has === 'function') ? _recPinned : { has: () => false };
+    rows.sort((a, b) => { const ap = pinned.has(a.id), bp = pinned.has(b.id); if(ap !== bp) return ap ? -1 : 1; return (b.modified || 0) - (a.modified || 0); });
+    if(!rows.length) return q ? 'No saved document has "' + q + '" in its title.' : 'No saved documents yet.';
+    const sz = (n) => n < 1024 ? n + ' B' : (n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(2) + ' MB');
+    const cur = (typeof _currentDocId !== 'undefined') ? _currentDocId : null;
+    return rows.length + ' document(s) (list is ' + Math.max(0, Math.round((Date.now() - aamDocCache.at) / 1000)) + 's old):\n' + rows.slice(0, 100).map((d, i) => (i+1) + '. ' + (d.title || 'Untitled') + (pinned.has(d.id) ? ' [pinned]' : '') + (cur && d.id === cur ? ' [open now]' : '') + ' — edited ' + (d.modified ? new Date(d.modified).toLocaleString() : 'unknown') + (typeof d.size === 'number' ? ', ' + sz(d.size) : '')).join('\n') + (rows.length > 100 ? '\n… and ' + (rows.length - 100) + ' more; narrow it with a filter.' : '');
+  });
+  reg('documentid', 'none', 'info', 'Show the ID of the document that is open now (the Document ID the editor uses for saving and sharing) together with its title. Read-only.', () => {
+    const id = (typeof _currentDocId !== 'undefined') ? _currentDocId : null;
+    if(!id) return 'No saved document is open (the editor has not given this one an ID yet).';
+    const t = document.getElementById('docTitle');
+    return 'Document ID: ' + id + (t && t.value ? ' — title: ' + t.value : '') + '.';
+  });
+
   // ── Zoom / navigation ────────────────────────────────────────────────
   reg('zoomin', 'none', 'action', 'Zoom the document in by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(10); return 'Zoomed in.'; } return 'Zoom function not available.'; });
   reg('zoomout', 'none', 'action', 'Zoom the document out by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(-10); return 'Zoomed out.'; } return 'Zoom function not available.'; });
