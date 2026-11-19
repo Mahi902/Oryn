@@ -992,6 +992,86 @@
     if(typeof scheduleAutoSave === 'function') scheduleAutoSave();
     return 'Inserted ' + t.label + ' "' + cfg.label + '" on page ' + pageNumFromEl(target.pc) + '.';
   });
+  // ── v2.0.19: Insert Draw and Insert E-Signature ─────────────────────
+  reg('opendraw', 'words', 'action', 'opendraw [page:<n>] — open Insert Draw (the freehand drawing window) with the cursor on the given page (or where it is now). Draw with the drag / pan UI tools, then press its Insert button with click. Use closedraw to cancel.', (a) => {
+    if(typeof openDrawOverlay !== 'function') return 'Insert Draw is not available in this editor version.';
+    if(!elAllowed('content')) return denyMsg('page content');
+    const pm = String(a||'').match(/^page:(\d+)$/i);
+    const target = resolveInsertTarget(pm ? parseInt(pm[1],10) : null);
+    if(target.error) return target.error;
+    openDrawOverlay();
+    return 'Opened Insert Draw for page ' + pageNumFromEl(target.pc) + '. Draw in the window, then use its Insert button.';
+  });
+  reg('closedraw', 'none', 'action', 'Close the Insert Draw window without inserting.', () => {
+    if(typeof closeDrawOverlay !== 'function') return 'Insert Draw is not available in this editor version.';
+    closeDrawOverlay(); return 'Closed Insert Draw.';
+  });
+
+  function aamEsignFontKey(f){ return String(f||'').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+  reg('esignfonts', 'none', 'info', 'List the typed-signature fonts insertsignature can use (number — name).', () => {
+    if(typeof ESX_FONTS === 'undefined') return 'E-Signature is not available in this editor version.';
+    return ESX_FONTS.map((f, i) => (i + 1) + ' — ' + f.n).join('\n');
+  });
+  reg('insertsignature', 'words', 'action', 'insertsignature [page:<n>] <name text> [font=<number or name>] [color=#hex] [width=px] — insert a typed E-Signature image at the cursor. Fonts: see esignfonts (default 1). Color default #111111; width 60–500 px (default 180). Example: insertsignature Mohtadi Azad Mahi font=Great-Vibes color=#1a237e width=240. Only sign with a name the user told you to use.', (...a) => {
+    if(typeof ESX === 'undefined' || typeof ESX_FONTS === 'undefined' || typeof openESignModal !== 'function' || typeof doInsertESign !== 'function') return 'E-Signature is not available in this editor version.';
+    if(!elAllowed('content')) return denyMsg('page content');
+    let pageNum = null;
+    if(a[0] && /^page:\d+$/i.test(a[0])) pageNum = parseInt(a.shift().slice(5), 10);
+    let fontIdx = 0, color = '#111111', width = 180; const words = [];
+    for(const t of a){
+      let m;
+      if((m = t.match(/^font=(.+)$/i))){
+        const v = m[1];
+        if(/^\d+$/.test(v)){ fontIdx = parseInt(v,10) - 1; }
+        else { fontIdx = ESX_FONTS.findIndex(f => aamEsignFontKey(f.n) === aamEsignFontKey(v)); }
+        if(!(fontIdx >= 0 && fontIdx < ESX_FONTS.length)) return 'Unknown font "' + v + '". See esignfonts.';
+      }
+      else if((m = t.match(/^colou?r=(#[0-9a-f]{6})$/i))) color = m[1];
+      else if((m = t.match(/^width=(\d+)$/i))) width = Math.min(500, Math.max(60, parseInt(m[1],10)));
+      else words.push(t);
+    }
+    const text = words.join(' ').trim();
+    if(!text) return 'Usage: insertsignature [page:<n>] <name text> [font=…] [color=#hex] [width=px].';
+    if(text.length > 60) return 'Signature text is too long (max 60 characters).';
+    const target = resolveInsertTarget(pageNum);
+    if(target.error) return target.error;
+    saveRange();
+    const pageN = pageNumFromEl(target.pc);
+    (async () => {
+      try{
+        openESignModal();
+        esignSwitchTab('type');
+        ESX.text = text; ESX.font = fontIdx;
+        const box = document.getElementById('esxText'); if(box) box.value = text;
+        if(typeof esxSetInk === 'function') esxSetInk(color); else ESX.ink = color;
+        if(typeof esxSetWidth === 'function') esxSetWidth(width); else ESX.width = width;
+        try{
+          const F = ESX_FONTS[fontIdx];
+          await Promise.race([document.fonts.load((F.w || 400) + ' 48px ' + F.f, text), new Promise(r => setTimeout(r, 4000))]);
+        }catch(e){}
+        esxBuildFonts(); esxRender();
+        doInsertESign();
+      }catch(e){
+        try{ closeMdl('esignMdl'); }catch(_){}
+        if(typeof showToast === 'function') showToast('Could not insert signature: ' + e.message, 'error');
+      }
+    })();
+    return 'Inserting a typed signature "' + text + '" (' + ESX_FONTS[fontIdx].n + ') on page ' + pageN + '…';
+  });
+  reg('openesign', 'words', 'action', 'openesign [page:<n>] — open the E-Signature window (Draw, Type or Upload tabs) with the cursor on that page, so a signature can be drawn or uploaded with the UI tools. For a typed signature, use insertsignature instead.', (a) => {
+    if(typeof openESignModal !== 'function') return 'E-Signature is not available in this editor version.';
+    if(!elAllowed('content')) return denyMsg('page content');
+    const pm = String(a||'').match(/^page:(\d+)$/i);
+    const target = resolveInsertTarget(pm ? parseInt(pm[1],10) : null);
+    if(target.error) return target.error;
+    saveRange(); openESignModal();
+    return 'Opened E-Signature for page ' + pageNumFromEl(target.pc) + '.';
+  });
+  reg('closeesign', 'none', 'action', 'Close the E-Signature window without inserting.', () => {
+    if(typeof closeMdl !== 'function') return 'E-Signature is not available in this editor version.';
+    closeMdl('esignMdl'); return 'Closed E-Signature.';
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
