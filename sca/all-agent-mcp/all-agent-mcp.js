@@ -3298,6 +3298,74 @@
     return 'Effect ' + n + ' applied.';
   });
 
+  // ── v2.0.49: Autofill With Example Data — fill [bracket] placeholders ──
+  function aamAedOk(){ return typeof AED !== 'undefined' && typeof aedScanText === 'function' && typeof aedApplyToContainer === 'function'; }
+  function aamAedLoad(){
+    if(AED.data) return true;
+    if(!AED.loading){ try{ Promise.resolve(AED.load()).catch(() => {}); }catch(e){} }
+    return false;
+  }
+  const AAM_AED_WAIT = 'The example data is still loading (it needs an internet connection). Run the command again in a moment.';
+  function aamAedPages(spec){
+    const pages = aamPages(); if(!pages.length) return { err: 'The document has no pages.' };
+    spec = String(spec||'').trim().toLowerCase();
+    let nums;
+    if(!spec || spec === 'all') nums = pages.map((_, i) => i + 1);
+    else { nums = aamPageList(spec); if(!nums) return { err: 'Pages look like all, 3 or 1-3,5.' }; }
+    const bad = nums.filter((n) => n < 1 || n > pages.length);
+    if(bad.length) return { err: 'Page' + (bad.length > 1 ? 's ' : ' ') + bad.join(', ') + ' not found (the document has ' + pages.length + ').' };
+    return { nums: nums, pages: pages };
+  }
+  reg('exampledata', 'rest', 'info', 'exampledata [filter] — list the example-data fields available for Autofill With Example Data (for instance a [name] or [city] placeholder), with how many sample values each has. An optional filter keeps only field names that contain it. It loads the list from the internet the first time.', (q) => {
+    if(!aamAedOk()) return 'Autofill With Example Data is not available in this editor version.';
+    if(!aamAedLoad()) return AAM_AED_WAIT;
+    q = String(q||'').toLowerCase().trim();
+    const keys = Object.keys(AED.data).filter((k) => !q || k.indexOf(q) >= 0).sort();
+    if(!keys.length) return q ? 'No example-data field contains "' + q + '".' : 'The example data is empty.';
+    return keys.length + ' field(s): ' + keys.slice(0, 150).map((k) => k + ' (' + AED.data[k].length + ')').join(', ') + (keys.length > 150 ? ', … narrow it with a filter.' : '');
+  });
+  reg('examplefields', 'rest', 'info', 'examplefields [pages] — scan the document (all pages, or e.g. 1-3,5) for [bracket] placeholders and say which ones Autofill With Example Data can fill and which it would leave as they are. Read-only.', (spec) => {
+    if(!aamAedOk()) return 'Autofill With Example Data is not available in this editor version.';
+    if(!aamAedLoad()) return AAM_AED_WAIT;
+    const r = aamAedPages(spec); if(r.err) return r.err;
+    const keys = new Set();
+    r.nums.forEach((n) => { const pc = r.pages[n-1].querySelector('.page-content'); if(pc) aedScanText(pc.textContent).forEach((k) => keys.add(k)); });
+    if(!keys.size) return 'No [bracket] placeholders found on the chosen pages.';
+    const all = Array.from(keys).sort();
+    const known = all.filter((k) => AED.data[k]), unknown = all.filter((k) => !AED.data[k]);
+    return all.length + ' placeholder(s) found.\nWill be filled: ' + (known.length ? known.map((k) => '[' + k + ']').join(' ') : 'none') + '\nNot in the example data (kept as they are): ' + (unknown.length ? unknown.map((k) => '[' + k + ']').join(' ') : 'none');
+  });
+  reg('examplefill', 'rest', 'action', 'examplefill [pages] [field=<n|random> …] — replace [bracket] placeholders with example data on the chosen pages (all pages by default; or e.g. 2 or 1-3,5), like Autofill With Example Data. Each field gets a random sample value unless you pick one with field=<n> (n is the 1-based sample number; see exampledata). Placeholders with no example data are left alone. Example: examplefill 1-2 name=3 city=random', (rest) => {
+    if(!elAllowed('content')) return denyMsg('content');
+    if(!aamAedOk()) return 'Autofill With Example Data is not available in this editor version.';
+    if(!aamAedLoad()) return AAM_AED_WAIT;
+    const toks = String(rest||'').trim().split(/\s+/).filter(Boolean);
+    let spec = ''; const picks = {};
+    for(const t of toks){
+      const eq = t.indexOf('=');
+      if(eq > 0){ picks[t.slice(0, eq).toLowerCase().replace(/^\[|\]$/g, '')] = t.slice(eq + 1).toLowerCase(); }
+      else if(!spec) spec = t; else return 'Unexpected "' + t + '". Usage: examplefill [pages] [field=<n|random> …].';
+    }
+    const r = aamAedPages(spec); if(r.err) return r.err;
+    for(const n of r.nums) if(!pageAllowed(n)) return denyMsg('page ' + n);
+    const assign = {};
+    for(const k of Object.keys(picks)){
+      const vals = AED.data[k]; if(!vals) return 'No example data for [' + k + '].';
+      if(picks[k] === 'random'){ continue; }
+      const i = parseInt(picks[k], 10);
+      if(!(i >= 1 && i <= vals.length)) return '[' + k + '] has ' + vals.length + ' sample value(s); pick 1-' + vals.length + ' or random.';
+      assign[k] = vals[i-1];
+    }
+    const keys = new Set();
+    r.nums.forEach((n) => { const pc = r.pages[n-1].querySelector('.page-content'); if(pc) aedScanText(pc.textContent).forEach((k) => keys.add(k)); });
+    Array.from(keys).forEach((k) => { if(AED.data[k] && !(k in assign)){ const v = AED.data[k]; assign[k] = v[Math.floor(Math.random() * v.length)]; } });
+    if(!Object.keys(assign).length) return 'No placeholders with example data found on the chosen pages.';
+    let changed = 0;
+    r.nums.forEach((n) => { const pc = r.pages[n-1].querySelector('.page-content'); if(!pc) return; const b = pc.innerHTML; aedApplyToContainer(pc, assign); if(pc.innerHTML !== b) changed++; });
+    try{ scheduleAutoSave(); }catch(e){}
+    return changed ? 'Autofill applied on ' + changed + ' page' + (changed === 1 ? '' : 's') + ': ' + Object.keys(assign).map((k) => '[' + k + '] -> ' + assign[k]).join('; ') : 'No placeholders were replaced.';
+  });
+
   // ── Zoom / navigation ────────────────────────────────────────────────
   reg('zoomin', 'none', 'action', 'Zoom the document in by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(10); return 'Zoomed in.'; } return 'Zoom function not available.'; });
   reg('zoomout', 'none', 'action', 'Zoom the document out by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(-10); return 'Zoomed out.'; } return 'Zoom function not available.'; });
