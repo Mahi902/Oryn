@@ -874,6 +874,124 @@
     toggleWordPrediction(a === 'on');
     return 'Word prediction ' + (a === 'on' ? 'enabled' : 'disabled') + '.';
   });
+  // ── v2.0.18: Insert Icon and Insert Form Field ──────────────────────
+  const AAM_ICON_ALIASES = {bootstrap:'bi', bi:'bi', tabler:'tabler', phosphor:'ph', ph:'ph', lucide:'lucide', hero:'heroicons', heroicons:'heroicons', radix:'radix-icons', 'radix-icons':'radix-icons', material:'material-symbols', 'material-symbols':'material-symbols'};
+  function aamIconLib(x){ return AAM_ICON_ALIASES[String(x||'').toLowerCase()] || null; }
+  function aamIconLabel(id){ return id === 'material-symbols' ? 'Material' : ((typeof ICON_LIBS !== 'undefined' && ICON_LIBS[id]) ? ICON_LIBS[id].label : id); }
+  function aamIconReady(){ return typeof ICON_LIBS !== 'undefined' && typeof libState === 'function' && typeof ensureLibLoaded === 'function' && typeof fetchIconSvg === 'function'; }
+  const AAM_ICON_IDS = ['lucide','tabler','ph','bi','heroicons','radix-icons','material-symbols'];
+  reg('iconlibs', 'none', 'info', 'List the icon sets Insert Icon can use (use these names with iconsearch and inserticon) and whether each is loaded yet.', () => {
+    if(!aamIconReady()) return 'Insert Icon is not available in this editor version.';
+    return AAM_ICON_IDS.map(id => { const st = libState(id); return id + ' — ' + aamIconLabel(id) + ' (' + (st.loaded ? st.allNames.length + ' icons loaded' : (st.error ? 'failed to load' : 'not loaded yet')) + ')'; }).join('\n');
+  });
+  reg('iconsearch', 'words', 'info', 'iconsearch <query> [library] — search icon names. library is one of lucide, tabler, ph, bi, heroicons, radix-icons, material-symbols (see iconlibs). Without a library it searches every loaded set. Sets load in the background on first use, so if it says "loading", run it again in a few seconds. Shows up to 40 matches.', (q, lib) => {
+    if(!aamIconReady()) return 'Insert Icon is not available in this editor version.';
+    if(!q) return 'Usage: iconsearch <query> [library].';
+    let ids;
+    if(lib){ const id = aamIconLib(lib); if(!id) return 'Unknown icon set "' + lib + '". See iconlibs.'; ids = [id]; } else ids = AAM_ICON_IDS;
+    const query = q.toLowerCase(), out = []; const loading = [];
+    ids.forEach(id => {
+      const st = libState(id);
+      if(!st.loaded){ if(lib || !st.error){ ensureLibLoaded(id).catch(()=>{}); loading.push(aamIconLabel(id)); } return; }
+      st.allNames.filter(n => n.toLowerCase().includes(query)).slice(0, 40).forEach(n => out.push(id + ' ' + n));
+    });
+    let msg = out.length ? out.slice(0, 40).join('\n') : 'No matches' + (loading.length ? ' yet' : '') + '.';
+    if(out.length > 40) msg += '\n(showing 40)';
+    if(loading.length) msg += '\nStill loading: ' + loading.join(', ') + '. Run iconsearch again in a few seconds.';
+    return msg;
+  });
+  reg('inserticon', 'words', 'action', 'inserticon [page:<n>] <library> <icon name> [size=px] [color=#hex] — insert an icon from an icon set at the cursor (see iconlibs / iconsearch). Size is width and height in px (8–600, default 40); color defaults to the editor\'s blue #1976d2. Runs in the background (it may need to download the icon). Example: inserticon lucide heart size=48 color=#e11d48', (...a) => {
+    if(!aamIconReady()) return 'Insert Icon is not available in this editor version.';
+    if(!elAllowed('content')) return denyMsg('page content');
+    let pageNum = null;
+    if(a[0] && /^page:\d+$/i.test(a[0])) pageNum = parseInt(a.shift().slice(5), 10);
+    const lib = aamIconLib(a.shift());
+    if(!lib) return 'Usage: inserticon [page:<n>] <library> <icon name> [size=px] [color=#hex]. See iconlibs.';
+    let size = 40, color = '#1976d2'; const nameParts = [];
+    a.forEach(t => {
+      let m;
+      if((m = t.match(/^size=(\d+)$/i))) size = Math.min(600, Math.max(8, parseInt(m[1],10)));
+      else if((m = t.match(/^colou?r=(#[0-9a-f]{3,8})$/i))) color = m[1];
+      else nameParts.push(t);
+    });
+    const want = nameParts.join('-').toLowerCase();
+    if(!want) return 'Missing icon name. Use iconsearch to find one.';
+    const st = libState(lib);
+    if(!st.loaded){ ensureLibLoaded(lib).catch(()=>{}); return aamIconLabel(lib) + ' icons are loading. Run inserticon again in a few seconds.'; }
+    let name = st.allNames.find(n => n.toLowerCase() === want);
+    if(!name){
+      const hits = st.allNames.filter(n => n.toLowerCase().includes(want));
+      if(hits.length === 1) name = hits[0];
+      else return hits.length ? 'Several icons match "' + want + '": ' + hits.slice(0, 12).join(', ') + (hits.length > 12 ? ', …' : '') + '. Use the exact name.' : 'No icon named "' + want + '" in ' + aamIconLabel(lib) + '. Try iconsearch.';
+    }
+    const target = resolveInsertTarget(pageNum);
+    if(target.error) return target.error;
+    if(typeof saveRange === 'function') saveRange();
+    const pageN = pageNumFromEl(target.pc);
+    (async () => {
+      try{
+        const raw = await fetchIconSvg(st.rawUrl(name));
+        if(typeof restoreRange === 'function') restoreRange();
+        const svg = String(raw).replace(/currentColor/g, color);
+        const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+        const img = makeImg(dataUrl);
+        img.alt = name; img.style.width = size + 'px'; img.style.height = size + 'px';
+        img.style.maxWidth = 'none'; img.style.cursor = 'move'; img.style.display = 'inline-block'; img.style.verticalAlign = 'middle';
+        if(typeof saveRecentIcon === 'function') saveRecentIcon({source: lib, name, raw});
+        insertAtCursor(img);
+        if(typeof scheduleAutoSave === 'function') scheduleAutoSave();
+        if(typeof showToast === 'function') showToast('Icon ' + name + ' inserted on page ' + pageN + '.', 'success');
+      }catch(e){ if(typeof showToast === 'function') showToast('Could not insert icon ' + name + ': ' + e.message, 'error'); }
+    })();
+    return 'Inserting ' + aamIconLabel(lib) + ' icon "' + name + '" on page ' + pageN + '…';
+  });
+
+  const AAM_FIELD_ACTIONS = ['reset', 'print', 'url', 'page'];
+  reg('formfieldtypes', 'none', 'info', 'List the form field types insertformfield can create.', () => {
+    if(typeof FIELD_TYPES === 'undefined') return 'Form fields are not available in this editor version.';
+    return FIELD_TYPES.map(t => t.id + ' — ' + t.label).join('\n');
+  });
+  reg('insertformfield', 'rest', 'action', 'insertformfield <type> [label]; [key=value; …] — insert a form field at the cursor (see formfieldtypes). Keys: name, placeholder, default, options (a|b|c, for dropdown/combobox/listbox/multiselect/radio), min, max, maxlen, minlen, width, height, lines, tooltip, style (box|underline|none), format, required, readonly, singleuse, bold, nolabel, page (insert on that page), action (reset|print|url|page, action buttons only), actionvalue (a URL), actionpage (a page number). Example: insertformfield dropdown Country; options=Bangladesh|India|Nepal; required; width=200', (src) => {
+    if(typeof FIELD_TYPES === 'undefined' || typeof buildFieldMarkup !== 'function' || typeof wireFormField !== 'function') return 'Form fields are not available in this editor version.';
+    if(!elAllowed('content')) return denyMsg('page content');
+    const segs = String(src||'').split(';').map(x => x.trim()).filter(Boolean);
+    if(!segs.length) return 'Usage: insertformfield <type> [label]; [key=value; …]. See formfieldtypes.';
+    const first = segs.shift().split(/\s+/);
+    const type = (first.shift() || '').toLowerCase();
+    const t = FIELD_TYPES.find(x => x.id.toLowerCase() === type);
+    if(!t) return 'Unknown field type "' + type + '". See formfieldtypes.';
+    const kv = {}; segs.forEach(x => { const i = x.indexOf('='); if(i < 0) kv[x.toLowerCase()] = true; else kv[x.slice(0,i).trim().toLowerCase()] = x.slice(i+1).trim(); });
+    const str = k => (kv[k] === true || kv[k] == null) ? '' : String(kv[k]);
+    const flag = k => kv[k] === true || /^(1|true|yes|on)$/i.test(str(k));
+    const action = str('action').toLowerCase() || 'reset';
+    if(t.id === 'actionButton' && !AAM_FIELD_ACTIONS.includes(action)) return 'Action must be one of: ' + AAM_FIELD_ACTIONS.join(', ') + '. (Run JavaScript buttons can only be made by hand.)';
+    let pageNum = null; if(kv.page && /^\d+$/.test(str('page'))) pageNum = parseInt(str('page'), 10);
+    const target = resolveInsertTarget(pageNum);
+    if(target.error) return target.error;
+    const style = str('style').toLowerCase();
+    const cfg = {
+      type: t.id, label: first.join(' ') || t.label, name: str('name'), placeholder: str('placeholder'), defaultValue: str('default'),
+      options: str('options').split('|').map(x => x.trim()).filter(Boolean), min: str('min'), max: str('max'), maxLen: str('maxlen'), minLen: str('minlen'),
+      allowNumbers: false, allowUpper: false, allowLower: false, allowSpecial: false, pattern: '', format: str('format'),
+      action, actionValue: t.id === 'actionButton' && action === 'url' ? str('actionvalue') : '',
+      actionPage: parseInt(str('actionpage'), 10) || (typeof getCurrentPageNum === 'function' ? getCurrentPageNum() : 1),
+      tooltip: str('tooltip'), style: ['box','underline','none'].includes(style) ? style : 'box',
+      textColor: '#607d8b', labelColor: '#1a1a2e', labelBold: false, labelSize: '', answerSize: '', noLabel: flag('nolabel'),
+      borderColor: '#9e9e9e', boxBg: '#ffffff', bold: flag('bold'), width: str('width'), height: str('height'),
+      lines: Math.max(1, parseInt(str('lines'), 10) || 4), tabIndex: '', required: flag('required'), readonly: flag('readonly'), autoFormat: false,
+      singleUse: (typeof SINGLE_USE_TYPES !== 'undefined' && SINGLE_USE_TYPES.includes(t.id)) ? flag('singleuse') : false
+    };
+    if(['dropdown','combobox','listbox','multiselect','radio'].includes(t.id) && !cfg.options.length) cfg.options = ['Option 1', 'Option 2', 'Option 3'];
+    const html = buildFieldMarkup(cfg);
+    document.execCommand('insertHTML', false, html);
+    const el = document.getElementById(_lastFwUid);
+    if(!el) return 'The field could not be inserted. Click into a page first.';
+    wireFormField(el);
+    if(typeof _fwApplyExactSize === 'function') _fwApplyExactSize(el);
+    if(typeof checkContent === 'function') checkContent();
+    if(typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    return 'Inserted ' + t.label + ' "' + cfg.label + '" on page ' + pageNumFromEl(target.pc) + '.';
+  });
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
