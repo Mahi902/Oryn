@@ -106,6 +106,8 @@
     return idx === -1 ? 1 : idx + 1;
   }
   // DOM-order page lookups — the addressing scheme every /command below uses.
+  function aamSwatch(inputId, hex){ const b = document.getElementById(inputId + '_btn'); const f = b && b.querySelector('.cc-swatch-fill'); if(f) f.style.background = hex; }
+  function aamHex(h){ return /^#[0-9a-f]{6}$/i.test(String(h||'')) ? String(h).toLowerCase() : null; }
   function pageContentByNum(n){ return document.querySelectorAll('#editorArea .page-content')[n-1] || null; }
   function pageByNum(n){ return document.querySelectorAll('#editorArea .page')[n-1] || null; }
   // Effective setting: the agent currently acting may have its own override (Agent Permissions), else the default.
@@ -543,10 +545,15 @@
     return side + ' margin set to ' + v + 'cm.';
   });
 
-  reg('bgset', 'words', 'action', 'bgset <#hex> [#hex2] — set page background color(s) (global).', (hex1, hex2) => {
+  reg('bgset', 'words', 'action', 'bgset <#hex> [#hex2] — set the page background. One color = solid; two colors = a gradient (angle unchanged; see bggradient to set the angle).', (hex1, hex2) => {
     if(!elAllowed('background')) return denyMsg('page background');
-    const a = document.getElementById('bgColor'), b = document.getElementById('bgColor2');
-    if(a && hex1) a.value = hex1; if(b && hex2) b.value = hex2;
+    const okHex = h => /^#[0-9a-f]{6}$/i.test(String(h||''));
+    if(hex1 && !okHex(hex1)) return 'Colors must look like #rrggbb.';
+    if(hex2 && !okHex(hex2)) return 'Colors must look like #rrggbb.';
+    const a = document.getElementById('bgColor'), b = document.getElementById('bgColor2'), t = document.getElementById('bgType');
+    if(a && hex1){ a.value = hex1; aamSwatch('bgColor', hex1); }
+    if(b && hex2){ b.value = hex2; aamSwatch('bgColor2', hex2); }
+    if(t && (hex1 || hex2)){ t.value = hex2 ? 'gradient' : 'solid'; if(typeof toggleGradientUI === 'function'){ toggleGradientUI(t.value); return 'Page background set (' + t.value + ').'; } }
     if(typeof updateBackground === 'function') updateBackground();
     return 'Page background updated.';
   });
@@ -1070,6 +1077,104 @@
   reg('closeesign', 'none', 'action', 'Close the E-Signature window without inserting.', () => {
     if(typeof closeMdl !== 'function') return 'E-Signature is not available in this editor version.';
     closeMdl('esignMdl'); return 'Closed E-Signature.';
+  });
+
+  // ── v2.0.20: page look (backgrounds, page numbers, header/footer, theme) ──
+  reg('bgsolid', 'words', 'action', 'bgsolid <#hex> — set a solid page background color.', (hex) => {
+    if(!elAllowed('background')) return denyMsg('page background');
+    const h = aamHex(hex); if(!h) return 'Usage: bgsolid #rrggbb.';
+    return runRegistryCommand('bgset', h, true);
+  });
+  reg('bggradient', 'words', 'action', 'bggradient <#hex1> <#hex2> [angle] — set a gradient page background. Angle is 0–360 degrees (default keeps the current one, 135 at first). Example: bggradient #fdf6e3 #ffd9b3 160', (h1, h2, ang) => {
+    if(!elAllowed('background')) return denyMsg('page background');
+    const a = aamHex(h1), b = aamHex(h2);
+    if(!a || !b) return 'Usage: bggradient #rrggbb #rrggbb [angle].';
+    const g = document.getElementById('gradientAngle');
+    if(g && ang != null && ang !== ''){ const n = parseInt(ang,10); if(isNaN(n)) return 'Angle must be a number from 0 to 360.'; g.value = Math.min(360, Math.max(0, n)); }
+    runRegistryCommand('bgset', a + ' ' + b, true);
+    return 'Gradient background set: ' + a + ' to ' + b + ' at ' + (g ? g.value : '?') + '°.';
+  });
+  reg('bgstatus', 'none', 'info', 'Current page background type (solid or gradient), colors and gradient angle.', () => {
+    if(!elAllowed('background')) return denyMsg('page background');
+    const g = id => (document.getElementById(id) || {value:''}).value;
+    return 'type:' + g('bgType') + ' color1:' + g('bgColor') + ' color2:' + g('bgColor2') + ' angle:' + g('gradientAngle');
+  });
+
+  const AAM_PN_POS = ['top-left','top-center','top-right','bottom-left','bottom-center','bottom-right'];
+  reg('pagenumberstyle', 'words', 'action', 'pagenumberstyle [position=top-left|top-center|top-right|bottom-left|bottom-center|bottom-right] [color=#hex] [highlight=#hex] [size=pt 6–36] [start=n] [pages=all|1-5|1,3,5] [bold=on|off] [italic=on|off] [underline=on|off] [strike=on|off] — change how page numbers look. Page numbers must be on (pagenumbering on). Example: pagenumberstyle position=bottom-center color=#555555 size=10 bold=on', (...a) => {
+    if(typeof PN === 'undefined' || typeof renderPageNumbers !== 'function') return 'Page numbering is not available in this editor version.';
+    if(!a.length) return 'Usage: pagenumberstyle key=value … (see /help pagenumberstyle).';
+    const done = [], bad = [];
+    const setIn = (id, v) => { const el = document.getElementById(id); if(el){ el.value = v; return true; } return false; };
+    for(const t of a){
+      const i = t.indexOf('='); if(i < 0){ bad.push(t); continue; }
+      const k = t.slice(0,i).toLowerCase(), v = t.slice(i+1);
+      if(k === 'position'){
+        const pos = v.toLowerCase();
+        const btn = AAM_PN_POS.includes(pos) && document.querySelector('.pn-pos-btn[data-pos="' + pos + '"]');
+        if(!btn){ bad.push(t); continue; } setPnPos(btn); done.push(k);
+      } else if(k === 'color' || k === 'highlight'){
+        const h = aamHex(v); const id = k === 'color' ? 'pnColor' : 'pnHighlight';
+        if(!h || !setIn(id, h)){ bad.push(t); continue; } aamSwatch(id, h); done.push(k);
+      } else if(k === 'size'){ const n = parseInt(v,10); if(isNaN(n) || !setIn('pnSize', Math.min(36, Math.max(6, n)))){ bad.push(t); continue; } done.push(k); }
+      else if(k === 'start'){ const n = parseInt(v,10); if(isNaN(n) || n < 0 || !setIn('pnStart', n)){ bad.push(t); continue; } done.push(k); }
+      else if(k === 'pages'){ if(!/^(all|[\d,\- ]+)$/i.test(v)){ bad.push(t); continue; } setIn('pnPages', /^all$/i.test(v) ? '' : v); done.push(k); }
+      else if(['bold','italic','underline','strike'].includes(k)){
+        const want = /^(on|true|yes|1)$/i.test(v), btn = document.querySelector('.pn-fmt-btn[data-fmt="' + k + '"]');
+        if(!btn){ bad.push(t); continue; }
+        if(PN.formats.has(k) !== want) togglePnFmt(btn);
+        done.push(k);
+      } else bad.push(t);
+    }
+    renderPageNumbers();
+    if(typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    return (done.length ? 'Updated page numbers: ' + done.join(', ') + '.' : 'Nothing changed.') + (bad.length ? ' Could not use: ' + bad.join(' ') + '.' : '') + (PN.enabled ? '' : ' (Page numbers are off — run pagenumbering on to show them.)');
+  });
+  reg('pagenumberstatus', 'none', 'info', 'Current page-number settings (on/off, position, color, highlight, size, start, pages, styles).', () => {
+    if(typeof PN === 'undefined') return 'Page numbering is not available in this editor version.';
+    const g = id => (document.getElementById(id) || {value:''}).value;
+    return 'enabled:' + !!PN.enabled + ' position:' + PN.position + ' color:' + g('pnColor') + ' highlight:' + g('pnHighlight') + ' size:' + g('pnSize') + ' start:' + g('pnStart') + ' pages:' + (g('pnPages') || 'all') + ' styles:' + ([...PN.formats].join(',') || 'none');
+  });
+
+  function aamHfStyle(kind, which, args){
+    const area = kind === 'header' ? '.page-header-area' : '.page-footer-area';
+    if(!elAllowed(kind)) return denyMsg('page ' + kind);
+    if(!which) return 'Usage: ' + kind + 'style <n|all> [color=#hex] [highlight=#hex] [size=pt].';
+    let color = null, hl = null, size = null; const bad = [];
+    args.forEach(t => {
+      const m = t.match(/^(color|colour|highlight|size)=(.+)$/i); if(!m){ bad.push(t); return; }
+      const k = m[1].toLowerCase(), v = m[2];
+      if(k === 'size'){ const n = parseInt(v,10); if(isNaN(n)) bad.push(t); else size = Math.min(72, Math.max(6, n)); }
+      else { const h = aamHex(v); if(!h) bad.push(t); else if(k === 'highlight') hl = h; else color = h; }
+    });
+    if(bad.length) return 'Could not use: ' + bad.join(' ') + '. Colors look like #rrggbb.';
+    if(!color && !hl && !size) return 'Give at least one of color=, highlight=, size=.';
+    let els;
+    if(String(which).toLowerCase() === 'all') els = Array.from(document.querySelectorAll('#editorArea ' + area)).filter(el => { const pg = el.closest('.page'); return pg && pageAllowed(pageNumFromEl(el)); });
+    else { const n = parseInt(which,10); if(!n) return 'Give a page number or "all".'; if(!pageAllowed(n)) return denyMsg('page ' + n); const pg = pageByNum(n); const el = pg && pg.querySelector(area); if(!el) return 'Page ' + n + ' not found.'; els = [el]; }
+    if(!els.length) return 'No ' + kind + 's to change.';
+    els.forEach(el => {
+      let span = (el.children.length === 1 && el.firstElementChild.dataset && el.firstElementChild.dataset.aamHf) ? el.firstElementChild : null;
+      if(!span){ span = document.createElement('span'); span.dataset.aamHf = '1'; while(el.firstChild) span.appendChild(el.firstChild); el.appendChild(span); }
+      if(color) span.style.color = color;
+      if(hl) span.style.backgroundColor = hl;
+      if(size) span.style.fontSize = size + 'pt';
+      const pc = el.closest('.page') && el.closest('.page').querySelector('.page-content');
+      if(pc && typeof notifyContentChanged === 'function') notifyContentChanged(pc);
+    });
+    if(typeof scheduleAutoSave === 'function') scheduleAutoSave();
+    return 'Styled ' + els.length + ' ' + kind + (els.length === 1 ? '' : 's') + '.';
+  }
+  reg('headerstyle', 'words', 'action', 'headerstyle <n|all> [color=#hex] [highlight=#hex] [size=pt] — set the text color, highlight and size of the header on page n (or every page). Set header text first with headerset.', (which, ...a) => aamHfStyle('header', which, a));
+  reg('footerstyle', 'words', 'action', 'footerstyle <n|all> [color=#hex] [highlight=#hex] [size=pt] — set the text color, highlight and size of the footer on page n (or every page). Set footer text first with footerset.', (which, ...a) => aamHfStyle('footer', which, a));
+
+  reg('themepanel', 'words', 'action', 'themepanel <open|close|status> — open or close the Theme Panel (accent colors and palettes). The editor only allows it for verified accounts; for anyone else open does nothing.', (v) => {
+    const T = window.SCTheme; const a = String(v||'status').toLowerCase();
+    if(!T) return 'The Theme Panel is not available in this editor version.';
+    if(a === 'status') return 'Theme Panel: ' + (T.verified() ? 'available for this account.' : 'not available (verified accounts only).');
+    if(a === 'close'){ T.close(); return 'Closed the Theme Panel.'; }
+    if(a === 'open'){ if(!T.verified()) return 'The Theme Panel is only available to verified accounts.'; T.open(); return 'Opened the Theme Panel.'; }
+    return 'Usage: themepanel <open|close|status>.';
   });
 
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
