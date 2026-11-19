@@ -2210,6 +2210,91 @@
     return 'Styled ' + cells.length + ' cell' + (cells.length === 1 ? '' : 's') + ' in table ' + m[1].toLowerCase() + '.' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
   });
 
+  // ── v2.0.32: Form fields already in the document ──────────────────────
+  const aamFields = () => [...document.querySelectorAll('#editorArea .page-content .fw-field')];
+  const aamFieldOk = () => typeof _fwGetCfg === 'function' && typeof buildFieldMarkup === 'function' && typeof wireFormField === 'function' && typeof S !== 'undefined' && S.lockedFields;
+  const aamFieldLocked = (f) => !!(typeof S !== 'undefined' && S.lockedFields && S.lockedFields.has(f));
+
+  reg('formfields', 'none', 'info', 'List the form fields in the document: number, page, type, label, name, required / read-only / locked flags and whether it is a free (draggable) field. Use the number with formfieldset, formfieldlock and formfieldremove.', () => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(!aamFieldOk()) return 'Form fields are not available in this editor version.';
+    const out = [];
+    aamFields().forEach((f, i) => {
+      const pn = pageNumFromEl(f); if(!pageAllowed(pn)) return;
+      const c = _fwGetCfg(f); const fl = [];
+      if(c.required) fl.push('required'); if(c.readonly) fl.push('read-only'); if(aamFieldLocked(f)) fl.push('locked'); if(f.style.position === 'absolute') fl.push('free');
+      out.push((i + 1) + '. page ' + pn + ' ' + (c.type || 'field') + ' label:"' + (c.label || '') + '"' + (c.name ? ' name:"' + c.name + '"' : '') + (fl.length ? ' [' + fl.join(', ') + ']' : ''));
+    });
+    return out.length ? out.join('\n') : 'No form fields.';
+  });
+
+  reg('formfieldset', 'rest', 'action', 'formfieldset <n> [label="…"] [name=…] [placeholder="…"] [default="…"] [options=a|b|c] [min=…] [max=…] [minlen=…] [maxlen=…] [tooltip="…"] [style=box|underline|none] [width=<px>] [height=<px>] [lines=<n>] [required=on|off] [readonly=on|off] [bold=on|off] [nolabel=on|off] [textcolor=#rrggbb] [labelcolor=#rrggbb] [bordercolor=#rrggbb] [boxbg=#rrggbb] — change the properties of form field n (see formfields). These are the same options as Field Properties; use the field type\'s own options (options= only works on dropdown, combobox, listbox, multiselect and radio).', (txt) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(!aamFieldOk()) return 'Form fields are not available in this editor version.';
+    const m = String(txt||'').trim().match(/^(\d+)\s*([\s\S]*)$/); const list = aamFields();
+    if(!m) return 'Usage: formfieldset <n> [label="…"] [required=on] … (see /help formfieldset).';
+    const i = aamImgNear(m[1], list); if(i < 0) return 'Form field ' + m[1] + ' not found. ' + aamCountMsg(list.length, 'form field');
+    const f = list[i]; const pn = pageNumFromEl(f); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    if(aamFieldLocked(f)) return 'Form field ' + (i + 1) + ' is locked. Unlock it first with formfieldlock ' + (i + 1) + ' off.';
+    const kv = aamKV(m[2]); const bad = kv.bad.slice(); const o = kv.o; const done = [];
+    if(!Object.keys(o).length) return 'Give at least one property, for example formfieldset ' + (i + 1) + ' label="Full name" required=on.';
+    const cfg = _fwGetCfg(f);
+    const isBtn = ['actionButton','button','submitButton','resetButton','printButton'].indexOf(cfg.type) >= 0;
+    const choice = ['dropdown','combobox','listbox','multiselect','radio'].indexOf(cfg.type) >= 0;
+    const flag = (k, prop) => { if(o[k] === undefined) return; const v = o[k].toLowerCase(); if(v === 'on' || v === 'true' || v === 'yes' || v === '1'){ cfg[prop] = true; done.push(k); } else if(v === 'off' || v === 'false' || v === 'no' || v === '0'){ cfg[prop] = false; done.push(k); } else bad.push(k + '=' + o[k] + ' (on|off)'); };
+    const text = (k, prop, max) => { if(o[k] !== undefined){ cfg[prop] = o[k].slice(0, max || 200); done.push(k); } };
+    const hex = (k, prop) => { if(o[k] === undefined) return; const h = aamHex(o[k]); if(h){ cfg[prop] = h; done.push(k); } else bad.push(k + '=' + o[k] + ' (use #rrggbb)'); };
+    const px = (k, prop, lo, hi) => { if(o[k] === undefined) return; if(o[k] === '' || o[k].toLowerCase() === 'auto'){ cfg[prop] = ''; done.push(k); return; } const n = parseInt(o[k], 10); if(isFinite(n) && n >= lo && n <= hi){ cfg[prop] = String(n); done.push(k); } else bad.push(k + '=' + o[k] + ' (' + lo + '-' + hi + ' or auto)'); };
+    text('label', 'label', 120); text('name', 'name', 60); text('placeholder', 'placeholder'); text('default', 'defaultValue'); text('tooltip', 'tooltip');
+    text('min', 'min', 40); text('max', 'max', 40); text('minlen', 'minLen', 6); text('maxlen', 'maxLen', 6);
+    if(o.options !== undefined){
+      if(choice){ const opts = o.options.split('|').map(x => x.trim()).filter(Boolean); if(opts.length){ cfg.options = opts; done.push('options'); } else bad.push('options= (empty)'); }
+      else bad.push('options (only for dropdown, combobox, listbox, multiselect and radio)');
+    }
+    if(o.style !== undefined){ const s = o.style.toLowerCase(); if(['box','underline','none'].indexOf(s) >= 0){ cfg.style = s; done.push('style'); } else bad.push('style=' + o.style + ' (box|underline|none)'); }
+    px('width', 'width', 20, 1200); px('height', 'height', 10, 1200);
+    if(o.lines !== undefined){ const n = parseInt(o.lines, 10); if(isFinite(n) && n >= 1 && n <= 50){ cfg.lines = n; done.push('lines'); } else bad.push('lines=' + o.lines + ' (1-50)'); }
+    flag('required', 'required'); flag('readonly', 'readonly'); flag('bold', 'bold'); flag('nolabel', 'noLabel');
+    hex('textcolor', 'textColor'); hex('labelcolor', 'labelColor'); hex('bordercolor', 'borderColor'); hex('boxbg', 'boxBg');
+    if(!done.length) return 'Nothing changed on form field ' + (i + 1) + '.' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+    if(isBtn && o.label !== undefined) cfg.label = cfg.label || 'Button';
+    // Rebuild the field exactly the way Field Properties does, keeping its position
+    const wasFree = f.style.position === 'absolute';
+    const pos = wasFree ? {left: f.style.left, top: f.style.top} : null;
+    if(S.selField === f) S.selField = null;
+    f.outerHTML = buildFieldMarkup(cfg);
+    const nf = document.getElementById(_lastFwUid);
+    if(!nf) return 'Could not rebuild form field ' + (i + 1) + '.';
+    if(pos){ nf.style.position = 'absolute'; nf.style.left = pos.left; nf.style.top = pos.top; nf.style.zIndex = '1000'; nf.style.margin = '0'; }
+    wireFormField(nf); if(typeof _fwApplyExactSize === 'function') _fwApplyExactSize(nf);
+    try{ checkContent(); }catch(e){} try{ scheduleAutoSave(); }catch(e){}
+    return 'Updated form field ' + (i + 1) + ' (' + done.join(', ') + ').' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
+  reg('formfieldlock', 'words', 'action', 'formfieldlock <n> <on|off> — lock form field n so it cannot be moved, edited or deleted, or unlock it.', (n, v) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(!aamFieldOk()) return 'Form fields are not available in this editor version.';
+    const list = aamFields(); const i = aamImgNear(n, list);
+    if(i < 0) return 'Form field ' + n + ' not found. ' + aamCountMsg(list.length, 'form field');
+    const a = String(v||'').toLowerCase(); if(a !== 'on' && a !== 'off') return 'Usage: formfieldlock <n> <on|off>.';
+    const f = list[i]; const pn = pageNumFromEl(f); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    if(a === 'on'){ S.lockedFields.add(f); f.classList.add('fw-locked'); } else { S.lockedFields.delete(f); f.classList.remove('fw-locked'); }
+    try{ scheduleAutoSave(); }catch(e){}
+    return 'Form field ' + (i + 1) + ' ' + (a === 'on' ? 'locked' : 'unlocked') + '.';
+  });
+
+  reg('formfieldremove', 'words', 'action', 'formfieldremove <n> — delete form field n (a locked field must be unlocked first).', (n) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(!aamFieldOk()) return 'Form fields are not available in this editor version.';
+    const list = aamFields(); const i = aamImgNear(n, list);
+    if(i < 0) return 'Form field ' + n + ' not found. ' + aamCountMsg(list.length, 'form field');
+    const f = list[i]; const pn = pageNumFromEl(f); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    if(aamFieldLocked(f)) return 'Form field ' + (i + 1) + ' is locked. Unlock it first with formfieldlock ' + (i + 1) + ' off.';
+    S.lockedFields.delete(f); if(S.selField === f) S.selField = null;
+    f.remove(); try{ checkContent(); }catch(e){} try{ if(typeof depickField === 'function') depickField(); }catch(e){} try{ scheduleAutoSave(); }catch(e){}
+    return 'Removed form field ' + (i + 1) + ' from page ' + pn + '.';
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
