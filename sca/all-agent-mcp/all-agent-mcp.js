@@ -3424,6 +3424,41 @@
     return 'Document ID: ' + id + (t && t.value ? ' — title: ' + t.value : '') + '.';
   });
 
+  // ── v2.0.52: Special buttons — Edit and View template buttons ──
+  function aamSbOk(){ return typeof SPECIAL_BTN_DESIGNS !== 'undefined' && typeof confirmInsertSpecialBtn === 'function' && typeof getTemplateLinks === 'function'; }
+  reg('specialbuttons', 'none', 'info', 'List the Special Button designs (Filled, Outline, Pill, Ghost and more) for insertspecialbutton. A Special Button is an Edit or View button that opens a copy of this document: its link carries the whole document inside the address, so only use it where that is wanted.', () => {
+    if(!aamSbOk()) return 'Special Buttons are not available in this editor version.';
+    return 'Special Button designs: ' + SPECIAL_BTN_DESIGNS.map((d) => d.id + ' (' + d.label + ')').join(', ') + '. Types: edit (opens an editable copy), view (opens a read-only copy).';
+  });
+  reg('insertspecialbutton', 'rest', 'action', 'insertspecialbutton <edit|view> [design=<id>] [text=<label>] — insert a Special Button at the cursor: edit opens an editable copy of this document, view opens a read-only copy. design is one of specialbuttons (default filled); text is the button label (default Edit or View, and it takes the rest of the line). The link carries the document\'s content inside the address, so the button must be refreshed on export (the editor does that itself). Place the cursor first (placecursor / select).', (rest) => {
+    if(!elAllowed('content')) return denyMsg('content');
+    if(!aamSbOk()) return 'Special Buttons are not available in this editor version.';
+    let s = String(rest||'').trim();
+    const m = s.match(/^(edit|view)\b\s*(.*)$/i);
+    if(!m) return 'Usage: insertspecialbutton <edit|view> [design=<id>] [text=<label>].';
+    const type = m[1].toLowerCase(); s = m[2];
+    let design = 'filled', text = '';
+    const ti = s.search(/(^|\s)text=/i);
+    if(ti >= 0){ const at = s.indexOf('=', ti); text = s.slice(at + 1).trim(); s = s.slice(0, ti).trim(); }
+    const dm = s.match(/(?:^|\s)design=(\S+)/i); if(dm) design = dm[1].toLowerCase();
+    if(s.replace(/(?:^|\s)design=\S+/i, '').trim()) return 'Unexpected "' + s.replace(/(?:^|\s)design=\S+/i, '').trim() + '". Usage: insertspecialbutton <edit|view> [design=<id>] [text=<label>].';
+    if(!SPECIAL_BTN_DESIGNS.some((d) => d.id === design)) return 'Unknown design "' + design + '". Designs: ' + SPECIAL_BTN_DESIGNS.map((d) => d.id).join(', ') + '.';
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount) return 'Place the cursor in the document first (placecursor / select).';
+    const n = sel.getRangeAt(0).startContainer; const host = n.nodeType === 1 ? n : n.parentElement;
+    if(!host || !host.closest || !host.closest('#editorArea .page-content')) return 'The cursor is not inside the document.';
+    const inp = document.getElementById(type === 'edit' ? 'specialEditText' : 'specialViewText');
+    const prevTxt = inp ? inp.value : '';
+    try{
+      if(inp) inp.value = text;
+      saveRange();
+      _specialBtnPending = type; _specialBtnDesignId = design;
+      confirmInsertSpecialBtn();
+    } catch(e){ return 'The button could not be inserted: ' + (e && e.message || e); }
+    finally { if(inp) inp.value = prevTxt; }
+    return 'Inserted a ' + type + ' button (' + design + ', "' + (text || (type === 'edit' ? 'Edit' : 'View')) + '").';
+  });
+
   // ── Zoom / navigation ────────────────────────────────────────────────
   reg('zoomin', 'none', 'action', 'Zoom the document in by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(10); return 'Zoomed in.'; } return 'Zoom function not available.'; });
   reg('zoomout', 'none', 'action', 'Zoom the document out by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(-10); return 'Zoomed out.'; } return 'Zoom function not available.'; });
