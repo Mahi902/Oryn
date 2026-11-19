@@ -1592,6 +1592,50 @@
     return 'Inserted "' + text + '".';
   });
 
+  // ── Insert chart ─────────────────────────────────────────────────────
+  // The editor's chart maker is a same-origin iframe (ColorLabs/chartmaker1.html). Its wizard
+  // state is plain script variables, so this fills them in and presses its own Insert logic.
+  const CHART_TYPES_OK = ['bar','line','pie','doughnut','radar','polararea'];
+  reg('insertchart', 'rest', 'action', 'insertchart <type>; <title>; <label=value>; <label=value> … — insert a chart image at the cursor. type is bar, line, pie, doughnut, radar or polarArea. Use _ for spaces inside a label. Example: insertchart bar; Sales 2026; Jan=10; Feb=20; Mar=15', (src) => {
+    const g = insertGate(); if(g) return g;
+    if(typeof openChartOverlay !== 'function' || !aamById('chartFrame')) return 'Insert Chart is not available in this editor version.';
+    const parts = String(src||'').split(';').map(s => s.trim()).filter(s => s.length);
+    const usage = 'Usage: insertchart <type>; <title>; <label=value>; <label=value> …';
+    if(parts.length < 3) return usage;
+    const typeIn = parts.shift().toLowerCase();
+    const ti = CHART_TYPES_OK.indexOf(typeIn);
+    if(ti < 0) return 'Unknown chart type "' + typeIn + '". Use bar, line, pie, doughnut, radar or polarArea.';
+    const type = ['bar','line','pie','doughnut','radar','polarArea'][ti];
+    const title = parts.shift().slice(0, 80);
+    const data = [];
+    for(const p of parts){
+      const m = p.match(/^(.+?)\s*=\s*(-?\d+(?:\.\d+)?)$/);
+      if(!m) return 'Could not read "' + p + '". ' + usage;
+      data.push({label: m[1].replace(/_/g, ' ').trim().slice(0, 40), value: parseFloat(m[2])});
+    }
+    if(data.length < 2 || data.length > 30) return 'Give between 2 and 30 data points.';
+    openChartOverlay();
+    (async () => {
+      let cw = null;
+      try {
+        const frame = aamById('chartFrame');
+        const ready = await aamWait(() => {
+          try { cw = frame.contentWindow; return cw && cw.document && cw.document.readyState === 'complete' && cw.eval('typeof Chart !== "undefined" && typeof doApply === "function" && typeof PALETTE !== "undefined"'); }
+          catch(e){ return false; }
+        }, 15000, 200);
+        if(!ready) throw new Error('the chart maker did not load (it must be served from the same site as the editor)');
+        cw.eval('_chartType=' + JSON.stringify(type) + ';_chartTitle=' + JSON.stringify(title) + ';_numPillars=' + data.length + ';_pillars=' + JSON.stringify(data) +
+          '.map(function(d,i){var c=PALETTE[i%PALETTE.length];return {label:d.label,value:d.value,fillColor:c,outlineColor:c}});');
+        await cw.eval('doApply()');
+        aamToast('Chart inserted', 'success');
+      } catch(e){
+        try { closeChartOverlay(); } catch(_){}
+        aamToast('Chart insert failed: ' + e.message, 'error');
+      }
+    })();
+    return 'Inserting a ' + type + ' chart "' + title + '" with ' + data.length + ' points — a toast confirms when it is in the document.';
+  });
+
 
   // ═══════════════════════════════════════════════════════════════════
   //  AGENT LAYER
