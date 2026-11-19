@@ -3033,6 +3033,67 @@
     return 'Markdown Renderer options reset to defaults.';
   });
 
+  // ── v2.0.45: Elegant Variation — vary repeated words with synonyms ──
+  const AAM_EV_OPTS = {
+    limit: { id: 'evLimit', kind: 'num', lo: 1, hi: 50, label: 'allowed repeats per 100 words' },
+    min: { id: 'evMin', kind: 'num', lo: 3, hi: 12, label: 'shortest word to change (letters)' },
+    stop: { id: 'evStop', kind: 'bool', label: 'ignore common words' },
+    single: { id: 'evSingle', kind: 'bool', label: 'single-word synonyms only' },
+    heads: { id: 'evHeads', kind: 'bool', label: 'skip headings' },
+    pick: { id: 'evPick', kind: 'pick', label: 'synonym choice (least, first or random)' }
+  };
+  function aamEvOk(){ return typeof SCElegant !== 'undefined' && SCElegant && typeof SCElegant.run === 'function' && !!document.getElementById('evMdl'); }
+  function aamEvFire(el){ el.dispatchEvent(new Event('change', { bubbles: true })); }
+  reg('elegantvariation', 'none', 'info', 'Show the Elegant Variation state (the Synonym Settings): whether Auto is on, how many repeats per 100 words are allowed, the shortest word changed, ignore common words, single-word synonyms only, synonym choice and skip headings. Run it with elegantrun, switch it with elegantauto, change settings with elegantoption.', () => {
+    if(!aamEvOk()) return 'Elegant Variation is not available in this editor version.';
+    const g = (id) => document.getElementById(id);
+    const b = (id) => { const e = g(id); return e ? (e.checked ? 'on' : 'off') : '?'; };
+    const v = (id) => { const e = g(id); return e ? e.value : '?'; };
+    return 'Elegant Variation: Auto ' + b('evAuto') + '\nlimit (repeats per 100 words) = ' + v('evLimit') + '\nmin (shortest word) = ' + v('evMin') + '\nstop (ignore common words) = ' + b('evStop') + '\nsingle (single-word synonyms only) = ' + b('evSingle') + '\nheads (skip headings) = ' + b('evHeads') + '\npick (synonym choice) = ' + v('evPick');
+  });
+  reg('elegantauto', 'words', 'action', 'elegantauto <on|off|status> — switch Elegant Variation\'s Auto mode on or off, or report it. While on, repeated words near the cursor are swapped for synonyms after you pause typing. It needs the synonym list to load (internet).', (v) => {
+    if(!aamEvOk()) return 'Elegant Variation is not available in this editor version.';
+    const cb = document.getElementById('evAuto'); if(!cb) return 'Elegant Variation Auto is not in this editor version.';
+    const a = String(v||'status').toLowerCase().trim() || 'status';
+    if(a === 'status') return 'Elegant Variation Auto is ' + (cb.checked ? 'on' : 'off') + '.';
+    if(a !== 'on' && a !== 'off') return 'Usage: elegantauto <on|off|status>.';
+    if(a === 'on' && !elAllowed('content')) return denyMsg('content');
+    if(cb.checked !== (a === 'on')){ cb.checked = (a === 'on'); aamEvFire(cb); }
+    return 'Elegant Variation Auto ' + (a === 'on' ? 'enabled' : 'disabled') + '.';
+  });
+  reg('elegantrun', 'none', 'action', 'Vary repeated words in the whole document now with synonyms (the Elegant Variation button), using the current settings. It loads the synonym list first (internet) and works in the background, so the result shows as a toast; check with toasts or read_page afterwards. Not allowed in viewing mode.', () => {
+    if(!elAllowed('content')) return denyMsg('content');
+    if(!aamEvOk()) return 'Elegant Variation is not available in this editor version.';
+    const c = document.body.classList;
+    if(c.contains('viewing-mode') || c.contains('sc-view-only') || c.contains('converter-mode')) return 'Switch to editing mode first.';
+    SCElegant.run(true);
+    try{ scheduleAutoSave(); }catch(e){}
+    return 'Elegant Variation started. It finishes in the background; see toasts for how many words were varied.';
+  });
+  reg('elegantoption', 'words', 'action', 'elegantoption <limit|min|stop|single|heads|pick> <value> — change one Elegant Variation setting. limit 1-50 (allowed repeats per 100 words), min 3-12 (shortest word to change), stop / single / heads on|off, pick least|first|random. Example: elegantoption limit 5', (k, v) => {
+    if(!aamEvOk()) return 'Elegant Variation is not available in this editor version.';
+    k = String(k||'').toLowerCase().trim(); v = String(v||'').toLowerCase().trim();
+    const o = AAM_EV_OPTS[k];
+    if(!o) return 'Usage: elegantoption <' + Object.keys(AAM_EV_OPTS).join('|') + '> <value>.';
+    const el = document.getElementById(o.id); if(!el) return 'That setting is not in this editor version.';
+    if(o.kind === 'num'){
+      const n = parseInt(v, 10);
+      if(isNaN(n) || n < o.lo || n > o.hi) return k + ' needs a number from ' + o.lo + ' to ' + o.hi + ' (' + o.label + ').';
+      el.value = String(n); aamEvFire(el); return k + ' set to ' + n + '.';
+    }
+    if(o.kind === 'bool'){
+      if(v !== 'on' && v !== 'off') return k + ' needs on or off (' + o.label + ').';
+      el.checked = (v === 'on'); aamEvFire(el); return k + ' ' + v + '.';
+    }
+    if(['least', 'first', 'random'].indexOf(v) < 0) return 'pick needs least, first or random.';
+    el.value = v; aamEvFire(el); return 'pick set to ' + v + '.';
+  });
+  reg('elegantreset', 'none', 'action', 'Reset the Elegant Variation settings (limit, shortest word, common words, single-word, choice, headings) to their defaults. Auto mode is kept as it is.', () => {
+    if(!aamEvOk() || typeof SCElegant.reset !== 'function') return 'Elegant Variation is not available in this editor version.';
+    SCElegant.reset();
+    return 'Elegant Variation settings reset to defaults.';
+  });
+
   // ── Zoom / navigation ────────────────────────────────────────────────
   reg('zoomin', 'none', 'action', 'Zoom the document in by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(10); return 'Zoomed in.'; } return 'Zoom function not available.'; });
   reg('zoomout', 'none', 'action', 'Zoom the document out by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(-10); return 'Zoomed out.'; } return 'Zoom function not available.'; });
