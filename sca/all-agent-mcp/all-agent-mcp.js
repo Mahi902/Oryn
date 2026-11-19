@@ -2538,6 +2538,148 @@
     return 'Deleted horizontal line ' + (i + 1) + ' from page ' + pn + '.';
   });
 
+  // ── v2.0.38: LaTeX formulas and text boxes already in the document ────
+  const aamFormulas = () => [...document.querySelectorAll('#editorArea .page-content [data-latex-src]')];
+
+  reg('latexformulas', 'none', 'info', 'List the LaTeX formulas in the document: number, page, inline or block, color and the formula text. Use the number with latexset and latexremove.', () => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const out = [];
+    aamFormulas().forEach((el, i) => {
+      const pn = pageNumFromEl(el); if(!pageAllowed(pn)) return;
+      const src = el.dataset.latexSrc || '';
+      out.push((i + 1) + '. page ' + pn + ' ' + (el.classList.contains('latex-block') ? 'block' : 'inline') + (el.dataset.latexColor ? ' color:' + el.dataset.latexColor : '') + ' ' + (src.length > 100 ? src.slice(0, 97) + '...' : src));
+    });
+    return out.length ? out.join('\n') : 'No LaTeX formulas.';
+  });
+
+  reg('latexset', 'rest', 'action', 'latexset <n> [mode=inline|block] [color=#rrggbb|none] [src=<formula>] — change LaTeX formula n (see latexformulas), the same as editing it in the Insert LaTeX window. src= takes the rest of the line, so put it last; spaces and backslashes are fine. Example: latexset 2 mode=block src=\\frac{a}{b}', (txt) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(!window.katex) return 'The formula engine (KaTeX) is still loading — try again in a moment.';
+    let rest = String(txt||'').trim(); const m = rest.match(/^(\d+)\s*([\s\S]*)$/); const list = aamFormulas();
+    if(!m) return 'Usage: latexset <n> [mode=inline|block] [color=#rrggbb|none] [src=<formula>].';
+    const i = aamImgNear(m[1], list); if(i < 0) return 'Formula ' + m[1] + ' not found. ' + aamCountMsg(list.length, 'formula');
+    const el = list[i]; const pn = pageNumFromEl(el); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    rest = m[2]; let src = null;
+    const sm = rest.match(/(^|\s)src=([\s\S]*)$/i); if(sm){ src = sm[2].trim(); rest = rest.slice(0, sm.index); }
+    const kv = aamKV(rest); const bad = kv.bad.slice(); const o = kv.o; const done = [];
+    if(src === null && !Object.keys(o).length) return 'Give at least one option, for example latexset ' + (i + 1) + ' color=#e53935 or latexset ' + (i + 1) + ' src=x^2+1.';
+    if(src === '') { bad.push('src= (empty)'); src = null; }
+    let block = el.classList.contains('latex-block');
+    if(o.mode !== undefined){ const md = o.mode.toLowerCase(); if(md === 'block' || md === 'inline'){ if((md === 'block') !== block){ block = md === 'block'; done.push('mode ' + md); } } else bad.push('mode=' + o.mode + ' (inline|block)'); }
+    let color = el.dataset.latexColor || '';
+    if(o.color !== undefined){ if(o.color.toLowerCase() === 'none'){ color = ''; done.push('color none'); } else { const h = aamHex(o.color); if(h){ color = h; done.push('color ' + h); } else bad.push('color=' + o.color + ' (use #rrggbb or none)'); } }
+    const newSrc = src !== null ? src : (el.dataset.latexSrc || ''); if(src !== null && src !== el.dataset.latexSrc) done.push('formula');
+    if(!done.length) return 'Nothing changed on formula ' + (i + 1) + '.' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+    const w = document.createElement(block ? 'div' : 'span');
+    w.className = block ? 'latex-block' : 'latex-inline'; w.dataset.latexSrc = newSrc; w.dataset.latexColor = color;
+    if(color) w.style.color = color; w.contentEditable = 'false'; w.title = 'Click to edit formula';
+    w.addEventListener('click', (e) => { e.stopPropagation(); if(typeof openLatexModal === 'function') openLatexModal(w); });
+    try { katex.render(newSrc, w, { throwOnError: false, displayMode: block, macros: { '\\RR': '\\mathbb{R}' } }); } catch(e){ w.textContent = newSrc; }
+    el.parentNode.replaceChild(w, el);
+    try{ checkContent(); }catch(e){} try{ scheduleAutoSave(); }catch(e){}
+    return 'Updated formula ' + (i + 1) + ' (' + done.join(', ') + ').' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
+  reg('latexremove', 'words', 'action', 'latexremove <n> — delete LaTeX formula n (see latexformulas).', (n) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const list = aamFormulas(); const i = aamImgNear(n, list);
+    if(i < 0) return 'Formula ' + n + ' not found. ' + aamCountMsg(list.length, 'formula');
+    const el = list[i]; const pn = pageNumFromEl(el); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    el.remove();
+    try{ checkContent(); }catch(e){} try{ scheduleAutoSave(); }catch(e){}
+    return 'Deleted formula ' + (i + 1) + ' from page ' + pn + '.';
+  });
+
+  const aamBoxes = () => [...document.querySelectorAll('#editorArea .page-content .tbx')];
+  const aamBoxLocked = (b) => b.dataset.locked === '1';
+  const aamHexA = (h, a) => { h = String(h || '#ffffff').replace('#', ''); if(h.length === 3) h = h.split('').map(c => c + c).join(''); const n = parseInt(h, 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')'; };
+
+  reg('textboxes', 'none', 'info', 'List the text boxes in the document: number, page, text, size, position, background, border, rotation, opacity and locked. Use the number with textboxset, textboxlock and textboxremove.', () => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const out = [];
+    aamBoxes().forEach((b, i) => {
+      const pn = pageNumFromEl(b); if(!pageAllowed(pn)) return;
+      const d = b.dataset, s = b.style; const t = (b.textContent || '').trim().replace(/\s+/g, ' ');
+      out.push((i + 1) + '. page ' + pn + ' "' + (t.length > 40 ? t.slice(0, 37) + '...' : t) + '" ' + Math.round(b.offsetWidth) + 'x' + Math.round(b.offsetHeight) + 'px at ' + (parseInt(s.left, 10) || 0) + ',' + (parseInt(s.top, 10) || 0)
+        + ' bg:' + (d.bgT || 'none') + ' border:' + (d.bs || 'solid') + ' ' + (d.bw || 1) + 'px ' + (d.bc || '#bdbdbd') + ' text:' + (d.tc || '#000000') + ' ' + (parseFloat(s.fontSize) || 16) + 'px'
+        + (parseFloat(d.rot) ? ' rotate:' + d.rot + 'deg' : '') + ' opacity:' + Math.round((parseFloat(s.opacity) || 1) * 100) + '%' + (aamBoxLocked(b) ? ' locked' : ''));
+    });
+    return out.length ? out.join('\n') : 'No text boxes.';
+  });
+
+  reg('textboxset', 'rest', 'action', 'textboxset <n> [text="…"] [bg=none|solid|gradient] [bgcolor=#rrggbb] [bgend=#rrggbb] [bgopacity=0-100] [bgangle=0-360] [border=none|solid|dashed|dotted|double] [bordercolor=#rrggbb] [borderwidth=1-16] [radius=0-200] [padding=0-80] [shadow=0-60] [opacity=5-100] [color=#rrggbb] [size=8-120] [align=left|center|right|justify] [rotate=-180-180] [width=40-2000] [height=24-3000|auto] [x=px] [y=px] [order=front|back] — change text box n (see textboxes), the same options as the Edit Text Box window. A locked text box must be unlocked first (textboxlock).', (txt) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const m = String(txt||'').trim().match(/^(\d+)\s*([\s\S]*)$/); const list = aamBoxes();
+    if(!m) return 'Usage: textboxset <n> [text="…"] [bg=…] [border=…] [color=#rrggbb] [size=…] … (see /help textboxset).';
+    const i = aamImgNear(m[1], list); if(i < 0) return 'Text box ' + m[1] + ' not found. ' + aamCountMsg(list.length, 'text box');
+    const b = list[i]; const pn = pageNumFromEl(b); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    if(aamBoxLocked(b)) return 'Text box ' + (i + 1) + ' is locked. Unlock it first with textboxlock ' + (i + 1) + ' off.';
+    const kv = aamKV(m[2]); const bad = kv.bad.slice(); const o = kv.o; const done = [];
+    if(!Object.keys(o).length) return 'Give at least one option, for example textboxset ' + (i + 1) + ' bg=solid bgcolor=#fff3cd radius=12.';
+    const d = b.dataset, s = b.style;
+    const num = (k, lo, hi) => { if(o[k] === undefined) return undefined; const n = parseFloat(o[k]); if(isFinite(n) && n >= lo && n <= hi) return n; bad.push(k + '=' + o[k] + ' (' + lo + '-' + hi + ')'); return undefined; };
+    const col = (k) => { if(o[k] === undefined) return undefined; const h = aamHex(o[k]); if(h) return h; bad.push(k + '=' + o[k] + ' (use #rrggbb)'); return undefined; };
+    const pick = (k, opts) => { if(o[k] === undefined) return undefined; const v = o[k].toLowerCase(); if(opts.indexOf(v) >= 0) return v; bad.push(k + '=' + o[k] + ' (' + opts.join('|') + ')'); return undefined; };
+    if(o.text !== undefined){ b.textContent = o.text; try{ b.dispatchEvent(new Event('input', {bubbles:true})); }catch(e){} done.push('text'); }
+    // background
+    let bgT = d.bgT || 'none', bg1 = d.bg1 || '#ffffff', bg2 = d.bg2 || '#bbdefb', bgA = d.bgA !== undefined ? +d.bgA : 100, bgAng = d.bgAng !== undefined ? +d.bgAng : 135;
+    let bgChanged = false;
+    const t0 = pick('bg', ['none','solid','gradient']); if(t0){ bgT = t0 === 'gradient' ? 'grad' : t0; bgChanged = true; }
+    const c1 = col('bgcolor'); if(c1){ bg1 = c1; bgChanged = true; if(bgT === 'none' && !t0) bgT = 'solid'; }
+    const c2 = col('bgend'); if(c2){ bg2 = c2; bgChanged = true; if(bgT !== 'grad' && !t0) bgT = 'grad'; }
+    const ba = num('bgopacity', 0, 100); if(ba !== undefined){ bgA = ba; bgChanged = true; }
+    const bg = num('bgangle', 0, 360); if(bg !== undefined){ bgAng = bg; bgChanged = true; }
+    if(bgChanged){
+      const a = bgA / 100; d.bgT = bgT; d.bg1 = bg1; d.bg2 = bg2; d.bgA = String(bgA); d.bgAng = String(bgAng);
+      s.background = bgT === 'none' ? 'transparent' : bgT === 'solid' ? aamHexA(bg1, a) : 'linear-gradient(' + bgAng + 'deg,' + aamHexA(bg1, a) + ',' + aamHexA(bg2, a) + ')';
+      done.push('background');
+    }
+    // border
+    let bs = d.bs || 'solid', bc = d.bc || '#bdbdbd', bw = d.bw !== undefined ? +d.bw : 1; let bdChanged = false;
+    const bs1 = pick('border', ['none','solid','dashed','dotted','double']); if(bs1){ bs = bs1; bdChanged = true; }
+    const bc1 = col('bordercolor'); if(bc1){ bc = bc1; bdChanged = true; }
+    const bw1 = num('borderwidth', 1, 16); if(bw1 !== undefined){ bw = bw1; bdChanged = true; }
+    if(bdChanged){ d.bs = bs; d.bc = bc; d.bw = String(bw); s.border = bs === 'none' ? 'none' : Math.max(1, bw) + 'px ' + bs + ' ' + bc; done.push('border'); }
+    const rad = num('radius', 0, 200); if(rad !== undefined){ s.borderRadius = rad + 'px'; done.push('radius'); }
+    const pad = num('padding', 0, 80); if(pad !== undefined){ s.padding = pad + 'px'; done.push('padding'); }
+    const sh = num('shadow', 0, 60); if(sh !== undefined){ d.sh = String(sh); s.boxShadow = sh ? '0 ' + Math.round(sh / 3) + 'px ' + sh + 'px rgba(0,0,0,.3)' : 'none'; done.push('shadow'); }
+    const op = num('opacity', 5, 100); if(op !== undefined){ s.opacity = String(op / 100); done.push('opacity'); }
+    const tc = col('color'); if(tc){ d.tc = tc; s.color = tc; done.push('text color'); }
+    const fs = num('size', 8, 120); if(fs !== undefined){ s.fontSize = fs + 'px'; done.push('font size'); }
+    const al = pick('align', ['left','center','right','justify']); if(al){ s.textAlign = al; done.push('align'); }
+    const rot = num('rotate', -180, 180); if(rot !== undefined){ d.rot = String(rot); s.transform = rot ? 'rotate(' + rot + 'deg)' : ''; done.push('rotation'); }
+    const w = num('width', 40, 2000); if(w !== undefined){ s.width = w + 'px'; done.push('width'); }
+    if(o.height !== undefined){ if(o.height.toLowerCase() === 'auto'){ s.height = ''; s.overflow = ''; done.push('height auto'); } else { const h = num('height', 24, 3000); if(h !== undefined){ s.height = h + 'px'; s.overflow = 'hidden'; done.push('height'); } } }
+    const x = num('x', -2000, 5000); if(x !== undefined){ s.left = x + 'px'; done.push('x'); }
+    const y = num('y', -2000, 20000); if(y !== undefined){ s.top = y + 'px'; done.push('y'); }
+    const ord = pick('order', ['front','back']); if(ord){ s.zIndex = ord === 'front' ? String(Math.max(900, ...aamBoxes().map(q => +q.style.zIndex || 0)) + 1) : '1'; done.push('order ' + ord); }
+    try{ checkContent(); }catch(e){} try{ scheduleAutoSave(); }catch(e){}
+    return (done.length ? 'Updated text box ' + (i + 1) + ' (' + done.join(', ') + ').' : 'Nothing changed on text box ' + (i + 1) + '.') + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
+  reg('textboxlock', 'words', 'action', 'textboxlock <n> [on|off] — lock or unlock text box n (see textboxes), the same as Lock / Unlock in its right-click window. With no on/off it toggles. A locked text box cannot be changed or deleted.', (n, mode) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const list = aamBoxes(); const i = aamImgNear(n, list);
+    if(i < 0) return 'Text box ' + n + ' not found. ' + aamCountMsg(list.length, 'text box');
+    const b = list[i]; const pn = pageNumFromEl(b); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    const a = String(mode||'').toLowerCase(); if(a && a !== 'on' && a !== 'off') return 'Usage: textboxlock <n> [on|off].';
+    const want = a ? a === 'on' : !aamBoxLocked(b);
+    if(want) b.dataset.locked = '1'; else delete b.dataset.locked;
+    try{ scheduleAutoSave(); }catch(e){}
+    return 'Text box ' + (i + 1) + ' is now ' + (want ? 'locked' : 'unlocked') + '.';
+  });
+
+  reg('textboxremove', 'words', 'action', 'textboxremove <n> — delete text box n (see textboxes). A locked text box must be unlocked first.', (n) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const list = aamBoxes(); const i = aamImgNear(n, list);
+    if(i < 0) return 'Text box ' + n + ' not found. ' + aamCountMsg(list.length, 'text box');
+    const b = list[i]; const pn = pageNumFromEl(b); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    if(aamBoxLocked(b)) return 'Text box ' + (i + 1) + ' is locked. Unlock it first with textboxlock ' + (i + 1) + ' off.';
+    b.remove();
+    try{ checkContent(); }catch(e){} try{ scheduleAutoSave(); }catch(e){}
+    return 'Deleted text box ' + (i + 1) + ' from page ' + pn + '.';
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
