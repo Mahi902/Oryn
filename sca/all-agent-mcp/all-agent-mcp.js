@@ -1566,6 +1566,32 @@
     return 'Used ' + u.used + ' of ' + TR_DAILY_LIMIT + ' characters today (' + Math.max(0, TR_DAILY_LIMIT - u.used) + ' left).' + (signed ? '' : ' Not signed in with Google, so the daily budget is not enforced here.');
   });
 
+  // ── Insert date / time ───────────────────────────────────────────────
+  reg('datetimeformats', 'rest', 'info', 'datetimeformats [filter] — the date/time formats insertdatetime accepts, with what each looks like right now. Optional filter text narrows the list.', (q) => {
+    if(typeof DT_FORMATS === 'undefined' || typeof formatDateWithPattern !== 'function') return 'Insert Time / Date is not available in this editor version.';
+    q = String(q||'').trim().toLowerCase();
+    const now = new Date(), out = [];
+    DT_FORMATS.forEach(grp => grp.formats.forEach(f => {
+      if(q && f.toLowerCase().indexOf(q) < 0 && grp.group.toLowerCase().indexOf(q) < 0) return;
+      out.push(f + '  →  ' + formatDateWithPattern(f, now));
+    }));
+    return out.length ? out.join('\n') : 'No formats match "' + q + '".';
+  });
+
+  reg('insertdatetime', 'rest', 'action', 'insertdatetime <format> — insert the current date/time at the cursor, e.g. insertdatetime dd MMMM yyyy  or  insertdatetime HH:mm. See datetimeformats for the list; defaults to "dd MMMM yyyy".', (fmt) => {
+    const g = insertGate(); if(g) return g;
+    if(typeof DT_FORMATS === 'undefined' || typeof formatDateWithPattern !== 'function') return 'Insert Time / Date is not available in this editor version.';
+    fmt = String(fmt||'').trim() || 'dd MMMM yyyy';
+    const known = DT_FORMATS.some(grp => grp.formats.indexOf(fmt) >= 0);
+    if(!known) return 'Unknown format "' + fmt + '". Use datetimeformats to see the available ones.';
+    const text = formatDateWithPattern(fmt, new Date());
+    try { if(typeof restoreRange === 'function') restoreRange(); } catch(e){}
+    try { if(typeof focusActivePageContent === 'function') focusActivePageContent(); } catch(e){}
+    document.execCommand('insertText', false, text);
+    try { if(typeof scheduleAutoSave === 'function') scheduleAutoSave(); } catch(e){}
+    return 'Inserted "' + text + '".';
+  });
+
 
   // ═══════════════════════════════════════════════════════════════════
   //  AGENT LAYER
