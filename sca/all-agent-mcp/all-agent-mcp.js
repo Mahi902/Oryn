@@ -2105,6 +2105,112 @@
     return 'Inserted a ' + type + ' button (' + design.id + ') on page ' + pageNumFromEl(target.pc) + '.' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
   });
 
+  // ── v2.0.30: Table attributes and cell styles (Edit Table) ────────────
+  const aamTblOk = () => typeof _readTableBorderModeFromDOM === 'function' && typeof _readCellStyleFromDOM === 'function';
+  const aamHex = (v) => /^#[0-9a-f]{6}$/i.test(v || '');
+
+  reg('tablestyle', 'words', 'info', 'tablestyle <table id> — show a table\'s border mode (default, noborder, nodivider or custom) with border colors and widths, and which cells have a fill color or their own border.', (id) => {
+    if(!elAllowed('tables')) return denyMsg('tables');
+    if(!aamTblOk()) return 'Table styling is not available in this editor version.';
+    const t = tableById(id); if(!t) return 'No table with ID "' + id + '".';
+    const bm = _readTableBorderModeFromDOM(t);
+    const ref = bm.mode === 'noborder' ? {style: 'none'} : {style: 'solid', color: bm.divColor, width: bm.divWidth};
+    const fills = [], own = [];
+    [...t.querySelectorAll('tr')].forEach((tr, r) => [...tr.querySelectorAll('td,th')].forEach((c, k) => {
+      const cs = _readCellStyleFromDOM(c, ref); const at = (r + 1) + ',' + (k + 1);
+      if(cs.fillType === 'gradient') fills.push(at + ' gradient'); else if(cs.fill && cs.fill.toLowerCase() !== '#ffffff' && cs.fillType !== 'none') fills.push(at + ' ' + cs.fill);
+      if(cs.borderStyle && cs.borderStyle !== 'none') own.push(at + ' ' + cs.borderStyle);
+    }));
+    return 'Table ' + id.toLowerCase() + ': border mode ' + bm.mode + ' (outer ' + bm.outerWidth + 'px ' + bm.outerColor + ', divider ' + bm.divWidth + 'px ' + bm.divColor + ').\nCells with a fill (row,col): ' + (fills.join('; ') || 'none') + '.\nCells with their own border: ' + (own.join('; ') || 'none') + '.';
+  });
+
+  reg('tableborder', 'words', 'action', 'tableborder <table id> <default|noborder|nodivider|custom> [outercolor=#rrggbb] [outerwidth=1-8] [divcolor=#rrggbb] [divwidth=1-8] — set the table border mode, the same as Edit Table. custom uses the color and width options; cells with their own border keep it.', (id, mode, ...rest) => {
+    if(!elAllowed('tables')) return denyMsg('tables');
+    if(!aamTblOk()) return 'Table styling is not available in this editor version.';
+    const t = tableById(id); if(!t) return 'No table with ID "' + id + '".';
+    mode = String(mode||'').toLowerCase();
+    if(['default','noborder','nodivider','custom'].indexOf(mode) < 0) return 'Usage: tableborder <table id> <default|noborder|nodivider|custom> [outercolor=…] [outerwidth=…] [divcolor=…] [divwidth=…].';
+    const kv = aamKV(rest.join(' ')); const bad = kv.bad.slice();
+    const bm = _readTableBorderModeFromDOM(t);
+    const oldRef = bm.mode === 'noborder' ? {style: 'none'} : {style: 'solid', color: bm.divColor, width: bm.divWidth};
+    let oc = bm.outerColor, ow = bm.outerWidth, dc = bm.divColor, dw = bm.divWidth;
+    const w = (v, name) => { const n = parseInt(v, 10); if(isFinite(n) && n >= 1 && n <= 8) return n; bad.push(name + '=' + v + ' (1-8)'); return null; };
+    if(mode === 'custom'){
+      if(kv.o.outercolor !== undefined){ if(aamHex(kv.o.outercolor)) oc = kv.o.outercolor; else bad.push('outercolor=' + kv.o.outercolor + ' (use #rrggbb)'); }
+      if(kv.o.divcolor !== undefined){ if(aamHex(kv.o.divcolor)) dc = kv.o.divcolor; else bad.push('divcolor=' + kv.o.divcolor + ' (use #rrggbb)'); }
+      if(kv.o.outerwidth !== undefined){ const n = w(kv.o.outerwidth, 'outerwidth'); if(n !== null) ow = n; }
+      if(kv.o.divwidth !== undefined){ const n = w(kv.o.divwidth, 'divwidth'); if(n !== null) dw = n; }
+    }
+    let outer = '1px solid #ccc', inner = '1px solid #ccc';
+    if(mode === 'noborder'){ outer = 'none'; inner = 'none'; }
+    else if(mode === 'nodivider'){ inner = 'none'; }
+    else if(mode === 'custom'){ outer = ow + 'px solid ' + oc; inner = dw + 'px solid ' + dc; }
+    // Cells with a deliberate border of their own are left alone
+    const keep = new Set();
+    t.querySelectorAll('td,th').forEach(c => { if(_readCellStyleFromDOM(c, oldRef).borderStyle !== 'none') keep.add(c); });
+    t.style.border = outer;
+    t.querySelectorAll('td,th').forEach(c => { if(!keep.has(c)) c.style.border = inner; });
+    notifyContentChanged(t.closest('.page-content'));
+    return 'Table ' + id.toLowerCase() + ' border mode set to ' + mode + (keep.size ? ' (' + keep.size + ' cell' + (keep.size === 1 ? '' : 's') + ' with their own border kept)' : '') + '.' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
+  reg('tablecellstyle', 'rest', 'action', 'tablecellstyle <table id> <row|all> <col|all> [fill=#rrggbb|none] [fill2=#rrggbb] [angle=0-360] [border=default|solid|dashed|dotted] [bordercolor=#rrggbb] [borderwidth=1-8] [radius=0-50] [radiustl=…] [radiustr=…] [radiusbr=…] [radiusbl=…] — style one cell, a row, a column or all cells (row/col 1-indexed). fill2 makes a gradient (angle sets its direction), border=default uses the table\'s divider, radius rounds all four corners (px).', (txt) => {
+    if(!elAllowed('tables')) return denyMsg('tables');
+    const m = String(txt||'').trim().match(/^(\S+)\s+(\d+|all)\s+(\d+|all)\s*([\s\S]*)$/i);
+    if(!m) return 'Usage: tablecellstyle <table id> <row|all> <col|all> [fill=#rrggbb] [border=solid] [radius=8] … (see /help tablecellstyle).';
+    const t = tableById(m[1]); if(!t) return 'No table with ID "' + m[1] + '".';
+    const rows = [...t.querySelectorAll('tr')];
+    const cells = [];
+    rows.forEach((tr, r) => [...tr.querySelectorAll('td,th')].forEach((c, k) => {
+      if((m[2].toLowerCase() === 'all' || parseInt(m[2], 10) === r + 1) && (m[3].toLowerCase() === 'all' || parseInt(m[3], 10) === k + 1)) cells.push(c);
+    }));
+    if(!cells.length) return 'No cells match row ' + m[2] + ', col ' + m[3] + ' in table ' + m[1].toLowerCase() + '.';
+    const kv = aamKV(m[4]); const bad = kv.bad.slice(); const o = kv.o;
+    if(!Object.keys(o).length) return 'Give at least one attribute, for example tablecellstyle ' + m[1].toLowerCase() + ' ' + m[2] + ' ' + m[3] + ' fill=#ffe9a8 radius=6.';
+    const num = (v, lo, hi, name) => { const n = parseFloat(v); if(isFinite(n) && n >= lo && n <= hi) return Math.round(n); bad.push(name + '=' + v + ' (' + lo + '-' + hi + ')'); return null; };
+    let bg = null;
+    if(o.fill !== undefined){
+      if(o.fill.toLowerCase() === 'none') bg = 'transparent';
+      else if(aamHex(o.fill)){
+        if(o.fill2 !== undefined){ if(aamHex(o.fill2)){ const a = o.angle !== undefined ? num(o.angle, 0, 360, 'angle') : 135; bg = 'linear-gradient(' + (a === null ? 135 : a) + 'deg,' + o.fill + ',' + o.fill2 + ')'; } else { bad.push('fill2=' + o.fill2 + ' (use #rrggbb)'); bg = o.fill; } }
+        else bg = o.fill;
+      } else bad.push('fill=' + o.fill + ' (use #rrggbb or none)');
+    } else if(o.fill2 !== undefined) bad.push('fill2 needs fill=#rrggbb');
+    let border = null;
+    if(o.border !== undefined || o.bordercolor !== undefined || o.borderwidth !== undefined){
+      const bs = (o.border || '').toLowerCase();
+      if(bs === 'default'){
+        let inner = '1px solid #ccc';
+        if(aamTblOk()){ const bm = _readTableBorderModeFromDOM(t); inner = bm.mode === 'noborder' || bm.mode === 'nodivider' ? 'none' : bm.divWidth + 'px solid ' + bm.divColor; }
+        border = inner;
+      } else {
+        const style = bs || 'solid';
+        if(['solid','dashed','dotted'].indexOf(style) < 0) bad.push('border=' + o.border + ' (default|solid|dashed|dotted)');
+        else {
+          const col = o.bordercolor !== undefined ? (aamHex(o.bordercolor) ? o.bordercolor : (bad.push('bordercolor=' + o.bordercolor + ' (use #rrggbb)'), '#cccccc')) : '#cccccc';
+          const wd = o.borderwidth !== undefined ? num(o.borderwidth, 1, 8, 'borderwidth') : 1;
+          border = (wd === null ? 1 : wd) + 'px ' + style + ' ' + col;
+        }
+      }
+    }
+    const corner = (k) => o[k] !== undefined ? num(o[k], 0, 50, k) : null;
+    const all = o.radius !== undefined ? num(o.radius, 0, 50, 'radius') : null;
+    const cr = {tl: corner('radiustl'), tr: corner('radiustr'), br: corner('radiusbr'), bl: corner('radiusbl')};
+    const hasRadius = all !== null || Object.keys(cr).some(k => cr[k] !== null);
+    cells.forEach(c => {
+      if(bg !== null) c.style.background = bg;
+      if(border !== null) c.style.border = border;
+      if(hasRadius){
+        const cur = getComputedStyle(c); const px = (v) => Math.round(parseFloat(v)) || 0;
+        const v = {tl: all !== null ? all : px(cur.borderTopLeftRadius), tr: all !== null ? all : px(cur.borderTopRightRadius), br: all !== null ? all : px(cur.borderBottomRightRadius), bl: all !== null ? all : px(cur.borderBottomLeftRadius)};
+        ['tl','tr','br','bl'].forEach(k => { if(cr[k] !== null) v[k] = cr[k]; });
+        c.style.borderRadius = v.tl + 'px ' + v.tr + 'px ' + v.br + 'px ' + v.bl + 'px';
+      }
+    });
+    notifyContentChanged(t.closest('.page-content'));
+    return 'Styled ' + cells.length + ' cell' + (cells.length === 1 ? '' : 's') + ' in table ' + m[1].toLowerCase() + '.' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
