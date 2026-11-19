@@ -1636,6 +1636,37 @@
     return 'Inserting a ' + type + ' chart "' + title + '" with ' + data.length + ' points — a toast confirms when it is in the document.';
   });
 
+  // ── Insert banner ────────────────────────────────────────────────────
+  reg('insertbanner', 'rest', 'action', 'insertbanner <title>; <description>; [layout] — insert a banner card at the cursor. layout is top (default), left, right or bottom (where the image sits). The image area stays empty until the user adds one. Example: insertbanner Summer Sale; Up to 50% off all items; left', (src) => {
+    const g = insertGate(); if(g) return g;
+    if(typeof openBannerModal !== 'function' || typeof bnrStart !== 'function' || typeof insertBanner !== 'function' || !aamById('bnrTitleField')) return 'Insert Banner is not available in this editor version.';
+    const parts = String(src||'').split(';').map(s => s.trim());
+    const title = parts[0] || '', desc = parts[1] || '';
+    let layout = (parts[2] || 'top').toLowerCase();
+    if(!title) return 'Usage: insertbanner <title>; <description>; [top|left|right|bottom]';
+    if(['top','left','right','bottom'].indexOf(layout) < 0) return 'Unknown layout "' + layout + '". Use top, left, right or bottom.';
+    openBannerModal();
+    bnrStart('blank');
+    (async () => {
+      try {
+        await aamSleep(200);
+        aamById('bnrTitleField').textContent = title;
+        aamById('bnrDescField').textContent = desc;
+        bnrTitleInput(); bnrDescInput();
+        const chip = document.querySelector('#bnrLayoutRow [data-v="' + layout + '"]');
+        if(chip && typeof bnrLayoutSel === 'function') bnrLayoutSel(chip);
+        bnrRenderPreview();
+        await aamSleep(150);
+        insertBanner();
+        aamToast('Banner inserted', 'success');
+      } catch(e){
+        try { closeMdl('bannerMdl'); } catch(_){}
+        aamToast('Banner insert failed: ' + e.message, 'error');
+      }
+    })();
+    return 'Inserting banner "' + title + '" (' + layout + ' layout).';
+  });
+
 
   // ═══════════════════════════════════════════════════════════════════
   //  AGENT LAYER
