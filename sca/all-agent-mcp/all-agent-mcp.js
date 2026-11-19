@@ -2295,6 +2295,59 @@
     return 'Removed form field ' + (i + 1) + ' from page ' + pn + '.';
   });
 
+  // ── v2.0.33: Shapes already in the document ───────────────────────────
+  // A shape is an image tagged data-shape-id, so imagemove / imagelock / imageremove / imageset also work on it.
+  const aamShapeImgs = () => aamImgs().filter(i => i.dataset.shapeId);
+  const aamShapeOk = () => typeof _findShape === 'function' && typeof _shapeToDataUrl === 'function' && typeof SHAPE_DATA !== 'undefined';
+
+  reg('shapes', 'none', 'info', 'List the shapes already in the document: shape number, page, shape name, size, stroke and fill (when known) and the image number to use with imagemove, imagelock, imageset and imageremove.', () => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const all = aamImgs(); const out = [];
+    aamShapeImgs().forEach((img, i) => {
+      const pn = pageNumFromEl(img); if(!pageAllowed(pn)) return;
+      const r = img.getBoundingClientRect(), z = ((typeof S !== 'undefined' && S.zoom) || 100) / 100;
+      out.push((i + 1) + '. page ' + pn + ' "' + (img.alt || img.dataset.shapeId) + '" (' + img.dataset.shapeId + ') ' + Math.round(r.width / z) + 'x' + Math.round(r.height / z) + 'px'
+        + (img.dataset.shapeStroke ? ' stroke:' + img.dataset.shapeStroke : '') + (img.dataset.shapeFill ? ' fill:' + img.dataset.shapeFill : '')
+        + (aamImgLocked(img) ? ' locked' : '') + ' [image ' + (all.indexOf(img) + 1) + ']');
+    });
+    return out.length ? out.join('\n') : 'No shapes.';
+  });
+
+  reg('shapeset', 'rest', 'action', 'shapeset <n> [stroke=#rrggbb|none] [fill=#rrggbb|none] [size=16-600] — recolor or resize shape n (see shapes), the same options as Insert Shape. Size is the width in px (shapes stay square). Colors a shape was inserted with are not stored, so a color you leave out is reset to the Insert Shape default (stroke #1976d2, fill #e3f2fd) unless it was set by shapeset before.', (txt) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(!aamShapeOk()) return 'Editing shapes is not available in this editor version.';
+    const m = String(txt||'').trim().match(/^(\d+)\s*([\s\S]*)$/); const list = aamShapeImgs();
+    if(!m) return 'Usage: shapeset <n> [stroke=#rrggbb|none] [fill=#rrggbb|none] [size=px].';
+    const i = aamImgNear(m[1], list); if(i < 0) return 'Shape ' + m[1] + ' not found. ' + aamCountMsg(list.length, 'shape');
+    const img = list[i]; const pn = pageNumFromEl(img); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    if(aamImgLocked(img)) return 'Shape ' + (i + 1) + ' is locked. Unlock it first with imagelock ' + (aamImgs().indexOf(img) + 1) + ' off.';
+    const sh = _findShape(img.dataset.shapeId); if(!sh) return 'The shape "' + img.dataset.shapeId + '" is no longer in the shape library.';
+    const kv = aamKV(m[2]); const bad = kv.bad.slice(); const o = kv.o;
+    if(!Object.keys(o).length) return 'Give at least one option, for example shapeset ' + (i + 1) + ' fill=#ffcc00 size=80.';
+    let stroke = img.dataset.shapeStroke || '#1976d2', fill = img.dataset.shapeFill || '#e3f2fd';
+    const col = (k, cur) => { if(o[k] === undefined) return cur; if(o[k].toLowerCase() === 'none') return 'none'; const h = aamHex(o[k]); if(h) return h; bad.push(k + '=' + o[k] + ' (use #rrggbb or none)'); return cur; };
+    stroke = col('stroke', stroke); fill = col('fill', fill);
+    let size = parseInt(img.style.width, 10); if(!(size >= 16)) { const r = img.getBoundingClientRect(), z = ((typeof S !== 'undefined' && S.zoom) || 100) / 100; size = Math.round(r.width / z) || 120; }
+    if(o.size !== undefined){ const n = parseInt(o.size, 10); if(isFinite(n) && n >= 16 && n <= 600) size = n; else bad.push('size=' + o.size + ' (16-600)'); }
+    const sw = stroke === 'none' ? 0 : 2; const url = _shapeToDataUrl(sh, stroke, fill, sw);
+    const tmp = new Image();
+    tmp.onload = () => {
+      try {
+        const SC = 3, c = document.createElement('canvas'); c.width = size * SC; c.height = size * SC;
+        c.getContext('2d').drawImage(tmp, 0, 0, size * SC, size * SC);
+        img.src = c.toDataURL('image/png');
+        img.style.width = size + 'px'; img.style.height = size + 'px';
+        img.dataset.shapeStroke = stroke; img.dataset.shapeFill = fill;
+        try{ if(S.selImg === img) showResizeH(img); }catch(e){}
+        try{ scheduleAutoSave(); }catch(e){}
+        aamToast('Shape ' + (i + 1) + ' updated', 'success');
+      } catch(e){ aamToast('Shape update failed: ' + e.message, 'error'); }
+    };
+    tmp.onerror = () => aamToast('Shape update failed: could not draw the shape', 'error');
+    tmp.src = url;
+    return 'Updating shape ' + (i + 1) + ' (stroke ' + stroke + ', fill ' + fill + ', ' + size + 'px).' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
