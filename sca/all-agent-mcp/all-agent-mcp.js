@@ -1431,6 +1431,80 @@
     return 'Inserting a mind map with ' + nodes.length + ' node' + (nodes.length===1?'':'s') + ' — a toast confirms when it is in the document.';
   });
 
+  // ── Insert text box / LaTeX / QR / barcode ───────────────────────────
+  reg('inserttextbox', 'rest', 'action', 'inserttextbox [text] — add a floating text box on the current page, with that text in it if given. Drag, resize and style it like any text box.', (text) => {
+    const g = insertGate(); if(g) return g;
+    if(typeof SCTextBox === 'undefined' || typeof SCTextBox.insert !== 'function') return 'Text boxes are not available in this editor version.';
+    const before = new Set(document.querySelectorAll('#editorArea .tbx'));
+    SCTextBox.insert();
+    const box = [...document.querySelectorAll('#editorArea .tbx')].find(b => !before.has(b));
+    if(!box) return 'The text box could not be added.';
+    text = String(text||'').trim();
+    if(text){
+      box.textContent = text;
+      box.dispatchEvent(new Event('input', {bubbles:true}));
+      try { if(typeof checkContent === 'function') checkContent(); } catch(e){}
+      try { if(typeof scheduleAutoSave === 'function') scheduleAutoSave(); } catch(e){}
+      try { box.blur(); } catch(e){}
+    }
+    return text ? 'Text box added with your text.' : 'Empty text box added — type into it or use inserttextbox <text>.';
+  });
+
+  reg('insertlatex', 'rest', 'action', 'insertlatex <formula> — insert a LaTeX formula at the cursor. Start with "block:" for a centred display formula (default is inline). Example: insertlatex block: \\frac{a}{b} + \\sqrt{x}', (src) => {
+    const g = insertGate(); if(g) return g;
+    if(typeof openLatexModal !== 'function' || typeof insertLatexFormula !== 'function') return 'Insert LaTeX is not available in this editor version.';
+    src = String(src||'').trim();
+    let mode = 'inline';
+    const m = src.match(/^(block|inline)\s*:\s*/i);
+    if(m){ mode = m[1].toLowerCase(); src = src.slice(m[0].length).trim(); }
+    if(!src) return 'Usage: insertlatex [block:] <formula>';
+    if(!window.katex) return 'The formula engine (KaTeX) is still loading — try again in a moment.';
+    openLatexModal();
+    try { if(typeof setLatexMode === 'function') setLatexMode(mode); } catch(e){}
+    const inp = aamById('latexInput');
+    if(!inp) return 'Insert LaTeX is not available in this editor version.';
+    inp.value = src;
+    inp.dispatchEvent(new Event('input', {bubbles:true}));
+    insertLatexFormula();
+    return 'Inserted ' + mode + ' formula.';
+  });
+
+  function aamCodeInsert(kind, field, value, label){
+    const g = insertGate(); if(g) return g;
+    if(typeof openQrModal !== 'function' || !aamById('qrInsert')) return 'Insert QR / barcode is not available in this editor version.';
+    openQrModal();
+    (async () => {
+      try {
+        await aamSleep(200);
+        const chip = document.querySelector('#qrKind .sm-chip[data-v="' + kind + '"]');
+        if(chip) chip.click();
+        await aamSleep(100);
+        const inp = aamById(field);
+        if(!inp) throw new Error('input not found');
+        aamSetVal(inp, value);
+        await aamSleep(300); // let the preview render
+        aamById('qrInsert').click();
+        aamToast(label + ' inserted', 'success');
+      } catch(e){
+        try { closeQrModal(); } catch(_){}
+        aamToast(label + ' insert failed: ' + e.message, 'error');
+      }
+    })();
+    return 'Inserting ' + label + ' for "' + value + '".';
+  }
+  reg('insertqr', 'rest', 'action', 'insertqr <text or URL> — insert a QR code at the cursor.', (text) => {
+    text = String(text||'').trim();
+    if(!text) return 'Usage: insertqr <text or URL>';
+    return aamCodeInsert('qr', 'qTxt', text, 'QR code');
+  });
+  reg('insertbarcode', 'words', 'action', 'insertbarcode <value> [type] — insert a barcode at the cursor. type is c128 (default), c39, ean13, ean8, upca, itf or codabar; number-only types need the right number of digits.', (value, type) => {
+    value = String(value||'').trim();
+    type = String(type||'c128').trim().toLowerCase();
+    if(!value) return 'Usage: insertbarcode <value> [c128|c39|ean13|ean8|upca|itf|codabar]';
+    if(['c128','c39','ean13','ean8','upca','itf','codabar'].indexOf(type) < 0) return 'Unknown barcode type "' + type + '". Use c128, c39, ean13, ean8, upca, itf or codabar.';
+    return aamCodeInsert(type, 'bcVal', value, 'Barcode');
+  });
+
 
   // ═══════════════════════════════════════════════════════════════════
   //  AGENT LAYER
