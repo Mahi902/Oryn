@@ -2033,6 +2033,78 @@
     return (target ? 'Updated numbered list ' + m[1] : 'Created a new numbered list') + ' (start ' + start + ').' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
   });
 
+  // ── v2.0.29: Links and Edit / View buttons already in the document ────
+  const aamLinks = () => [...document.querySelectorAll('#editorArea .page-content a[href]')].filter(a => !a.closest('.sc-banner'));
+  const aamLinkIsBtn = (a) => !!(a.style.padding && a.style.padding !== '0px' && a.style.padding !== '0') || !!a.style.background || !!a.style.backgroundColor;
+  const aamBtnDesigns = () => (typeof SPECIAL_BTN_DESIGNS !== 'undefined' && Array.isArray(SPECIAL_BTN_DESIGNS)) ? SPECIAL_BTN_DESIGNS : [];
+
+  reg('links', 'none', 'info', 'List the hyperlinks and link buttons in the document: number, page, kind (link or button), text and address.', () => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const out = [];
+    aamLinks().forEach((a, i) => {
+      const pn = pageNumFromEl(a); if(!pageAllowed(pn)) return;
+      out.push((i + 1) + '. page ' + pn + ' ' + (aamLinkIsBtn(a) ? 'button' : 'link') + ' "' + (a.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60) + '" -> ' + (a.getAttribute('href') || '').slice(0, 120));
+    });
+    return out.length ? out.join('\n') : 'No links.';
+  });
+
+  reg('linkset', 'rest', 'action', 'linkset <n> [text="…"] [url=<address>] [color=#rrggbb] [underline=on|off] [design=filled|outline|pill|ghost|underline|subtle] — change link n (see links). color and underline are for plain links; design restyles a link as one of the Edit / View button designs.', (txt) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const m = String(txt||'').trim().match(/^(\d+)\s*([\s\S]*)$/); const list = aamLinks();
+    if(!m) return 'Usage: linkset <n> [text="…"] [url=…] [color=#rrggbb] [underline=on|off] [design=…].';
+    const i = aamImgNear(m[1], list); if(i < 0) return 'Link ' + m[1] + ' not found. ' + aamCountMsg(list.length, 'link');
+    const a = list[i]; const pn = pageNumFromEl(a); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    const kv = aamKV(m[2]); const bad = kv.bad.slice(); const done = [];
+    if(!Object.keys(kv.o).length) return 'Give at least one attribute, for example linkset ' + (i + 1) + ' text="Read more" url=https://example.com.';
+    if(kv.o.text !== undefined){ const t = kv.o.text.trim(); if(t){ a.textContent = t.slice(0, 300); done.push('text'); } else bad.push('text= (empty)'); }
+    if(kv.o.url !== undefined){ const u = kv.o.url.trim(); if(/^(https?:\/\/|mailto:|tel:|#)/i.test(u)){ a.setAttribute('href', u); a.removeAttribute('data-no-redir'); done.push('url'); } else bad.push('url=' + u + ' (must start with http://, https://, mailto:, tel: or #)'); }
+    if(kv.o.design !== undefined){
+      const d = aamBtnDesigns().find(x => x.id === kv.o.design.toLowerCase());
+      if(d){ a.style.cssText = d.style; done.push('design'); } else bad.push('design=' + kv.o.design + ' (' + (aamBtnDesigns().map(x => x.id).join('|') || 'not available') + ')');
+    }
+    if(kv.o.color !== undefined || kv.o.underline !== undefined){
+      if(aamLinkIsBtn(a) && kv.o.design === undefined) bad.push('color/underline apply to plain links; use design= for buttons');
+      else if(kv.o.design === undefined){
+        let color = kv.o.color, ul = kv.o.underline !== undefined ? kv.o.underline.toLowerCase() : null;
+        if(color !== undefined && !/^#[0-9a-f]{6}$/i.test(color)){ bad.push('color=' + color + ' (use #rrggbb)'); color = undefined; }
+        if(ul !== null && ul !== 'on' && ul !== 'off'){ bad.push('underline=' + ul + ' (on|off)'); ul = null; }
+        if(color !== undefined){ a.style.color = color; done.push('color'); }
+        if(ul !== null){ a.style.textDecoration = ul === 'on' ? 'underline' : 'none'; done.push('underline'); }
+      }
+    }
+    try{ scheduleAutoSave(); }catch(e){}
+    return (done.length ? 'Updated link ' + (i + 1) + ' (' + done.join(', ') + ').' : 'Nothing changed on link ' + (i + 1) + '.') + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
+  reg('linkremove', 'words', 'action', 'linkremove <n> [delete] — remove link n (see links) but keep its text as normal text. Add delete to remove the text too.', (n, mode) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    const list = aamLinks(); const i = aamImgNear(n, list);
+    if(i < 0) return 'Link ' + n + ' not found. ' + aamCountMsg(list.length, 'link');
+    const a = list[i]; const pn = pageNumFromEl(a); if(!pageAllowed(pn)) return denyMsg('page ' + pn);
+    const del = String(mode||'').toLowerCase() === 'delete';
+    if(del) a.remove(); else a.replaceWith(document.createTextNode(a.textContent));
+    try{ checkContent(); }catch(e){} try{ scheduleAutoSave(); }catch(e){}
+    return (del ? 'Deleted link ' : 'Unlinked link ') + (i + 1) + ' on page ' + pn + '.';
+  });
+
+  reg('linkbutton', 'rest', 'action', 'linkbutton <edit|view> [page:<n>] [design=filled|outline|pill|ghost|underline|subtle] [text="…"] — insert the document\'s Edit or View button (the special buttons in the link window). Same placement rules as /inserttext.', (txt) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(typeof getTemplateLinks !== 'function' || !aamBtnDesigns().length) return 'Edit / View buttons are not available in this editor version.';
+    let rest = String(txt||'').trim(); const tm = rest.match(/^(edit|view)\b\s*([\s\S]*)$/i);
+    if(!tm) return 'Usage: linkbutton <edit|view> [page:<n>] [design=…] [text="…"].';
+    const type = tm[1].toLowerCase(); rest = tm[2]; let pageNum = null;
+    rest = rest.replace(/(^|\s)page:(\d+)(?=\s|$)/i, (all, sp, num) => { pageNum = parseInt(num, 10); return ' '; });
+    const kv = aamKV(rest); const bad = kv.bad.slice();
+    let design = aamBtnDesigns()[0];
+    if(kv.o.design !== undefined){ const d = aamBtnDesigns().find(x => x.id === kv.o.design.toLowerCase()); if(d) design = d; else bad.push('design=' + kv.o.design + ' (' + aamBtnDesigns().map(x => x.id).join('|') + ')'); }
+    const label = (kv.o.text || '').trim().slice(0, 60) || (type === 'edit' ? 'Edit' : 'View');
+    const target = resolveInsertTarget(pageNum); if(target.error) return target.error;
+    const url = getTemplateLinks()[type];
+    document.execCommand('insertHTML', false, '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" style="' + design.style + '">' + esc(label) + '</a>');
+    try{ scheduleAutoSave(); }catch(e){}
+    return 'Inserted a ' + type + ' button (' + design.id + ') on page ' + pageNumFromEl(target.pc) + '.' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
