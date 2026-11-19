@@ -3134,6 +3134,84 @@
     return 'New items ' + (a === 'on' ? 'may' : 'may not') + ' overlap other items by default.';
   });
 
+  // ── v2.0.47: Photo Editor — open, adjustments, filters, undo, apply ──
+  function aamPedOk(){ return typeof PED !== 'undefined' && typeof pedOpen === 'function' && typeof PED_DEF !== 'undefined' && typeof PED_PRE !== 'undefined'; }
+  function aamPedOpen(){ return aamPedOk() && PED.open && PED.base; }
+  const AAM_PED_NEED = 'The Photo Editor is not open. Open the Image window with an image chosen, then run photoeditoropen.';
+  const AAM_PED_ADJ = { bri: 'brightness', exp: 'exposure', con: 'contrast', sat: 'saturation', hue: 'hue', tmp: 'temperature', tnt: 'tint', blr: 'blur', vig: 'vignette', gry: 'grayscale', sep: 'sepia', inv: 'invert (0 or 1)' };
+  reg('photoeditor', 'none', 'info', 'Show the Photo Editor state: whether it is open, the current tab, image size, undo / redo steps, and any adjustment that is not at its default. The Photo Editor lives inside the Image window (Open Photo Editor button), so choose an image there first; then run photoeditoropen.', () => {
+    if(!aamPedOk()) return 'The Photo Editor is not available in this editor version.';
+    if(!aamPedOpen()){
+      const has = !!((typeof _croppedImgData !== 'undefined' && _croppedImgData) || (typeof S !== 'undefined' && S.imgData));
+      return 'Photo Editor: closed. ' + (has ? 'An image is chosen in the Image window; run photoeditoropen to edit it.' : 'No image is chosen in the Image window yet.');
+    }
+    const ch = Object.keys(PED_DEF).filter((k) => PED.adj && PED.adj[k] !== PED_DEF[k]).map((k) => k + '=' + PED.adj[k]);
+    return 'Photo Editor: open, tab ' + PED.tool + ', image ' + PED.base.width + 'x' + PED.base.height + ' px, ' + Math.max(0, PED.hist.length - 1) + ' undo step(s), ' + PED.redo.length + ' redo step(s). Adjustments: ' + (ch.length ? ch.join(' ') : 'none (all default)') + '.';
+  });
+  reg('photoeditoropen', 'none', 'action', 'Open the Photo Editor for the image currently chosen in the Image window (the same as its Open Photo Editor button). It loads in the background; run photoeditor a moment later to confirm it is open. Edits are only kept after photoeditorclose apply.', () => {
+    if(!elAllowed('content')) return denyMsg('content');
+    if(!aamPedOk()) return 'The Photo Editor is not available in this editor version.';
+    if(aamPedOpen()) return 'The Photo Editor is already open.';
+    const has = !!((typeof _croppedImgData !== 'undefined' && _croppedImgData) || (typeof S !== 'undefined' && S.imgData));
+    if(!has) return 'Choose an image in the Image window first (open_dialog image, then set an image).';
+    try{ Promise.resolve(pedOpen()).catch(() => {}); }catch(e){ return 'The Photo Editor could not open: ' + (e && e.message || e); }
+    return 'Opening the Photo Editor. Run photoeditor in a moment to confirm.';
+  });
+  reg('photoeditorclose', 'words', 'action', 'photoeditorclose <apply|discard> — close the Photo Editor. apply bakes the edits into the image (they are inserted with it when you press Insert in the Image window); discard throws the edits away without asking.', (v) => {
+    if(!aamPedOk()) return 'The Photo Editor is not available in this editor version.';
+    if(!aamPedOpen()) return AAM_PED_NEED;
+    const a = String(v||'').toLowerCase().trim();
+    if(a !== 'apply' && a !== 'discard') return 'Usage: photoeditorclose <apply|discard>.';
+    if(a === 'apply'){ pedApply(); return 'Edits applied to the image in the Image window. Insert or update it there to put it in the document.'; }
+    pedClose(); return 'Photo Editor closed; edits discarded.';
+  });
+  reg('photoadjust', 'words', 'action', 'photoadjust <setting> <value> — set one Adjust slider of the Photo Editor: bri (brightness), exp (exposure), con (contrast), sat (saturation), hue, tmp (temperature), tnt (tint), blr (blur), vig (vignette), gry (grayscale), sep (sepia), inv (invert, 0 or 1). Most go from -100 to 100 (hue -180 to 180, gry/sep 0 to 100); the exact range is checked against the slider. Adjustments stay live until another edit commits them. Example: photoadjust bri 20. Use photoeditor to see the values.', (k, v) => {
+    if(!aamPedOk()) return 'The Photo Editor is not available in this editor version.';
+    if(!aamPedOpen()) return AAM_PED_NEED;
+    k = String(k||'').toLowerCase().trim();
+    if(!(k in PED_DEF)) return 'Usage: photoadjust <' + Object.keys(PED_DEF).join('|') + '> <value>. ' + Object.keys(AAM_PED_ADJ).map((x) => x + '=' + AAM_PED_ADJ[x]).join(', ') + '.';
+    const n = Number(String(v||'').trim());
+    if(String(v||'').trim() === '' || isNaN(n)) return 'Give a number, e.g. photoadjust ' + k + ' 20.';
+    const el = document.getElementById('ped_' + k);
+    let lo = el && el.min !== '' ? Number(el.min) : (k === 'hue' ? -180 : (k === 'gry' || k === 'sep' || k === 'blr' || k === 'vig' ? 0 : -100));
+    let hi = el && el.max !== '' ? Number(el.max) : (k === 'hue' ? 180 : 100);
+    if(k === 'inv'){ lo = 0; hi = 1; }
+    if(n < lo || n > hi) return k + ' must be between ' + lo + ' and ' + hi + '.';
+    PED.adj[k] = n; pedSyncUI(); pedQueue();
+    return AAM_PED_ADJ[k] + ' set to ' + n + '.';
+  });
+  reg('photofilters', 'none', 'info', 'List the Photo Editor filter presets (Original, B&W, Sepia, Vivid and more) that photofilter accepts.', () => {
+    if(!aamPedOk()) return 'The Photo Editor is not available in this editor version.';
+    return 'Filters: ' + Object.keys(PED_PRE).join(', ') + '.';
+  });
+  reg('photofilter', 'rest', 'action', 'photofilter <name> — apply a Photo Editor filter preset (it sets the Adjust sliders; see photofilters). Original resets the sliders. Example: photofilter Sepia', (name) => {
+    if(!aamPedOk()) return 'The Photo Editor is not available in this editor version.';
+    if(!aamPedOpen()) return AAM_PED_NEED;
+    name = String(name||'').trim().toLowerCase();
+    const key = Object.keys(PED_PRE).find((x) => x.toLowerCase() === name);
+    if(!key) return 'Unknown filter. Filters: ' + Object.keys(PED_PRE).join(', ') + '.';
+    PED.adj = Object.assign({}, PED_DEF, PED_PRE[key]); pedSyncUI(); pedRender(); try{ pedBtns(); }catch(e){}
+    return 'Filter ' + key + ' applied.';
+  });
+  reg('photoundo', 'none', 'action', 'Undo the last Photo Editor step (or reset the sliders first if they are not at their defaults).', () => {
+    if(!aamPedOk()) return 'The Photo Editor is not available in this editor version.';
+    if(!aamPedOpen()) return AAM_PED_NEED;
+    if(pedIsDef() && PED.hist.length < 2) return 'Nothing to undo in the Photo Editor.';
+    pedUndo(); return 'Photo Editor undo done (' + Math.max(0, PED.hist.length - 1) + ' undo step(s) left).';
+  });
+  reg('photoredo', 'none', 'action', 'Redo the last undone Photo Editor step.', () => {
+    if(!aamPedOk()) return 'The Photo Editor is not available in this editor version.';
+    if(!aamPedOpen()) return AAM_PED_NEED;
+    if(!PED.redo.length) return 'Nothing to redo in the Photo Editor.';
+    pedRedo(); return 'Photo Editor redo done (' + PED.redo.length + ' redo step(s) left).';
+  });
+  reg('photoreset', 'words', 'action', 'photoreset confirm — throw away every Photo Editor edit and go back to the original image. Only runs when you pass the word confirm.', (v) => {
+    if(!aamPedOk()) return 'The Photo Editor is not available in this editor version.';
+    if(!aamPedOpen()) return AAM_PED_NEED;
+    if(String(v||'').toLowerCase().trim() !== 'confirm') return 'This discards all edits in the Photo Editor. Run photoreset confirm to do it.';
+    pedResetAll(); return 'Photo Editor reset to the original image.';
+  });
+
   // ── Zoom / navigation ────────────────────────────────────────────────
   reg('zoomin', 'none', 'action', 'Zoom the document in by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(10); return 'Zoomed in.'; } return 'Zoom function not available.'; });
   reg('zoomout', 'none', 'action', 'Zoom the document out by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(-10); return 'Zoomed out.'; } return 'Zoom function not available.'; });
