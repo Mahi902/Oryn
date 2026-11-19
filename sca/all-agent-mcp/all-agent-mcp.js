@@ -1328,6 +1328,125 @@
     return 'Usage: pagenavigator <open|close>.';
   });
 
+  // ── v2.0.23: Slides (presentation mode) ───────────────────────────────
+  const aamSl = () => (typeof SLD !== 'undefined' && typeof slidesLaunch === 'function') ? SLD : null;
+  const aamSlOpen = () => { const o = document.getElementById('slidesOverlay'); return !!(o && o.classList.contains('open')); };
+  let aamSlBusy = false;
+  const NEED_SL = 'Slides are not open. Run slides open first.';
+
+  reg('slides', 'words', 'action', 'slides <open|close|status> — start or leave Slides (the full-screen presentation view of the document). Opening takes a few seconds while the pages are rendered; check with slidesstatus.', (v) => {
+    const S_ = aamSl(); if(!S_) return 'Slides are not available in this editor version.';
+    const a = String(v||'status').toLowerCase();
+    if(a === 'status') return aamSlOpen() ? 'Slides are open on page ' + (S_.cur + 1) + ' of ' + S_.pages.length + '.' : (aamSlBusy ? 'Slides are being prepared.' : 'Slides are closed.');
+    if(a === 'close'){ if(!aamSlOpen()) return 'Slides are already closed.'; slidesClose(); return 'Closed Slides.'; }
+    if(a === 'open'){
+      if(aamSlOpen()) return 'Slides are already open.';
+      if(aamSlBusy) return 'Slides are already being prepared.';
+      aamSlBusy = true;
+      Promise.resolve().then(() => slidesLaunch()).catch(() => {}).then(() => { aamSlBusy = false; });
+      return 'Preparing Slides — the pages are being rendered. Use slidesstatus to see when they are ready.';
+    }
+    return 'Usage: slides <open|close|status>.';
+  });
+
+  reg('slidesstatus', 'none', 'info', 'Report the Slides state: open or closed, current page, active drawing tool, slideshow mode, page strip and zoom.', () => {
+    const S_ = aamSl(); if(!S_) return 'Slides are not available in this editor version.';
+    if(!aamSlOpen()) return aamSlBusy ? 'Slides are being prepared.' : 'Slides are closed.';
+    const th = document.getElementById('slidesThumbs');
+    const z = document.querySelector('#slidesFabPanel .sld-fab-opt.active');
+    return 'Slides open. page:' + (S_.cur + 1) + '/' + S_.pages.length + ' tool:' + (S_.tool || 'none')
+      + ' slideshow:' + (S_.play.active ? 'playing (' + S_.play.mode + (S_.play.mode === 'timer' ? ', ' + S_.play.interval + 's' : '') + ')' : 'stopped (mode ' + S_.play.mode + ')')
+      + ' pageStrip:' + (th && th.classList.contains('collapsed') ? 'hidden' : 'shown') + ' zoom:' + (z ? z.textContent.replace(/zoom_in|fit_screen/g,'').trim() : '100%');
+  });
+
+  reg('slidesnav', 'words', 'action', 'slidesnav <next|prev|first|last|n> — move to another page in Slides. Example: slidesnav 3', (v) => {
+    const S_ = aamSl(); if(!S_) return 'Slides are not available in this editor version.';
+    if(!aamSlOpen()) return NEED_SL;
+    const a = String(v||'').toLowerCase(); const last = S_.pages.length - 1;
+    let to;
+    if(a === 'next') to = S_.cur + 1; else if(a === 'prev' || a === 'previous') to = S_.cur - 1;
+    else if(a === 'first') to = 0; else if(a === 'last') to = last;
+    else if(/^\d+$/.test(a)) to = parseInt(a,10) - 1;
+    else return 'Usage: slidesnav <next|prev|first|last|n>.';
+    if(to < 0 || to > last) return 'No such page. Slides has ' + S_.pages.length + ' page' + (S_.pages.length === 1 ? '' : 's') + ' and you are on page ' + (S_.cur + 1) + '.';
+    if(to === S_.cur) return 'Already on page ' + (to + 1) + '.';
+    if(Math.abs(to - S_.cur) === 1 && /^(next|prev|previous)$/.test(a)) slidesNav(to - S_.cur); else slidesShowPage(to);
+    return 'Showing page ' + (to + 1) + ' of ' + S_.pages.length + '.';
+  });
+
+  reg('slidestool', 'words', 'action', 'slidestool <marker|highlighter|laser|eraser|none> [color=<css color>] [size=<n>] [opacity=<10-100>] — pick the drawing tool in Slides. Marker size 2-32, highlighter size 10-52; opacity is a percent (marker 10-100, highlighter 10-80). The laser takes color=red|black|white|green|rainbow. The user then draws with it.', (...a) => {
+    const S_ = aamSl(); if(!S_) return 'Slides are not available in this editor version.';
+    if(!aamSlOpen()) return NEED_SL;
+    const tool = String(a.shift()||'').toLowerCase();
+    if(!/^(marker|highlighter|laser|eraser|none)$/.test(tool)) return 'Usage: slidestool <marker|highlighter|laser|eraser|none> [color=…] [size=…] [opacity=…].';
+    const bad = [], opt = {};
+    for(const x of a){ const m = String(x).match(/^(color|size|opacity)=(.+)$/i); if(m) opt[m[1].toLowerCase()] = m[2]; else bad.push(x); }
+    if(tool === 'none'){ if(S_.tool) slidesSetTool(S_.tool); return 'No drawing tool selected.'; }
+    if((opt.size || opt.opacity) && (tool === 'laser' || tool === 'eraser')) bad.push('size/opacity (not used by the ' + tool + ')');
+    if(tool === 'laser'){
+      if(opt.color){ const c = opt.color.toLowerCase(); if(['red','black','white','green','rainbow'].indexOf(c) >= 0) S_.laser.color = c; else bad.push('color=' + opt.color); }
+    } else if(tool === 'eraser'){
+      if(opt.color) bad.push('color (not used by the eraser)');
+    } else {
+      const cfg = S_[tool];
+      if(opt.color){ if(window.CSS && CSS.supports && CSS.supports('color', opt.color)) cfg.color = opt.color; else bad.push('color=' + opt.color); }
+      if(opt.size){ const n = parseInt(opt.size,10), lo = tool === 'marker' ? 2 : 10, hi = tool === 'marker' ? 32 : 52; if(n >= lo && n <= hi) cfg.size = n; else bad.push('size=' + opt.size + ' (' + lo + '-' + hi + ')'); }
+      if(opt.opacity){ const n = parseInt(opt.opacity,10), hi = tool === 'marker' ? 100 : 80; if(n >= 10 && n <= hi) cfg.opacity = n / 100; else bad.push('opacity=' + opt.opacity + ' (10-' + hi + ')'); }
+    }
+    if(S_.tool !== tool) slidesSetTool(tool);
+    return 'Slides tool: ' + tool + (bad.length ? '. Could not use: ' + bad.join(', ') + '.' : '.');
+  });
+
+  reg('slidesundo', 'none', 'action', 'Undo the last drawing stroke on the current Slides page.', () => {
+    if(!aamSl()) return 'Slides are not available in this editor version.'; if(!aamSlOpen()) return NEED_SL;
+    slidesUndo(); return 'Undid the last stroke.';
+  });
+  reg('slidesredo', 'none', 'action', 'Redo the last undone drawing stroke on the current Slides page.', () => {
+    if(!aamSl()) return 'Slides are not available in this editor version.'; if(!aamSlOpen()) return NEED_SL;
+    slidesRedo(); return 'Redid the stroke.';
+  });
+  reg('slidesclear', 'none', 'action', 'Erase all drawings on the current Slides page (the document itself is not changed).', () => {
+    if(!aamSl()) return 'Slides are not available in this editor version.'; if(!aamSlOpen()) return NEED_SL;
+    slidesClearCanvas(); return 'Cleared the drawings on this page.';
+  });
+
+  reg('slidesplay', 'words', 'action', 'slidesplay <click|hold|timer|stop> [interval=<2-60 seconds>] — start the slideshow, or stop it. click: advance with Next; hold: hold the play button 5 seconds; timer: advance automatically (default every 5 seconds).', (...a) => {
+    const S_ = aamSl(); if(!S_) return 'Slides are not available in this editor version.';
+    if(!aamSlOpen()) return NEED_SL;
+    const mode = String(a.shift()||'').toLowerCase();
+    if(mode === 'stop'){ if(!S_.play.active) return 'The slideshow is not playing.'; slidesCancelPlay(); return 'Stopped the slideshow.'; }
+    if(!/^(click|hold|timer)$/.test(mode)) return 'Usage: slidesplay <click|hold|timer|stop> [interval=2-60].';
+    let bad = '';
+    for(const x of a){
+      const m = String(x).match(/^interval=(\d+)$/i);
+      if(m && +m[1] >= 2 && +m[1] <= 60){ if(mode === 'timer') S_.play.interval = +m[1]; else bad = ' Interval only applies to timer mode.'; }
+      else bad = ' Interval must be 2-60 seconds (interval=<n>).';
+    }
+    S_.play.mode = mode; slidesStartPlay();
+    return 'Slideshow started (' + mode + (mode === 'timer' ? ', every ' + S_.play.interval + ' seconds' : '') + ').' + bad;
+  });
+
+  reg('slidesthumbs', 'words', 'action', 'slidesthumbs <show|hide|toggle> — show or hide the page strip on the left of Slides.', (v) => {
+    const S_ = aamSl(); if(!S_) return 'Slides are not available in this editor version.';
+    if(!aamSlOpen()) return NEED_SL;
+    const a = String(v||'toggle').toLowerCase();
+    if(!/^(show|hide|toggle)$/.test(a)) return 'Usage: slidesthumbs <show|hide|toggle>.';
+    const wantHidden = a === 'toggle' ? !S_.thumbsCollapsed : a === 'hide';
+    if(!!S_.thumbsCollapsed !== wantHidden) slidesToggleThumbs();
+    return 'Page strip ' + (wantHidden ? 'hidden' : 'shown') + '.';
+  });
+
+  reg('slideszoom', 'words', 'action', 'slideszoom <100|150|200|250|fit> — zoom the page shown in Slides.', (v) => {
+    const S_ = aamSl(); if(!S_) return 'Slides are not available in this editor version.';
+    if(!aamSlOpen()) return NEED_SL;
+    const a = String(v||'').toLowerCase().replace('%','');
+    const map = {'100':1,'150':1.5,'200':2,'250':2.5,'fit':'fit'};
+    if(!(a in map)) return 'Usage: slideszoom <100|150|200|250|fit>.';
+    const btn = a === 'fit' ? [...document.querySelectorAll('#slidesFabPanel .sld-fab-opt')].find(b => /fit/i.test(b.textContent)) : document.getElementById('sldFabZoom' + a);
+    slidesFabZoom(map[a], btn || null);
+    return 'Slides zoom: ' + (a === 'fit' ? 'fit to screen' : a + '%') + '.';
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
