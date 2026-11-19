@@ -1198,6 +1198,81 @@
     return 'A4 portrait restored on ' + (pl.nums.length === 1 ? 'page ' + pl.nums[0] : pl.nums.length + ' pages') + '.';
   });
 
+  // ── Insert video / audio / map ───────────────────────────────────────
+  // These open the editor's own Insert modals, fill them in and press their
+  // Insert button, so the result is identical to a person doing it. The commands
+  // return at once; the editor shows a toast when the insert has finished.
+  function aamWait(cond, ms, step){
+    return new Promise(res => {
+      const t0 = Date.now();
+      (function tick(){
+        let ok = false; try { ok = !!cond(); } catch(e){}
+        if(ok) return res(true);
+        if(Date.now() - t0 > ms) return res(false);
+        setTimeout(tick, step || 150);
+      })();
+    });
+  }
+  function aamToast(msg, type){ try { if(typeof showToast === 'function') showToast(msg, type || 'info'); } catch(e){} }
+  function aamById(id){ return document.getElementById(id); }
+  function insertGate(){
+    if(!elAllowed('content')) return denyMsg('page content');
+    return null;
+  }
+
+  reg('insertvideo', 'words', 'action', 'insertvideo <url> — insert a video at the cursor from a link (YouTube, Vimeo or a direct .mp4/.webm URL). It appears as a poster; double-click plays it.', (url) => {
+    const g = insertGate(); if(g) return g;
+    if(typeof openVideoModal !== 'function' || !aamById('vidUrl')) return 'Insert Video is not available in this editor version.';
+    url = String(url||'').trim();
+    if(!/^https?:\/\//i.test(url)) return 'Usage: insertvideo <https://… link>';
+    openVideoModal();
+    try { vidSrcTab('url', true); } catch(e){}
+    aamById('vidUrl').value = url;
+    try { vidUrlChanged(); } catch(e){}
+    aamWait(() => { const b = aamById('vidInsertBtn'); return b && !b.disabled; }, 20000).then(ok => {
+      if(!ok){ try { closeMdl('videoMdl'); } catch(e){} aamToast('Video link could not be read: ' + url, 'error'); return; }
+      try { vidInsert(); } catch(e){ aamToast('Video insert failed: ' + e.message, 'error'); }
+    });
+    return 'Inserting video from ' + url + ' — a toast confirms when it is in the document.';
+  });
+
+  reg('insertaudio', 'words', 'action', 'insertaudio <url> — insert an audio player card at the cursor from a direct audio link (.mp3/.wav/.ogg/.m4a). Tap or double-click it to play.', (url) => {
+    const g = insertGate(); if(g) return g;
+    if(typeof openAudioModal !== 'function' || !aamById('audUrl')) return 'Insert Audio is not available in this editor version.';
+    url = String(url||'').trim();
+    if(!/^https?:\/\//i.test(url)) return 'Usage: insertaudio <https://… link>';
+    openAudioModal();
+    try { audSrcTab('url', true); } catch(e){}
+    aamById('audUrl').value = url;
+    try { audUrlChanged(); } catch(e){}
+    aamWait(() => { const b = aamById('audInsertBtn'); return b && !b.disabled; }, 20000).then(ok => {
+      if(!ok){ try { closeMdl('audioMdl'); } catch(e){} aamToast('Audio link could not be read: ' + url, 'error'); return; }
+      try { audInsert(); } catch(e){ aamToast('Audio insert failed: ' + e.message, 'error'); }
+    });
+    return 'Inserting audio from ' + url + ' — a toast confirms when it is in the document.';
+  });
+
+  reg('insertmap', 'rest', 'action', 'insertmap <place name or "lat, lon"> — insert a map image of that place at the cursor, with a pin on it.', (q) => {
+    const g = insertGate(); if(g) return g;
+    if(typeof openMapModal !== 'function' || !aamById('mpSearch')) return 'Insert Map is not available in this editor version.';
+    q = String(q||'').trim();
+    if(!q) return 'Usage: insertmap <place name or "lat, lon">';
+    openMapModal();
+    aamById('mpSearch').value = q;
+    const isCoord = /^\s*-?\d{1,2}(?:\.\d+)?\s*[,;\s]\s*-?\d{1,3}(?:\.\d+)?\s*$/.test(q);
+    aamById('mpSearchBtn').click();
+    (async () => {
+      if(!isCoord){
+        const found = await aamWait(() => document.querySelector('#mpRes button'), 12000);
+        if(!found){ try { closeMdl('mapMdl'); } catch(e){} aamToast('No map place found for "' + q + '".', 'error'); return; }
+        document.querySelector('#mpRes button').click();
+      }
+      await new Promise(r => setTimeout(r, 2500)); // let map tiles load before the image is drawn
+      try { aamById('mpInsert').click(); } catch(e){ aamToast('Map insert failed: ' + e.message, 'error'); }
+    })();
+    return 'Inserting a map of "' + q + '" — a toast or the map appearing confirms it.';
+  });
+
 
   // ═══════════════════════════════════════════════════════════════════
   //  AGENT LAYER
