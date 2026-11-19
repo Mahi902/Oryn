@@ -1521,6 +1521,149 @@
     toggleInkTracePanel(); return 'inkTrace panel ' + (a === 'open' ? 'opened' : 'closed') + '.';
   });
 
+  // ── v2.0.25: Summarize, Ask Document, Assistive Writing, Context Expansion options, Echo ──
+  // These read the whole document, so they only run when the agent may see every page.
+  const aamAiNeed = () => !elAllowed('content') ? denyMsg('page content') : (allowedPages() !== null ? 'Permission denied: this tool reads the whole document, and this agent is limited to certain pages in Agent Configuration.' : '');
+  const aamModalOpen = (id) => { const m = document.getElementById(id); return !!(m && m.classList.contains('open')); };
+  const aamAiGate = () => (typeof sumGatingOk === 'function' && !sumGatingOk()) ? 'The on-device AI tools are locked. The user has to enable them in the app Settings > AI.' : '';
+
+  reg('summarize', 'words', 'action', 'summarize <document|selection|run|status|insert|replace|close> [style=short|paragraph|bullets] [pages=<list>] — use the editor\'s on-device Summarize tool. document or selection opens it (selection needs text selected; pages=1,3-4 limits a document summary). Then run starts it, status shows progress and the summary, insert puts the summary at the top of the document, replace swaps the selection for it, close leaves. Needs the summarization model installed in the app.', (...a) => {
+    if(typeof openSummarize !== 'function' || !document.getElementById('sumMdl')) return 'Summarize is not available in this editor version.';
+    const act = String(a.shift()||'status').toLowerCase();
+    const need = aamAiNeed(); if(need) return need;
+    const lock = aamAiGate();
+    if(act === 'document' || act === 'selection'){
+      if(lock) return lock;
+      if(act === 'selection'){ const s = window.getSelection(); if(!s || s.isCollapsed || !s.rangeCount) return 'Select some text first (see /select), then run summarize selection.'; }
+      const opt = {}; const bad = [];
+      for(const x of a){ const m = String(x).match(/^(style|pages)=(.+)$/i); if(m) opt[m[1].toLowerCase()] = m[2]; else bad.push(x); }
+      let style = null, list = null;
+      if(opt.style){ style = opt.style.toLowerCase(); if(!/^(short|paragraph|bullets)$/.test(style)){ bad.push('style=' + opt.style); style = null; } }
+      if(opt.pages){ if(act !== 'document') bad.push('pages (only for document)'); else { list = aamPageList(opt.pages); const n = document.querySelectorAll('#editorArea .page-content').length; if(!list || list.some(x => x > n)){ bad.push('pages=' + opt.pages); list = null; } } }
+      Promise.resolve(openSummarize(act)).then(() => {
+        const st = document.getElementById('sumStyle'); if(st && style){ st.value = style; try{ localStorage.setItem('sum_style', style); }catch(e){} }
+        if(list){ const sc = document.getElementById('sumScope'); if(sc){ sc.value = 'pages'; if(typeof sumScopeChanged === 'function') sumScopeChanged(); if(typeof _sumPages !== 'undefined'){ _sumPages = list.slice(); if(typeof sumBuildPageChips === 'function') sumBuildPageChips(); if(typeof sumUpdateSource === 'function') sumUpdateSource(); } } }
+      }).catch(() => {});
+      return 'Opening Summarize for the ' + act + '. Then use summarize run, and summarize status to read the result.' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+    }
+    if(!aamModalOpen('sumMdl')) return 'Summarize is not open. Use summarize document or summarize selection first.';
+    if(act === 'run'){ if(typeof _sumBusy !== 'undefined' && _sumBusy) return 'Summarize is already running. Use summarize status.'; sumRun(); return 'Summarize started. Use summarize status to follow it.'; }
+    if(act === 'status'){
+      const busy = typeof _sumBusy !== 'undefined' && _sumBusy;
+      const st = textOf('sumStatus'), out = ((document.getElementById('sumOut')||{}).value || '').trim();
+      return (busy ? 'Running. ' : 'Idle. ') + (st ? 'Status: ' + st + '. ' : '') + (out ? 'Summary:\n' + out : 'No summary yet.');
+    }
+    if(act === 'insert' || act === 'replace'){
+      if(!((document.getElementById('sumOut')||{}).value || '').trim()) return 'There is no summary yet. Run summarize run first.';
+      if(act === 'replace' && typeof _sumMode !== 'undefined' && _sumMode !== 'selection') return 'Replace only works on a summarized selection. Use summarize insert for a document summary.';
+      if(act === 'insert') sumInsert(); else sumReplace();
+      return act === 'insert' ? 'Inserted the summary at the top of the document.' : 'Replaced the selection with the summary.';
+    }
+    if(act === 'close'){ sumClose(); return 'Closed Summarize.'; }
+    return 'Usage: summarize <document|selection|run|status|insert|replace|close>.';
+  });
+
+  reg('askdocument', 'rest', 'action', 'askdocument <open|close|clear|status|scope smart|all|pages <list>|ask <question>> — use the editor\'s on-device Ask Document chat. ask puts the question to the document (read the answer with status), clear wipes the chat. Needs the summarization model installed in the app.', (txt) => {
+    if(typeof openAskDocument !== 'function' || !document.getElementById('askMdl')) return 'Ask Document is not available in this editor version.';
+    const parts = String(txt||'status').trim().split(/\s+/); const act = (parts.shift() || 'status').toLowerCase(); const rest = parts.join(' ');
+    const need = aamAiNeed(); if(need) return need;
+    if(act === 'open'){ const l = aamAiGate(); if(l) return l; Promise.resolve(openAskDocument()).catch(() => {}); return 'Opening Ask Document.'; }
+    if(!aamModalOpen('askMdl')) return 'Ask Document is not open. Use askdocument open first.';
+    if(act === 'close'){ askClose(); return 'Closed Ask Document.'; }
+    if(act === 'clear'){ askClear(); return 'Cleared the chat.'; }
+    if(act === 'scope'){
+      const w = rest.toLowerCase().split(/\s+/); const sc = w.shift(); const sel = document.getElementById('askScope');
+      if(!sel || !/^(smart|all|pages)$/.test(sc || '')) return 'Usage: askdocument scope <smart|all|pages <list>>.';
+      let list = null;
+      if(sc === 'pages'){ list = aamPageList(w.join(' ')); const n = document.querySelectorAll('#editorArea .page-content').length; if(!list || list.some(x => x > n)) return 'Usage: askdocument scope pages <list> with pages from 1 to ' + n + '.'; }
+      sel.value = sc; askScopeChanged();
+      if(list){ _askPages = list.slice(); if(typeof askBuildPageChips === 'function') askBuildPageChips(); }
+      return 'Ask Document scope: ' + sc + (list ? ' (' + list.join(', ') + ')' : '') + '.';
+    }
+    if(act === 'ask'){
+      if(!rest) return 'Usage: askdocument ask <question>.';
+      if(typeof _askBusy !== 'undefined' && _askBusy) return 'Ask Document is still answering. Use askdocument status.';
+      const inp = document.getElementById('askInput'); if(!inp) return 'Ask Document is not available in this editor version.';
+      inp.value = rest; askSend(); return 'Question sent. Use askdocument status to read the answer.';
+    }
+    if(act === 'status'){
+      const busy = typeof _askBusy !== 'undefined' && _askBusy; const msgs = (typeof _askMsgs !== 'undefined' && _askMsgs) || [];
+      const lastQ = [...msgs].reverse().find(m => m.role === 'user'), lastA = [...msgs].reverse().find(m => m.role !== 'user');
+      const st = textOf('askStatus');
+      return (busy ? 'Answering. ' : 'Idle. ') + (st ? 'Status: ' + st + '. ' : '') + (lastQ ? 'Last question: ' + lastQ.content + '\n' : '') + (lastA && lastA.content ? 'Answer:\n' + lastA.content : (lastQ ? '' : 'No messages yet.'));
+    }
+    return 'Usage: askdocument <open|close|clear|status|scope …|ask <question>>.';
+  });
+
+  reg('placeholders', 'none', 'info', 'List the Assistive Writing placeholders (names the editor swaps for example values, like [name]) and their values.', () => {
+    if(typeof AW === 'undefined' || !AW.placeholders) return 'Placeholders are not available in this editor version.';
+    const e = Object.entries(AW.placeholders);
+    return e.length ? e.map(([k, v]) => '[' + k + '] = ' + v.join(', ')).join('\n') : 'No placeholders yet.';
+  });
+  reg('placeholderadd', 'rest', 'action', 'placeholderadd <name> <value1, value2, …> — add (or replace) an Assistive Writing placeholder. Names are lowercased with spaces turned into underscores. Example: placeholderadd city Dhaka, Chattogram', (txt) => {
+    if(typeof AW === 'undefined' || !AW.placeholders) return 'Placeholders are not available in this editor version.';
+    const m = String(txt||'').trim().match(/^(\S+)\s+([\s\S]+)$/);
+    if(!m) return 'Usage: placeholderadd <name> <value1, value2, …>.';
+    const key = m[1].toLowerCase().replace(/\s+/g, '_').replace(/^\[|\]$/g, '');
+    const vals = m[2].split(',').map(v => v.trim()).filter(Boolean);
+    if(!key || !vals.length) return 'Usage: placeholderadd <name> <value1, value2, …>.';
+    const had = Object.prototype.hasOwnProperty.call(AW.placeholders, key);
+    AW.placeholders[key] = vals; if(typeof renderPlaceholderList === 'function') renderPlaceholderList();
+    return (had ? 'Updated' : 'Added') + ' placeholder [' + key + '] with ' + vals.length + ' value' + (vals.length === 1 ? '' : 's') + '.';
+  });
+  reg('placeholderremove', 'words', 'action', 'placeholderremove <name> — delete an Assistive Writing placeholder.', (n) => {
+    if(typeof AW === 'undefined' || !AW.placeholders) return 'Placeholders are not available in this editor version.';
+    const key = String(n||'').toLowerCase().replace(/\s+/g, '_').replace(/^\[|\]$/g, '');
+    if(!key) return 'Usage: placeholderremove <name>.';
+    if(!Object.prototype.hasOwnProperty.call(AW.placeholders, key)) return 'No placeholder named [' + key + '].';
+    delete AW.placeholders[key]; if(typeof renderPlaceholderList === 'function') renderPlaceholderList();
+    return 'Removed placeholder [' + key + '].';
+  });
+
+  reg('assistivewriting', 'words', 'action', 'assistivewriting <open|close|status> — open or close the Assistive Writing panel (spell check, word prediction, placeholders), or report which of its helpers are on. Use /spellcheck and /wordprediction to switch the helpers.', (v) => {
+    if(typeof AW === 'undefined' || typeof toggleAssistiveWriting !== 'function') return 'Assistive Writing is not available in this editor version.';
+    const a = String(v||'status').toLowerCase();
+    if(a === 'status') return 'Assistive Writing panel ' + (AW.open ? 'open' : 'closed') + '. spellCheck:' + (AW.spellCheck ? 'on' : 'off') + ' wordPrediction:' + (AW.wordPred ? 'on' : 'off') + ' placeholders:' + Object.keys(AW.placeholders || {}).length;
+    if(a !== 'open' && a !== 'close') return 'Usage: assistivewriting <open|close|status>.';
+    if((a === 'open') === !!AW.open) return 'The panel is already ' + (AW.open ? 'open' : 'closed') + '.';
+    toggleAssistiveWriting(); return 'Assistive Writing panel ' + (a === 'open' ? 'opened' : 'closed') + '.';
+  });
+
+  reg('expandoptions', 'words', 'action', 'expandoptions [accuracy=0-100] [creativity=0-100] [rounds=1-200] [percent=0-100] [words=1-50] [fullselection=on|off] [requirechange=on|off] — show or change the Context Expansion options (the same ones as its options window). With no arguments it just reports them.', (...a) => {
+    if(typeof ceGetOptions !== 'function') return 'Context Expansion is not available in this editor version.';
+    const bad = [], set = {};
+    const num = (v, lo, hi) => { const n = parseInt(v,10); return (String(n) === String(v).trim() && n >= lo && n <= hi) ? n : null; };
+    const onoff = (v) => { v = String(v).toLowerCase(); return v === 'on' ? 'true' : v === 'off' ? 'false' : null; };
+    const spec = {accuracy:['ce_accuracy',(v)=>num(v,0,100)], creativity:['ce_creativity',(v)=>num(v,0,100)], rounds:['ce_rounds',(v)=>num(v,1,200)], percent:['ce_expand_percent',(v)=>num(v,0,100)], words:['ce_context_words',(v)=>num(v,1,50)], fullselection:['ce_full_selection',onoff], requirechange:['ce_require_change',onoff]};
+    for(const x of a){
+      const m = String(x).match(/^([a-z]+)=(.+)$/i); const s = m && spec[m[1].toLowerCase()];
+      if(!s){ bad.push(x); continue; }
+      const val = s[1](m[2]); if(val === null){ bad.push(x); continue; }
+      set[s[0]] = String(val);
+    }
+    for(const k in set){ try{ localStorage.setItem(k, set[k]); }catch(e){ bad.push(k + ' (could not save)'); } }
+    const o = ceGetOptions();
+    return 'Context Expansion: accuracy ' + o.accuracy + '%, creativity ' + o.creativity + '%, rounds ' + o.rounds + ', expand ' + o.expandPercent + '%, context words ' + (o.fullSelection ? 'full selection' : o.contextWords) + ', require change ' + (o.requireChange ? 'on' : 'off') + '.' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
+  });
+
+  reg('echo', 'words', 'info', 'echo [range=15|40|100] — Echo check for repeated wording: words that appear twice within the chosen number of words (default: whatever the Echo panel is set to) and sentence openers used three or more times. Needs the full document to be readable.', (v) => {
+    if(typeof window.__echoScan !== 'function') return 'Echo is not available in this editor version.';
+    const need = aamAiNeed(); if(need) return need;
+    if(v){
+      const m = String(v).match(/^range=(15|40|100)$/i); if(!m) return 'Usage: echo [range=15|40|100].';
+      const pill = document.querySelector('#echoRange .wc-pill[data-n="' + m[1] + '"]'); if(pill) pill.click();
+    }
+    try{ window.__echoScan(); }catch(e){ return 'Echo could not run in this editor version.'; }
+    const pills = (id) => [...document.querySelectorAll('#' + id + ' .wc-pill')].map(p => { const b = p.querySelector('b'), e = p.querySelector('em'); return b ? b.textContent + (e ? ' x' + e.textContent : '') : ''; }).filter(Boolean);
+    const words = pills('echo-list'), opens = pills('echo-open-list');
+    const d = document.getElementById('wcDropdown'); if(!(d && d.classList.contains('open')) && typeof window.echoClear === 'function') window.echoClear();
+    return 'Repeated words: ' + (words.length ? words.join(', ') : 'none') + '. Sentence openers used 3+ times: ' + (opens.length ? opens.join(', ') : 'none') + '.' + (words.length >= 24 ? ' (Showing the 24 most repeated.)' : '');
+  });
+  reg('echoclear', 'none', 'action', 'Remove the Echo highlights from the document.', () => {
+    if(typeof window.echoClear !== 'function') return 'Echo is not available in this editor version.';
+    window.echoClear(); return 'Cleared the Echo highlights.';
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
