@@ -1243,6 +1243,91 @@
     return 'Word goal: ' + g + ' words. Progress: ' + words + ' (' + pct + '%)' + (words >= g ? ' — goal reached.' : ', ' + (g - words) + ' to go.') + ((!document.querySelector('.ew-goal input[title="Word goal"]') && v) ? ' (The Word Goal widget is not on screen, but the goal is saved.)' : '');
   });
 
+  // ── v2.0.22: Page Navigator / Page Manager operations ─────────────────
+  // Page lists look like "1,3,5-7". Returns sorted unique page numbers, or null if the text is not a valid list.
+  function aamPageList(text){
+    const out = new Set();
+    for(const part of String(text||'').split(/[\s,]+/).filter(Boolean)){
+      const m = part.match(/^(\d+)(?:-(\d+))?$/); if(!m) return null;
+      let a = parseInt(m[1],10), b = m[2] ? parseInt(m[2],10) : a;
+      if(a > b){ const x = a; a = b; b = x; }
+      if(a < 1 || b - a > 500) return null;
+      for(let i = a; i <= b; i++) out.add(i);
+    }
+    return out.size ? [...out].sort((x,y) => x - y) : null;
+  }
+  const aamPages = () => [...document.querySelectorAll('#editorArea .page')];
+
+  reg('insertpage', 'words', 'action', 'insertpage <n> — insert a blank page so it becomes page n (existing pages from n onward move down). Use a number past the last page, or insertpage end, to add at the end. The new page inherits the look of its neighbour.', (n) => {
+    const pages = aamPages(); const total = pages.length;
+    const at = String(n||'').toLowerCase() === 'end' ? total + 1 : parseInt(n,10);
+    if(!(at >= 1)) return 'Usage: insertpage <n|end>.';
+    const num = Math.min(at, total + 1);
+    if(!pageAllowed(Math.min(num, total))) return denyMsg('page ' + Math.min(num, total));
+    if(typeof pgxAddPageAt !== 'function') return 'Page insertion is not available in this editor version.';
+    const pg = pgxAddPageAt(num - 1);
+    if(!pg) return 'The editor did not add the page (it may be locked right now).';
+    return 'Inserted a blank page as page ' + num + '. The document now has ' + aamPages().length + ' pages.';
+  });
+
+  reg('movepage', 'words', 'action', 'movepage <from> <to> — move page <from> so it ends up as page <to> (reorders the document). Example: movepage 5 2', (f, t) => {
+    const from = parseInt(f,10), to = parseInt(t,10), total = aamPages().length;
+    if(!(from >= 1 && to >= 1)) return 'Usage: movepage <from> <to>.';
+    if(from > total || to > total) return 'The document has ' + total + ' page' + (total === 1 ? '' : 's') + '.';
+    if(from === to) return 'Page ' + from + ' is already page ' + to + '.';
+    if(!pageAllowed(from)) return denyMsg('page ' + from);
+    if(!pageAllowed(to)) return denyMsg('page ' + to);
+    if(typeof pgxMovePage !== 'function') return 'Page reordering is not available in this editor version.';
+    if(!pgxMovePage(from - 1, to - 1)) return 'The editor did not move the page (it may be locked right now).';
+    return 'Moved page ' + from + ' to position ' + to + '.';
+  });
+
+  reg('duplicatepages', 'words', 'action', 'duplicatepages <list> — duplicate several pages at once; each copy is placed right after its original. List looks like 1,3,5-7. Use /duplicatepage <n> for a single page.', (...a) => {
+    const nums = aamPageList(a.join(' ')); if(!nums) return 'Usage: duplicatepages <list>, for example 1,3,5-7.';
+    const pages = aamPages(); const bad = nums.filter(n => n > pages.length);
+    if(bad.length) return 'Page' + (bad.length > 1 ? 's ' : ' ') + bad.join(', ') + ' not found (the document has ' + pages.length + ').';
+    for(const n of nums) if(!pageAllowed(n)) return denyMsg('page ' + n);
+    if(typeof pgxDuplicatePages !== 'function') return 'Multi-page duplication is not available in this editor version.';
+    const made = pgxDuplicatePages(nums.map(n => pages[n-1]));
+    if(!made || !made.length) return 'The editor did not duplicate the pages (it may be locked right now).';
+    return 'Duplicated ' + made.length + ' page' + (made.length === 1 ? '' : 's') + ' (' + nums.join(', ') + '). The document now has ' + aamPages().length + ' pages.';
+  });
+
+  reg('removepages', 'words', 'action', 'removepages <list> — delete several pages at once. List looks like 2,4,6-8. At least one page must remain. This cannot be undone with a confirmation prompt, so double-check the numbers; /checkpoint first if unsure.', (...a) => {
+    const nums = aamPageList(a.join(' ')); if(!nums) return 'Usage: removepages <list>, for example 2,4,6-8.';
+    const pages = aamPages(); const bad = nums.filter(n => n > pages.length);
+    if(bad.length) return 'Page' + (bad.length > 1 ? 's ' : ' ') + bad.join(', ') + ' not found (the document has ' + pages.length + ').';
+    if(nums.length >= pages.length) return 'At least one page must remain.';
+    for(const n of nums) if(!pageAllowed(n)) return denyMsg('page ' + n);
+    if(typeof pgxDeletePagesExec !== 'function') return 'Multi-page deletion is not available in this editor version.';
+    if(!pgxDeletePagesExec(nums.map(n => pages[n-1]))) return 'The editor did not delete the pages (it may be locked right now).';
+    return 'Removed page' + (nums.length === 1 ? ' ' : 's ') + nums.join(', ') + '. The document now has ' + aamPages().length + ' pages.';
+  });
+
+  reg('overlappingpages', 'none', 'info', 'List pages whose content runs past the bottom of the page (the editor\'s Overlapping Pages check). Only pages the agent may see are checked.', () => {
+    if(!elAllowed('counts')) return denyMsg('page information');
+    const over = [];
+    document.querySelectorAll('#editorArea .page-content').forEach((pc, idx) => {
+      const n = idx + 1; if(!pageAllowed(n)) return;
+      if(typeof _lazyCheck === 'function' && !_lazyCheck(pc)) return;
+      if(pc.scrollHeight > pc.clientHeight + 6) over.push(n);
+    });
+    return over.length ? 'Pages with overflowing content: ' + over.join(', ') + '.' : 'No overlapping pages.';
+  });
+
+  reg('pagenavigator', 'words', 'action', 'pagenavigator <open|close> — open or close the Page Navigator (small previews of every page for the user to jump, reorder or select).', (v) => {
+    const a = String(v||'open').toLowerCase();
+    if(a === 'open'){
+      if(typeof openPageNavigator !== 'function') return 'The Page Navigator is not available in this editor version.';
+      openPageNavigator(); return 'Opened the Page Navigator.';
+    }
+    if(a === 'close'){
+      if(typeof closePageNavigator !== 'function') return 'The Page Navigator is not available in this editor version.';
+      closePageNavigator(); return 'Closed the Page Navigator.';
+    }
+    return 'Usage: pagenavigator <open|close>.';
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
