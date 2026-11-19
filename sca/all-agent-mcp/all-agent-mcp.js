@@ -717,6 +717,60 @@
     document.execCommand('formatBlock', false, 'h' + lvl); return 'Applied heading ' + lvl + '.';
   });
 
+  // ── v2.0.16: Select all, paragraph styles, Format Painter ───────────
+  reg('selectall', 'words', 'action', 'selectall [page:<n>] — select all the text on the current page (or on page n). Same as the editor\'s Select all.', (a) => {
+    const pm = (a||'').match(/^page:(\d+)$/i);
+    let pc = null, n = null;
+    if(pm){
+      n = parseInt(pm[1],10);
+      if(!pageAllowed(n)) return denyMsg('page ' + n);
+      pc = pageContentByNum(n);
+      if(!pc) return 'Page ' + n + ' not found.';
+    } else {
+      const f = document.activeElement;
+      pc = (f && f.classList && f.classList.contains('page-content')) ? f : document.querySelector('#editorArea .page-content') || document.querySelector('.page-content');
+      if(!pc) return 'No editable page found.';
+      n = pageNumFromEl(pc);
+      if(n && !pageAllowed(n)) return denyMsg('page ' + n);
+    }
+    pc.focus();
+    const r = document.createRange(); r.selectNodeContents(pc);
+    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    return 'Selected all text on page ' + (n || '?') + '.';
+  });
+
+  const PARA_STYLES = {p:'Paragraph', h1:'Heading 1', h2:'Heading 2', h3:'Heading 3', h4:'Heading 4', h5:'Heading 5', h6:'Heading 6', blockquote:'Blockquote', pre:'Preformatted'};
+  const PARA_ALIASES = {paragraph:'p', normal:'p', text:'p', quote:'blockquote', code:'pre', preformatted:'pre', 'heading1':'h1','heading2':'h2','heading3':'h3','heading4':'h4','heading5':'h5','heading6':'h6'};
+  reg('paragraphstyle', 'words', 'action', 'paragraphstyle <p|h1-h6|blockquote|pre> — set the paragraph style of the current paragraph (the toolbar\'s Paragraph style menu). Aliases: paragraph, normal, quote, code. Example: paragraphstyle h2', (a) => {
+    let k = String(a||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+    if(PARA_ALIASES[k]) k = PARA_ALIASES[k];
+    if(!PARA_STYLES[k]) return 'Usage: paragraphstyle <p|h1|h2|h3|h4|h5|h6|blockquote|pre>.';
+    document.execCommand('formatBlock', false, k);
+    const lab = document.getElementById('formatBlockLabel'); if(lab) lab.textContent = PARA_STYLES[k];
+    return 'Paragraph style set to ' + PARA_STYLES[k] + '.';
+  });
+  reg('paragraphstylelist', 'none', 'info', 'List the paragraph styles paragraphstyle can apply.', () =>
+    Object.keys(PARA_STYLES).map(k => k + ' — ' + PARA_STYLES[k]).join('\n'));
+  reg('removeparagraphstyle', 'none', 'action', 'Remove the special paragraph style (heading, quote, preformatted) from the current paragraph. Same as the menu\'s Remove style.', () => {
+    if(typeof removeBlockStyle !== 'function') return 'This editor version has no Remove style action.';
+    removeBlockStyle(); return 'Removed the paragraph style.';
+  });
+
+  function painterKey(code, key){
+    document.dispatchEvent(new KeyboardEvent('keydown', {code, key, ctrlKey:true, altKey:true, bubbles:true, cancelable:true}));
+  }
+  reg('formatpainter', 'words', 'action', 'formatpainter <copy|paste|arm|disarm|status> — Format Painter. copy: take the format of the selected text. paste: apply the copied format to the current selection. arm: copy and then paint the next selection you make. disarm: cancel. status: is it armed?', (a) => {
+    const act = String(a||'').toLowerCase();
+    const FP = window.SCFormatPainter;
+    if(!FP) return 'Format Painter is not available in this editor version.';
+    if(act === 'status') return FP.isArmed() ? 'Format Painter is armed: the next selection will be painted.' : 'Format Painter is not armed.';
+    if(act === 'disarm'){ FP.disarm(); return 'Format Painter disarmed.'; }
+    if(act === 'arm'){ FP.arm(); return FP.isArmed() ? 'Format copied and Format Painter armed. Select text to paint it.' : 'Could not arm Format Painter. Select formatted text first.'; }
+    if(act === 'copy'){ painterKey('KeyC','c'); return 'Copied the format of the selection (if text was selected).'; }
+    if(act === 'paste'){ painterKey('KeyV','v'); return 'Applied the copied format to the selection (if one was copied and text is selected).'; }
+    return 'Usage: formatpainter <copy|paste|arm|disarm|status>.';
+  });
+
   function transformSelection(fn){
     const sel = window.getSelection();
     if(!sel || !sel.rangeCount || sel.isCollapsed) return false;
