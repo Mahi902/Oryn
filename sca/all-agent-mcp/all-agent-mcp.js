@@ -2777,6 +2777,90 @@
     return 'Usage: readaloud <status|enable|disable|start|selection|pause|stop>.';
   });
 
+  // ── v2.0.40: Font chooser — document font, online fonts, custom fonts ─
+  const aamFontItems = () => [...document.querySelectorAll('#fcPanelFonts .fc-font-item')];
+  const aamFontNames = () => aamFontItems().map(el => el.dataset.font).filter(Boolean);
+  const aamFontOk = () => typeof FC !== 'undefined' && typeof fcSelectFont === 'function' && !!document.getElementById('fcPanelFonts');
+  const aamFontFind = (name) => { const q = String(name||'').trim().toLowerCase(); return aamFontNames().find(n => n.toLowerCase() === q) || null; };
+  const aamFontMiss = (name) => { const q = String(name||'').trim().toLowerCase(); const near = aamFontNames().filter(n => n.toLowerCase().indexOf(q) >= 0).slice(0, 5); return 'Font "' + name + '" is not in the font list.' + (near.length ? ' Did you mean: ' + near.join(', ') + '?' : ' Run fonts to see them, or load one with fontload.'); };
+  // run fn with the chooser forced to whole-document scope, then restore its previous scope
+  const aamFcDoc = (fn) => { const ps = FC.scope, pr = FC.savedRange; FC.scope = 'document'; FC.savedRange = null; try { return fn(); } finally { FC.scope = ps; FC.savedRange = pr; } };
+
+  reg('fonts', 'none', 'info', 'List the fonts in the font chooser (built-in, uploaded and loaded online fonts) and which one the whole document uses. Use a name from this list with fontdoc, fontselection and fontremove.', () => {
+    if(!aamFontOk()) return 'The font chooser is not available in this editor version.';
+    const names = aamFontNames(); const cur = (typeof S !== 'undefined' && S.font) || 'Default';
+    const uploaded = (typeof S !== 'undefined' && S.fonts) ? Object.keys(S.fonts) : [];
+    return 'Document font: ' + cur + '\nFonts (' + names.length + '): ' + names.map(n => n + (n === cur ? ' *' : '') + (uploaded.indexOf(n) >= 0 ? ' (uploaded)' : '')).join(', ');
+  });
+
+  reg('fontdoc', 'rest', 'action', 'fontdoc <name> — set the font of the whole document from the font chooser list (see fonts). Use Default to go back to the editor default. This is the font chooser\'s "Entire document" option; fontfamily and fontselection change only selected text.', (name) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(!aamFontOk()) return 'The font chooser is not available in this editor version.';
+    name = String(name||'').trim(); if(!name) return 'Usage: fontdoc <name> (see fonts).';
+    const f = aamFontFind(name); if(!f) return aamFontMiss(name);
+    aamFcDoc(() => fcSelectFont(f));
+    try{ scheduleAutoSave(); }catch(e){}
+    return 'The document font is now ' + f + '.';
+  });
+
+  reg('fontselection', 'rest', 'action', 'fontselection <name> — set the font of the selected text from the font chooser list (see fonts), the same as the chooser\'s "Selected text" option. Select text first (select / selecttext).', (name) => {
+    if(!elAllowed('content') || !elAllowed('selection')) return denyMsg('selection');
+    if(!aamFontOk()) return 'The font chooser is not available in this editor version.';
+    name = String(name||'').trim(); if(!name) return 'Usage: fontselection <name> (see fonts).';
+    const f = aamFontFind(name); if(!f) return aamFontMiss(name);
+    if(f === 'Default') return 'Default would clear all formatting on the selection. Use fontdoc Default for the document, or clearformatting for the selection.';
+    const sel = window.getSelection(); if(!sel || !sel.rangeCount || sel.getRangeAt(0).collapsed) return 'Select some text first.';
+    const r = sel.getRangeAt(0); const n = r.commonAncestorContainer; const host = n.nodeType === 1 ? n : n.parentElement;
+    if(!host || !host.closest || !host.closest('#editorArea .page-content')) return 'The selection is not inside the document.';
+    const ps = FC.scope, pr = FC.savedRange;
+    try { FC.savedRange = r.cloneRange(); FC.scope = 'selection'; fcSelectFont(f); } finally { FC.scope = ps; FC.savedRange = pr; }
+    try{ scheduleAutoSave(); }catch(e){}
+    return 'Selected text set to ' + f + '.';
+  });
+
+  reg('fontsearch', 'rest', 'info', 'fontsearch <text> — search the online font list (Google Fonts) by name and show up to 30 matches, with the ones already loaded marked. Load one with fontload <name>.', (q) => {
+    q = String(q||'').trim().toLowerCase(); if(!q) return 'Usage: fontsearch <text>.';
+    if(typeof extractFontNameFromUrl !== 'function') return 'The online font list is not available in this editor version.';
+    if(typeof _fcOnlineFonts === 'undefined' || !_fcOnlineFonts){
+      try{ if(typeof loadFcOnlineFonts === 'function') loadFcOnlineFonts(); }catch(e){}
+      return 'The online font list is still loading — run fontsearch again in a moment.';
+    }
+    const have = aamFontNames().map(n => n.toLowerCase());
+    const hits = _fcOnlineFonts.map(u => extractFontNameFromUrl(u)).filter(n => n && n.toLowerCase().indexOf(q) >= 0);
+    if(!hits.length) return 'No online fonts match "' + q + '".';
+    return hits.length + ' match' + (hits.length === 1 ? '' : 'es') + ':\n' + hits.slice(0, 30).map(n => n + (have.indexOf(n.toLowerCase()) >= 0 ? ' (loaded)' : '')).join(', ') + (hits.length > 30 ? '\n…and ' + (hits.length - 30) + ' more; narrow the search.' : '');
+  });
+
+  reg('fontload', 'rest', 'action', 'fontload <font name | Google Fonts link> — load an online font into the font chooser, for example fontload Lobster or fontload https://fonts.googleapis.com/css2?family=Lobster. Use fontdoc / fontselection afterwards to apply it. A toast confirms when it is loaded.', (txt) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(typeof loadFcCustomUrl !== 'function' || !document.getElementById('fcUrlInp') || typeof extractFontNameFromUrl !== 'function') return 'Loading online fonts is not available in this editor version.';
+    if(!navigator.onLine) return 'Loading an online font needs an internet connection.';
+    txt = String(txt||'').trim(); if(!txt) return 'Usage: fontload <font name | Google Fonts link>.';
+    let url = txt;
+    if(!/^https?:\/\//i.test(txt)){
+      const hit = (typeof _fcOnlineFonts !== 'undefined' && _fcOnlineFonts) ? _fcOnlineFonts.find(u => (extractFontNameFromUrl(u) || '').toLowerCase() === txt.toLowerCase()) : null;
+      url = hit || ('https://fonts.googleapis.com/css2?family=' + encodeURIComponent(txt) + '&display=swap');
+    }
+    if(!/^https:\/\/fonts\.googleapis\.com\//i.test(url) && url.indexOf('fonts.google.com/specimen/') < 0) return 'Only Google Fonts links (fonts.googleapis.com) or font names can be loaded.';
+    const nm = extractFontNameFromUrl(url.indexOf('fonts.google.com/specimen/') >= 0 ? 'https://fonts.googleapis.com/css2?family=' + url.split('/specimen/')[1].split('?')[0] : url);
+    if(nm && aamFontFind(nm)) return 'Font "' + aamFontFind(nm) + '" is already in the list. Use fontdoc ' + aamFontFind(nm) + ' to apply it.';
+    aamById('fcUrlInp').value = url;
+    Promise.resolve().then(() => loadFcCustomUrl()).catch(e => aamToast('Font load failed: ' + (e && e.message || e), 'error'));
+    return 'Loading font ' + (nm || url) + ' — a toast confirms when it is in the list; then use fontdoc or fontselection.';
+  });
+
+  reg('fontremove', 'rest', 'action', 'fontremove <name> — remove an uploaded or online font from the font chooser list (see fonts). The built-in Default cannot be removed. If it was the document font, the document goes back to Default.', (name) => {
+    if(!elAllowed('content')) return denyMsg('page content');
+    if(!aamFontOk() || typeof deleteFcFont !== 'function') return 'The font chooser is not available in this editor version.';
+    name = String(name||'').trim(); if(!name) return 'Usage: fontremove <name> (see fonts).';
+    const f = aamFontFind(name); if(!f) return aamFontMiss(name);
+    if(f === 'Default') return 'The Default font cannot be removed.';
+    const item = aamFontItems().find(el => el.dataset.font === f);
+    aamFcDoc(() => deleteFcFont(f, item));
+    try{ scheduleAutoSave(); }catch(e){}
+    return 'Removed font ' + f + '.';
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
