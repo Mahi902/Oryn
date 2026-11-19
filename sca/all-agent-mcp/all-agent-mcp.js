@@ -1097,6 +1097,107 @@
     return 'Page ' + num + ' duplicated.';
   });
 
+  // ── Layout, pagination & page size ───────────────────────────────────
+  // These drive the editor's own setPagination / setPageLayout / setPageOrient /
+  // setPageSize functions, so toasts, saving, zoom and the sidebar UI stay in sync.
+  function pgnPageList(spec){
+    const total = document.querySelectorAll('#editorArea .page').length;
+    const s = String(spec == null || spec === '' ? 'all' : spec).trim().toLowerCase() || 'all';
+    if(typeof parseCmargPages !== 'function') return {err:'Page range helper not available.'};
+    const set = parseCmargPages(s, total);
+    const nums = [...set].sort((a,b) => a-b);
+    if(!nums.length) return {err:'No pages match "' + s + '" (document has ' + total + ' page' + (total===1?'':'s') + ').'};
+    const bad = nums.find(n => !pageAllowed(n));
+    if(bad) return {err: denyMsg('page ' + bad)};
+    return {nums, spec: s};
+  }
+  function pgnSizeName(d){ return (typeof pgLabel === 'function') ? pgLabel(d) : (d.w + ' × ' + d.h + ' cm'); }
+
+  reg('pagination', 'none', 'info', 'Current pagination mode: manual (you add pages) or auto (text flows onto new pages).', () => {
+    if(typeof PGN === 'undefined') return 'Pagination is not available in this editor version.';
+    return 'Pagination: ' + PGN.mode + '.';
+  });
+
+  reg('paginationset', 'words', 'action', 'paginationset <auto|manual> — switch pagination. Auto flows overflowing content onto new pages by itself; manual leaves page breaks to you.', (m) => {
+    if(typeof setPagination !== 'function') return 'Pagination is not available in this editor version.';
+    const v = String(m||'').trim().toLowerCase();
+    if(v !== 'auto' && v !== 'manual') return 'Usage: paginationset <auto|manual>';
+    setPagination(v);
+    return 'Pagination set to ' + v + '.';
+  });
+
+  reg('pagelayout', 'none', 'info', 'Current page layout: how many pages sit side by side (1–4) and the flow direction (vertical or horizontal).', () => {
+    if(typeof VW === 'undefined') return 'Page layout is not available in this editor version.';
+    return 'Layout: ' + VW.layout + ' column' + (VW.layout===1?'':'s') + ', ' + (VW.orient === 'h' ? 'horizontal' : 'vertical') + ' flow.';
+  });
+
+  reg('pagelayoutset', 'words', 'action', 'pagelayoutset <1|2|3|4> — show 1 to 4 pages side by side.', (n) => {
+    if(typeof setPageLayout !== 'function') return 'Page layout is not available in this editor version.';
+    const c = parseInt(n,10);
+    if(!(c >= 1 && c <= 4)) return 'Usage: pagelayoutset <1|2|3|4>';
+    setPageLayout(c);
+    return 'Page layout set to ' + c + ' column' + (c===1?'':'s') + '.';
+  });
+
+  reg('pageorientset', 'words', 'action', 'pageorientset <vertical|horizontal> — pages flow top-to-bottom (vertical) or left-to-right (horizontal).', (o) => {
+    if(typeof setPageOrient !== 'function') return 'Page layout is not available in this editor version.';
+    const v = String(o||'').trim().toLowerCase();
+    if(!['v','h','vertical','horizontal'].includes(v)) return 'Usage: pageorientset <vertical|horizontal>';
+    setPageOrient(v[0]);
+    return 'Page flow set to ' + (v[0]==='h' ? 'horizontal' : 'vertical') + '.';
+  });
+
+  reg('pagesizelist', 'none', 'info', 'List the built-in page sizes (key, name, width × height in cm). Use the key with pagesizeset.', () => {
+    if(typeof PG_SIZES === 'undefined') return 'Page size is not available in this editor version.';
+    return Object.keys(PG_SIZES).filter(k => k !== 'custom').map(k => k + ' — ' + PG_SIZES[k][0] + ' (' + PG_SIZES[k][1] + ' × ' + PG_SIZES[k][2] + ' cm)').join('\n') +
+      '\ncustom — any width × height from 5 to 100 cm (pagesizeset custom <w> <h> [pages])';
+  });
+
+  reg('pagesize', 'words', 'info', 'pagesize [n] — size of page n, or a summary of every page size in the document when n is left out.', (n) => {
+    if(typeof pgOf !== 'function') return 'Page size is not available in this editor version.';
+    if(n && String(n).trim()){
+      const num = parseInt(n,10) || 1;
+      if(!pageAllowed(num)) return denyMsg('page ' + num);
+      const p = pageByNum(num); if(!p) return 'Page ' + num + ' not found.';
+      const d = pgOf(p);
+      return 'Page ' + num + ': ' + pgnSizeName(d) + ' (' + d.w + ' × ' + d.h + ' cm, ' + d.orient + ').';
+    }
+    return (typeof pgSummaryText === 'function' ? pgSummaryText() : '') || 'A4';
+  });
+
+  reg('pagesizeset', 'words', 'action', 'pagesizeset <key> [portrait|landscape] [pages] — set a preset size (see pagesizelist). pagesizeset custom <width_cm> <height_cm> [pages] — custom size. [pages] is "all" (default), "2", "1,3" or "2-5".', (...a) => {
+    if(typeof setPageSize !== 'function' || typeof PG_SIZES === 'undefined') return 'Page size is not available in this editor version.';
+    const args = a.map(x => String(x).trim()).filter(Boolean);
+    const key = (args.shift() || '').toLowerCase();
+    if(!key || !PG_SIZES[key]) return 'Unknown size "' + key + '". Use pagesizelist for the keys.';
+    let orient = 'portrait', w, h;
+    if(key === 'custom'){
+      w = parseFloat(args.shift()); h = parseFloat(args.shift());
+      if(!(w >= 5 && w <= 100) || !(h >= 5 && h <= 100)) return 'Usage: pagesizeset custom <width_cm> <height_cm> [pages] — each from 5 to 100.';
+    } else if(args.length && /^(portrait|landscape|p|l)$/i.test(args[0])){
+      orient = args.shift().toLowerCase()[0] === 'l' ? 'landscape' : 'portrait';
+    }
+    const pl = pgnPageList(args.join(','));
+    if(pl.err) return pl.err;
+    const el = document.getElementById('pgPages');
+    const prev = el ? el.value : null;
+    if(el) el.value = pl.nums.join(',');
+    try { setPageSize(key, orient, w, h); }
+    finally { if(el && prev !== null) el.value = prev; }
+    const d = pgCompute(key, orient, w, h);
+    return pgnSizeName(d) + ' applied to ' + (pl.nums.length === 1 ? 'page ' + pl.nums[0] : pl.nums.length + ' pages') + '.';
+  });
+
+  reg('pagesizereset', 'words', 'action', 'pagesizereset [pages] — put pages back to the default A4 portrait. [pages] is "all" (default), "2", "1,3" or "2-5".', (spec) => {
+    if(typeof pgApplyEl !== 'function' || typeof pgAllPages !== 'function') return 'Page size is not available in this editor version.';
+    const pl = pgnPageList(spec);
+    if(pl.err) return pl.err;
+    const all = pgAllPages();
+    pl.nums.forEach(n => pgApplyEl(all[n-1], null));
+    if(typeof pgAfter === 'function') pgAfter();
+    return 'A4 portrait restored on ' + (pl.nums.length === 1 ? 'page ' + pl.nums[0] : pl.nums.length + ' pages') + '.';
+  });
+
 
   // ═══════════════════════════════════════════════════════════════════
   //  AGENT LAYER
