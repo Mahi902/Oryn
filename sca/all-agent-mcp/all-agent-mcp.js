@@ -2921,6 +2921,35 @@
     return 'Lazy Pages ' + (a === 'on' ? 'enabled' : 'disabled') + '. ' + state();
   });
 
+  // ── v2.0.42: Indent style — first line, hanging and marker indents ───
+  const AAM_INDENT_STYLES = ['firstline', 'hanging', 'triangle-out', 'circle-out', 'triangle-in', 'circle-in', 'none'];
+  reg('indentstyles', 'none', 'info', 'List the indent styles the Indent popup offers (first line, hanging, and four marker styles) that indentstyle accepts, plus none to clear one.', () => {
+    return 'Indent styles: firstline (first line indented 2em), hanging (all but the first line indented), triangle-out, circle-out, triangle-in, circle-in (a marker at the start with the paragraph indented), none (clear the indent style). Use: indentstyle <name> with the cursor in a paragraph or text selected.';
+  });
+  reg('indentstyle', 'words', 'action', 'indentstyle <firstline|hanging|triangle-out|circle-out|triangle-in|circle-in|none> — apply an Indent popup style to the paragraph that holds the cursor or the start of the selection (the same as the Indent button\'s popup). none removes the indent and any marker. Place the cursor first with placecursor / select. See indentstyles. This is different from indent / outdent, which step the indent level.', (v) => {
+    if(!elAllowed('content')) return denyMsg('content');
+    if(typeof applyIndentStyle !== 'function') return 'Indent styles are not available in this editor version.';
+    const st = String(v||'').toLowerCase().trim();
+    if(AAM_INDENT_STYLES.indexOf(st) < 0) return 'Usage: indentstyle <' + AAM_INDENT_STYLES.join('|') + '>.';
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount) return 'Place the cursor in a paragraph first (placecursor / select).';
+    const r = sel.getRangeAt(0);
+    let n = r.startContainer; while(n && n.nodeType !== 1) n = n.parentNode;
+    if(!n || !n.closest || !n.closest('#editorArea .page-content')) return 'The cursor is not inside the document.';
+    if(st === 'none'){
+      let b = n; const tags = ['P','H1','H2','H3','H4','H5','H6','DIV','LI'];
+      while(b && !(b.classList && b.classList.contains('page-content')) && tags.indexOf(b.tagName) < 0) b = b.parentNode;
+      if(!b || (b.classList && b.classList.contains('page-content'))) return 'Put the cursor inside a paragraph first.';
+      b.style.textIndent = ''; b.style.paddingLeft = ''; b.style.marginLeft = '';
+      if(b._indentMarker){ try{ b._indentMarker.remove(); }catch(e){} delete b._indentMarker; }
+      try{ scheduleAutoSave(); }catch(e){}
+      return 'Indent style cleared.';
+    }
+    _indentSavedRange = r.cloneRange();
+    applyIndentStyle(st);
+    return 'Indent style "' + st + '" applied.';
+  });
+
   // ── Zoom / navigation ────────────────────────────────────────────────
   reg('zoomin', 'none', 'action', 'Zoom the document in by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(10); return 'Zoomed in.'; } return 'Zoom function not available.'; });
   reg('zoomout', 'none', 'action', 'Zoom the document out by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(-10); return 'Zoomed out.'; } return 'Zoom function not available.'; });
