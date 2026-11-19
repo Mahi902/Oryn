@@ -504,8 +504,6 @@
   reg('italic', 'none', 'action', 'Toggle italic on the current selection.', () => { document.execCommand('italic'); return 'Toggled italic.'; });
   reg('underline', 'none', 'action', 'Toggle underline on the current selection.', () => { document.execCommand('underline'); return 'Toggled underline.'; });
   reg('strikethrough', 'none', 'action', 'Toggle strikethrough on the current selection.', () => { document.execCommand('strikeThrough'); return 'Toggled strikethrough.'; });
-  reg('undo', 'none', 'action', 'Undo the last edit.', () => { document.execCommand('undo'); return 'Undid last edit.'; });
-  reg('redo', 'none', 'action', 'Redo the last undone edit.', () => { document.execCommand('redo'); return 'Redid edit.'; });
   reg('clearformatting', 'none', 'action', 'Clear formatting on the current selection.', () => { document.execCommand('removeFormat'); return 'Cleared formatting.'; });
   reg('deleteselection', 'none', 'action', 'Delete the currently selected text.', () => { document.execCommand('delete'); return 'Deleted selection.'; });
 
@@ -3092,6 +3090,48 @@
     if(!aamEvOk() || typeof SCElegant.reset !== 'function') return 'Elegant Variation is not available in this editor version.';
     SCElegant.reset();
     return 'Elegant Variation settings reset to defaults.';
+  });
+
+  // ── v2.0.46: Edit history (undo / redo with counts) and the overlap default ──
+  function aamHist(){ return (typeof SCHistory !== 'undefined' && SCHistory && typeof SCHistory.undo === 'function') ? SCHistory : null; }
+  function aamHistCounts(){ const H = aamHist(); const st = H && H._state; return st ? { undo: st.undo.length, redo: st.redo.length } : null; }
+  function aamHistRun(kind, v){
+    if(!elAllowed('content')) return denyMsg('content');
+    let n = 1;
+    if(String(v||'').trim()){ n = parseInt(v, 10); if(!(n >= 1 && n <= 50)) return 'Usage: ' + kind + ' [steps 1-50].'; }
+    const H = aamHist(); let done = 0;
+    for(let i = 0; i < n; i++){
+      let ok;
+      if(H) ok = !!H[kind]();
+      else { try{ ok = document.execCommand(kind); }catch(e){ ok = false; } }
+      if(!ok) break; done++;
+    }
+    const c = aamHistCounts(); const word = kind === 'undo' ? 'Undid' : 'Redid';
+    const tail = c ? ' (' + c.undo + ' undo / ' + c.redo + ' redo step(s) left)' : '';
+    if(!done) return (H ? 'Nothing to ' + kind + '.' : (kind === 'undo' ? 'Undid last edit.' : 'Redid edit.')) + tail;
+    return word + ' ' + done + ' step' + (done === 1 ? '' : 's') + (done < n ? ' (ran out of steps)' : '') + '.' + tail;
+  }
+  reg('undo', 'words', 'action', 'undo [steps] — undo the last edit, or several steps at once (up to 50). Says plainly when there is nothing left to undo. See history for the step counts.', (v) => aamHistRun('undo', v));
+  reg('redo', 'words', 'action', 'redo [steps] — redo the last undone edit, or several steps at once (up to 50). Says plainly when there is nothing left to redo.', (v) => aamHistRun('redo', v));
+  reg('history', 'none', 'info', 'Show how many undo and redo steps the editor currently has.', () => {
+    const c = aamHistCounts();
+    if(!c) return 'Edit history counts are not available in this editor version (undo and redo still work).';
+    return 'Edit history: ' + c.undo + ' undo step(s), ' + c.redo + ' redo step(s).';
+  });
+  reg('historyclear', 'words', 'action', 'historyclear confirm — throw away the whole undo and redo history. This cannot be undone, so it only runs when you pass the word confirm.', (v) => {
+    if(!elAllowed('content')) return denyMsg('content');
+    const H = aamHist(); if(!H || typeof H.clear !== 'function') return 'Clearing the edit history is not available in this editor version.';
+    if(String(v||'').toLowerCase().trim() !== 'confirm') return 'This permanently discards every undo and redo step. Run historyclear confirm to do it.';
+    H.clear();
+    return 'Edit history cleared.';
+  });
+  reg('overlapdefault', 'words', 'action', 'overlapdefault <on|off|status> — whether newly inserted items (text boxes, images, shapes and so on) may overlap other items by default (the Allow overlapping switch in the Insert menu). Each insert window can still override it for one item.', (v) => {
+    if(typeof SCHit === 'undefined' || !SCHit || typeof SCHit.set !== 'function') return 'The overlap setting is not available in this editor version.';
+    const a = String(v||'status').toLowerCase().trim() || 'status';
+    if(a === 'status') return 'New items ' + (SCHit.defaultAllow ? 'may' : 'may not') + ' overlap other items by default.';
+    if(a !== 'on' && a !== 'off') return 'Usage: overlapdefault <on|off|status>.';
+    SCHit.set(a === 'on');
+    return 'New items ' + (a === 'on' ? 'may' : 'may not') + ' overlap other items by default.';
   });
 
   // ── Zoom / navigation ────────────────────────────────────────────────
