@@ -2433,6 +2433,16 @@
     return 'Cropped image ' + (i + 1) + ' (left ' + t.left + '%, top ' + t.top + '%, right ' + t.right + '%, bottom ' + t.bottom + '%).' + (bad.length ? ' Could not use: ' + bad.join(', ') + '.' : '');
   });
 
+  // ── v2.0.36: Sidebar ──────────────────────────────────────────────────
+  reg('sidebar', 'words', 'action', 'sidebar <show|hide|toggle> — show or hide the editor sidebar (the same as its collapse / expand button). With no option it reports whether it is shown.', (v) => {
+    const sb = document.getElementById('sidebar'); if(!sb || typeof toggleSidebar !== 'function') return 'The sidebar is not available in this editor version.';
+    const a = String(v||'').toLowerCase(); const hidden = sb.classList.contains('collapsed');
+    if(!a) return 'The sidebar is ' + (hidden ? 'hidden' : 'shown') + '.';
+    if(['show','hide','toggle'].indexOf(a) < 0) return 'Usage: sidebar <show|hide|toggle>.';
+    if(a === 'toggle' || (a === 'show' && hidden) || (a === 'hide' && !hidden)) toggleSidebar();
+    return 'The sidebar is now ' + (sb.classList.contains('collapsed') ? 'hidden' : 'shown') + '.';
+  });
+
   reg('pagenumbering', 'words', 'action', 'pagenumbering <on|off> — toggle page numbers.', (v) => {
     if(typeof togglePageNumbering === 'function'){ togglePageNumbering((v||'').toLowerCase() === 'on'); return 'Page numbering ' + ((v||'').toLowerCase()==='on'?'enabled':'disabled') + '.'; }
     return 'Page numbering function not available.';
