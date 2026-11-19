@@ -3366,6 +3366,35 @@
     return changed ? 'Autofill applied on ' + changed + ' page' + (changed === 1 ? '' : 's') + ': ' + Object.keys(assign).map((k) => '[' + k + '] -> ' + assign[k]).join('; ') : 'No placeholders were replaced.';
   });
 
+  // ── v2.0.50: Context Expansion — switch it on and run it on a selection ──
+  function aamCeOk(){ return typeof toggleContextExpansion === 'function' && typeof runExpandContext === 'function' && typeof ceGatingOk === 'function'; }
+  function aamCeOn(){ try{ return localStorage.getItem('ce_enabled') === 'true'; }catch(e){ return false; } }
+  reg('contextexpansion', 'words', 'action', 'contextexpansion <on|off|status> — switch the Context Expansion helper (Assistive Writing) on or off, or report it. It needs AI Features and the Sugarcane AI use case enabled in the app Settings > AI; if they are not, the editor refuses and this command says so. Change its options with expandoptions, then run it with expandcontext.', (v) => {
+    if(!aamCeOk()) return 'Context Expansion is not available in this editor version.';
+    const a = String(v||'status').toLowerCase().trim() || 'status';
+    const locked = !ceGatingOk();
+    const state = () => 'Context Expansion is ' + (aamCeOn() ? 'on' : 'off') + (locked ? ' (locked: enable AI Features and AI Usecases > Sugarcane in the app Settings > AI)' : '') + '.';
+    if(a === 'status') return state();
+    if(a !== 'on' && a !== 'off') return 'Usage: contextexpansion <on|off|status>.';
+    if(a === 'on' && locked) return 'Context Expansion is locked: enable AI Features and AI Usecases > Sugarcane in the app Settings > AI first.';
+    const cb = document.getElementById('awContextExpand'); if(cb && cb.checked !== (a === 'on')) cb.checked = (a === 'on');
+    toggleContextExpansion(a === 'on');
+    return 'Context Expansion ' + (a === 'on' ? 'enabled' : 'disabled') + '.';
+  });
+  reg('expandcontext', 'none', 'action', 'Expand the selected text with Context Expansion (the Expand Context button in the selection popup): it grows the selection by filling in and adding words, using the options from expandoptions. Select at least two words first (select / selecttext) and switch it on with contextexpansion on. The result replaces the selection and works in the background; check with read_selection or toasts.', () => {
+    if(!elAllowed('content') || !elAllowed('selection')) return denyMsg('selection');
+    if(!aamCeOk()) return 'Context Expansion is not available in this editor version.';
+    if(!ceGatingOk()) return 'Context Expansion is locked: enable AI Features and AI Usecases > Sugarcane in the app Settings > AI first.';
+    if(!aamCeOn()) return 'Context Expansion is off. Switch it on with contextexpansion on.';
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount || sel.isCollapsed) return 'Select at least two words first.';
+    const n = sel.getRangeAt(0).commonAncestorContainer; const host = n.nodeType === 1 ? n : n.parentElement;
+    if(!host || !host.closest || !host.closest('#editorArea .page-content')) return 'The selection is not inside the document.';
+    if(sel.toString().trim().split(/\s+/).filter(Boolean).length < 2) return 'Select at least two words first.';
+    try{ Promise.resolve(runExpandContext()).catch(() => {}); }catch(e){ return 'Context Expansion could not start: ' + (e && e.message || e); }
+    return 'Context Expansion started on the selection. It runs in the background; read_selection or toasts show the result.';
+  });
+
   // ── Zoom / navigation ────────────────────────────────────────────────
   reg('zoomin', 'none', 'action', 'Zoom the document in by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(10); return 'Zoomed in.'; } return 'Zoom function not available.'; });
   reg('zoomout', 'none', 'action', 'Zoom the document out by 10%.', () => { if(typeof adjustZoom==='function'){ adjustZoom(-10); return 'Zoomed out.'; } return 'Zoom function not available.'; });
