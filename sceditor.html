@@ -7,7 +7,7 @@
 <title>Sugarcane Editor</title>
 <meta name="description" content="Sugarcane Editor: a powerful all-in-one online editor from the Oryn suite. Write, design and edit with add-ons and extensions.">
 <meta name="keywords" content="Sugarcane Editor, SCEditor, DocuWrite Pro, sugarcane, sca add-ons, editor add-ons, extensions, online editor, document editor, online document editor, free document editor, Word alternative, Google Docs alternative, WYSIWYG editor, rich text editor, text editor, write documents online, A4 editor, docs, office, word processor, online word processor, create documents, edit documents, format documents, export document, export PDF, export DOCX, export HTML, print document, page layout, headings, fonts, tables, lists, templates, document templates, resume maker, letter writer, report writer, essay writer, Oryn, Oryn app, Oryn online, Mohtadi Azad Mahi, Education By Mohtadi Azad, mahi902, free online tools, online tools, web tools, browser tools, no signup, no login, no ads, no credit card, free forever, works in browser, client-side, privacy friendly, offline friendly, PWA, progressive web app, productivity tools, productivity suite, document suite, all-in-one workspace, online workspace, Android app, mobile friendly, dark mode, open source, GitHub Pages, Toolstructer, instant, fast, easy to use, secure, no installation, no server upload">
-<meta name="sceditor-version" content="252">
+<meta name="sceditor-version" content="253">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -4300,7 +4300,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v252…</p>
+    <p class="loading-text">Loading Sugarcane v253…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -6789,6 +6789,7 @@ body #ulBulletChips .olcust-chip.active,body.dark #ulBulletChips .olcust-chip.ac
         <div class="scf-seg" id="imgSrcSeg">
           <button type="button" class="scf-seg-btn on" data-src="upload" onclick="imgSrcTab('upload')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></span>Upload</button>
           <button type="button" class="scf-seg-btn" data-src="url" onclick="imgSrcTab('url')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span>URL</button>
+          <button type="button" class="scf-seg-btn" data-src="web" id="imgSrcWebTab" onclick="imgSrcTab('web')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg></span>Web</button>
           <button type="button" class="scf-seg-btn" data-src="gen" id="imgSrcGenTab" style="display:none" onclick="imgSrcTab('gen')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z"/><path d="M19 16v4M17 18h4"/></svg></span>Generate</button>
           <button type="button" class="scf-seg-btn" data-src="drive" id="imgSrcDriveTab" style="display:none" onclick="imgSrcTab('drive')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 1 1 .8-8.9A6 6 0 0 1 19 11a3.5 3.5 0 0 1-.5 7z"/></svg></span>Google Drive</button>
         </div>
@@ -6811,7 +6812,17 @@ body #ulBulletChips .olcust-chip.active,body.dark #ulBulletChips .olcust-chip.ac
           <div class="scf-grid" id="imgUrlGrid"></div>
         </div>
 
-        <div class="scf-pane" data-pane="gen">
+        <div class="scf-pane" data-pane="web">
+<div class="scf-row">
+<input type="text" class="scf-input" id="imgWebInput" placeholder="Search free photos" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();imgWebSearch()}"/>
+<button type="button" class="scf-btn pri" id="imgWebGo" onclick="imgWebSearch()"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg></span>Search</button>
+</div>
+<div class="scf-status" id="imgWebStatus">Search free photos from Unsplash.</div>
+<div class="scf-grid" id="imgWebGrid"></div>
+<button type="button" class="scf-btn" id="imgWebMore" style="display:none;margin:10px auto 0" onclick="imgWebSearch(true)">Load more</button>
+</div>
+
+<div class="scf-pane" data-pane="gen">
           <div class="scf-row">
             <input type="text" class="scf-input" id="imgGenPrompt" placeholder="Describe a picture, e.g. a cat astronaut on the moon" maxlength="200" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();imgGenStart()}"/>
             <button type="button" class="scf-btn pri" id="imgGenGo" onclick="imgGenStart()"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3l1.8 5.2L18 10l-5.2 1.8L11 17l-1.8-5.2L4 10l5.2-1.8z"/><path d="M19 16v4M17 18h4"/></svg></span><span id="imgGenGoLbl">Generate</span></button>
@@ -9500,7 +9511,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 252; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 253; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -17504,6 +17515,9 @@ function openImageModal() {
   _imgEl('imgEdBack').style.display = '';
   const dt = _imgEl('imgSrcDriveTab');
   if (dt) dt.style.display = (typeof _googleUser !== 'undefined' && _googleUser) ? '' : 'none';
+  const wt = _imgEl('imgSrcWebTab'); if (wt) wt.style.display = navigator.onLine ? '' : 'none';
+  _imgWeb = { q: '', page: 1, src: '', more: false, busy: false };
+  _imgEl('imgWebInput').value = ''; _imgEl('imgWebGrid').innerHTML = ''; _imgEl('imgWebMore').style.display = 'none'; imgWebStatus('Search free photos from Unsplash.');
   imgSrcTab('upload', true);
   SCFlow.go('imageMdl', 'source');
   setupImgDZ();
@@ -17560,6 +17574,8 @@ function imgSrcTab(name, silent) {
   document.querySelectorAll('#imageMdl .scf-pane').forEach(p => p.classList.toggle('on', p.dataset.pane === name));
   if (name === 'drive' && !silent) imgLoadDrive();
   if (name === 'url' && !silent) setTimeout(() => _imgEl('imgUrlInput').focus(), 60);
+if (name === 'web' && !silent) setTimeout(() => _imgEl('imgWebInput').focus(), 60);
+try { const ab = document.querySelector('#imgSrcSeg .scf-seg-btn.on'); if (ab) ab.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) {}
   if (name === 'gen' && !silent) setTimeout(() => _imgEl('imgGenPrompt').focus(), 60);
 }
 
@@ -17751,6 +17767,64 @@ async function imgPickRemote(item) {
   imgUrlStatus('Loading image…');
   try { imgSetImage(await imgToDataURL(item.src), item.name); imgUrlStatus('Image selected — press Next.'); }
   catch (e) { imgUrlStatus('Could not load that image.'); showToast('Could not load that image', 'error'); }
+}
+
+/* ── Web source: Unsplash (needs a free access key) with Openverse as the keyless fallback ── */
+const UNSPLASH_ACCESS_KEY = ''; /* paste a free key from unsplash.com/developers, or set localStorage 'sc_unsplash_key' */
+let _imgWeb = { q: '', page: 1, src: '', more: false, busy: false };
+function _unsplashKey() { let k = UNSPLASH_ACCESS_KEY; if (!k) { try { k = localStorage.getItem('sc_unsplash_key') || ''; } catch (e) {} } return k; }
+function imgWebStatus(t) { const s = _imgEl('imgWebStatus'); if (s) s.textContent = t; }
+async function imgWebUnsplash(q, page) {
+  const key = _unsplashKey(); if (!key) throw new Error('No Unsplash key');
+  const r = await fetch('https://api.unsplash.com/search/photos?query=' + encodeURIComponent(q) + '&per_page=24&page=' + page + '&content_filter=high', { headers: { 'Accept-Version': 'v1', 'Authorization': 'Client-ID ' + key } });
+  if (!r.ok) throw new Error('Unsplash HTTP ' + r.status);
+  const j = await r.json();
+  return { more: page < (j.total_pages || 0), items: (j.results || []).map(p => ({ id: p.id, name: (p.alt_description || p.description || 'Unsplash photo').slice(0, 60), thumb: p.urls.small, src: p.urls.regular, alt: p.urls.small, credit: 'Photo by ' + (p.user && p.user.name || 'Unknown') + ' on Unsplash', dl: p.links && p.links.download_location, from: 'unsplash' })) };
+}
+async function imgWebOpenverse(q, page) {
+  const r = await fetch('https://api.openverse.org/v1/images/?q=' + encodeURIComponent(q) + '&page_size=20&page=' + page + '&mature=false');
+  if (!r.ok) throw new Error('Openverse HTTP ' + r.status);
+  const j = await r.json();
+  return { more: page < (j.page_count || 0), items: (j.results || []).map(p => ({ id: p.id, name: (p.title || 'Image').slice(0, 60), thumb: p.thumbnail || p.url, src: p.url, alt: p.thumbnail || '', credit: (p.creator ? 'By ' + p.creator + ' \u00b7 ' : '') + (p.license ? 'CC ' + String(p.license).toUpperCase() + ' \u00b7 ' : '') + 'Openverse', from: 'openverse' })) };
+}
+async function imgWebSearch(more) {
+  if (_imgWeb.busy) return;
+  const inp = _imgEl('imgWebInput'), grid = _imgEl('imgWebGrid'), btn = _imgEl('imgWebGo'), moreBtn = _imgEl('imgWebMore');
+  const q = more ? _imgWeb.q : inp.value.trim();
+  if (!q) { showToast('Type what to search for', 'error'); return; }
+  if (!navigator.onLine) { imgWebStatus('You are offline. Web search needs an internet connection.'); return; }
+  const page = more ? _imgWeb.page + 1 : 1;
+  _imgWeb.busy = true; btn.disabled = true; moreBtn.disabled = true;
+  if (!more) { grid.innerHTML = ''; moreBtn.style.display = 'none'; }
+  imgWebStatus('Searching\u2026');
+  const order = more && _imgWeb.src ? [_imgWeb.src] : ['unsplash', 'openverse'];
+  let res = null, used = '';
+  for (const src of order) {
+    try { res = await (src === 'unsplash' ? imgWebUnsplash(q, page) : imgWebOpenverse(q, page)); used = src; break; }
+    catch (e) { console.warn('[Sugarcane] web images (' + src + ')', e); }
+  }
+  _imgWeb.busy = false; btn.disabled = false; moreBtn.disabled = false;
+  if (!res) {
+    imgWebStatus('Image search is unavailable right now. Try again later, or use Upload / URL.');
+    showToast('Image search is unavailable', 'error'); return;
+  }
+  _imgWeb.q = q; _imgWeb.page = page; _imgWeb.src = used; _imgWeb.more = res.more;
+  if (!res.items.length && !more) { imgWebStatus('No photos found for \u201c' + q + '\u201d.'); return; }
+  const tmp = document.createElement('div');
+  imgRenderGrid(tmp, res.items, imgWebPick);
+  while (tmp.firstChild) grid.appendChild(tmp.firstChild);
+  moreBtn.style.display = res.more ? '' : 'none';
+  imgWebStatus('Photos from ' + (used === 'unsplash' ? 'Unsplash' : 'Openverse') + ' \u2014 tap one to select it.');
+}
+async function imgWebPick(item) {
+  imgWebStatus('Loading image\u2026');
+  try {
+    let d = await imgToDataURL(item.src);
+    if (d === item.src && item.alt && item.alt !== item.src) d = await imgToDataURL(item.alt);
+    imgSetImage(d, item.name);
+    imgWebStatus('Image selected \u2014 press Next. ' + (item.credit || ''));
+    if (item.from === 'unsplash' && item.dl) { const k = _unsplashKey(); try { fetch(item.dl, { headers: { 'Authorization': 'Client-ID ' + k } }).catch(() => {}); } catch (e) {} }
+  } catch (e) { imgWebStatus('Could not load that image.'); showToast('Could not load that image', 'error'); }
 }
 
 /* ── Google Drive source (only offered while signed in) ── */
@@ -33157,7 +33231,7 @@ authInitFromCookie();
 (function(){
   var css=document.createElement('style');
   css.textContent='#scOfflineMsg{position:fixed;left:50%;bottom:22px;transform:translate(-50%,30px);opacity:0;pointer-events:none;z-index:2147483000;padding:11px 20px;border-radius:12px;color:#fff;font:600 14px/1.3 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.3);transition:.3s;max-width:90vw;text-align:center}#scOfflineMsg.show{opacity:1;transform:translate(-50%,0)}#scOfflineMsg.off{background:#b45309}#scOfflineMsg.on{background:#15803d}'
-  +'body.sc-offline #imgSrcSeg [data-src="url"],body.sc-offline [onclick*="bnrStart(\'link\')"],body.sc-offline #fcUrlInp,body.sc-offline #fcUrlInp+.fc-url-btn,body.sc-offline #fcFancyUrlInp,body.sc-offline #fcFancyUrlBtn,body.sc-offline #recTabLive,body.sc-offline #recDropLiveItem,body.sc-offline #tbMagicBtn,body.sc-offline #mgStartBtn,body.sc-offline #tbDictateBtn,body.sc-offline #sdStartBtn,body.sc-offline #collabDropdown,body.sc-offline #collabChevron,body.sc-offline #imgSrcDriveTab,body.sc-offline #impSrcDriveTab,body.sc-offline #impSrcUrlTab,body.sc-offline .drive-backup-btn,body.sc-offline [onclick*="openTranslateModal"],body.sc-offline [onclick*="openCollabLanding"],body.sc-offline [onclick*="makeDocLive"]{opacity:.35!important;pointer-events:none!important;filter:grayscale(1)}';
+  +'body.sc-offline #imgSrcSeg [data-src="url"],body.sc-offline #imgSrcSeg [data-src="web"],body.sc-offline [onclick*="bnrStart(\'link\')"],body.sc-offline #fcUrlInp,body.sc-offline #fcUrlInp+.fc-url-btn,body.sc-offline #fcFancyUrlInp,body.sc-offline #fcFancyUrlBtn,body.sc-offline #recTabLive,body.sc-offline #recDropLiveItem,body.sc-offline #tbMagicBtn,body.sc-offline #mgStartBtn,body.sc-offline #tbDictateBtn,body.sc-offline #sdStartBtn,body.sc-offline #collabDropdown,body.sc-offline #collabChevron,body.sc-offline #imgSrcDriveTab,body.sc-offline #impSrcDriveTab,body.sc-offline #impSrcUrlTab,body.sc-offline .drive-backup-btn,body.sc-offline [onclick*="openTranslateModal"],body.sc-offline [onclick*="openCollabLanding"],body.sc-offline [onclick*="makeDocLive"]{opacity:.35!important;pointer-events:none!important;filter:grayscale(1)}';
   document.head.appendChild(css);
   function say(txt){try{showToast(txt,'info');}catch(e){}}
   var NOOP=function(name){return function(){say('Not available in Offline Compatibility Mode','off');};};
@@ -42912,8 +42986,9 @@ body.dark .mbox.scf-box{--scf-a:hsl(calc(var(--sc-h,210) + -3.3) calc(89% * var(
 @keyframes scfIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .scf-box .material-symbols-outlined{flex-shrink:0}
 /* segmented source switch */
-.scf-seg{display:flex;gap:4px;padding:4px;border-radius:15px;background:var(--ui-chip);margin-bottom:14px}
-.scf-seg-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 8px;border:none;border-radius:12px;background:transparent;color:var(--ui-muted);font:600 13px inherit;font-family:inherit;cursor:pointer;transition:background .15s,color .15s,box-shadow .15s}
+.scf-seg{display:flex;gap:4px;padding:4px;border-radius:15px;background:var(--ui-chip);margin-bottom:14px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.scf-seg::-webkit-scrollbar{display:none}
+.scf-seg-btn{flex:1;min-width:max-content;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 8px;border:none;border-radius:12px;background:transparent;color:var(--ui-muted);font:600 13px inherit;font-family:inherit;cursor:pointer;transition:background .15s,color .15s,box-shadow .15s}
 .scf-seg-btn .material-symbols-outlined{font-size:18px}
 .scf-seg-btn.on{background:var(--ui-raise);color:var(--scf-a);box-shadow:var(--ui-shadow-sm)}
 .scf-pane{display:none}.scf-pane.on{display:block;animation:scfIn .22s ease}
