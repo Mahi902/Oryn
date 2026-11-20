@@ -7635,20 +7635,30 @@ body #ulBulletChips .olcust-chip.active,body.dark #ulBulletChips .olcust-chip.ac
             <span class="exp-quality-val" id="pdfQualityVal">100%</span>
           </div>
         </div>
-        <div class="exp-opt-row">
-          <div class="exp-opt-label">Password <span style="opacity:.6;font-weight:400">(optional)</span></div>
+        <div class="exp-opt-row exp-opt-toggle-row">
+          <div class="exp-opt-label">Password</div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="pdfPwOn" onchange="EXP.pdfPwOn=this.checked;document.getElementById('pdfPwBox').style.display=this.checked?'flex':'none'"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="exp-opt-row" id="pdfPwBox" style="display:none">
           <div style="display:flex;gap:6px;align-items:center;width:100%">
-            <input type="password" class="scf-input" id="pdfPassword" maxlength="128" autocomplete="new-password" spellcheck="false" placeholder="Leave empty for no password" oninput="EXP.pdfPassword=this.value" style="padding:8px 12px"/>
+            <input type="password" class="scf-input" id="pdfPassword" maxlength="128" autocomplete="new-password" spellcheck="false" placeholder="Enter password" oninput="EXP.pdfPassword=this.value" style="padding:8px 12px"/>
             <button type="button" class="exp-chip" id="pdfPwToggle" title="Show / hide password" onclick="var i=document.getElementById('pdfPassword');var h=i.type==='password';i.type=h?'text':'password';this.textContent=h?'Hide':'Show'">Show</button>
           </div>
         </div>
-        <div class="exp-opt-row">
-          <div class="exp-opt-label">Expiration Date <span style="opacity:.6;font-weight:400">(optional)</span></div>
+        <div class="exp-opt-row exp-opt-toggle-row">
+          <div class="exp-opt-label">Expiration Date</div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="pdfExpOn" onchange="EXP.pdfExpOn=this.checked;document.getElementById('pdfExpBox').style.display=this.checked?'flex':'none'"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="exp-opt-row" id="pdfExpBox" style="display:none">
           <div style="display:flex;gap:6px;align-items:center;width:100%">
-            <input type="text" class="scf-input" id="pdfExpiry" placeholder="Leave empty for no expiration date" autocomplete="off" onfocus="this.type='datetime-local';try{this.showPicker()}catch(e){}" onblur="if(!this.value)this.type='text'" oninput="EXP.pdfExpiry=this.value" onchange="EXP.pdfExpiry=this.value" style="padding:8px 12px"/>
-            <button type="button" class="exp-chip" id="pdfExpClear" title="Clear expiration" onclick="var i=document.getElementById('pdfExpiry');i.value='';i.type='text';EXP.pdfExpiry=''">Clear</button>
+            <input type="datetime-local" class="scf-input" id="pdfExpiry" oninput="EXP.pdfExpiry=this.value" onchange="EXP.pdfExpiry=this.value" style="padding:8px 12px"/>
           </div>
-          
         </div>
         <button class="exp-do-btn" onclick="doExportWithOpts('pdf')"><span class="material-symbols-outlined">picture_as_pdf</span>Export PDF</button>
       </div>
@@ -20897,8 +20907,10 @@ function setupDZ(zoneId, inputId, onFile) {
 const EXP = {
   pdfTech: 'scanned',    // 'scanned' | 'native' | 'structured'
   pdfQuality: 100,
-  pdfPassword: '',       // optional; empty = no password
-  pdfExpiry: '',         // optional datetime-local string; empty = never expires
+  pdfPassword: '',
+  pdfPwOn: false,        // password toggle (off by default)
+  pdfExpiry: '',         // datetime-local string, used only when pdfExpOn
+  pdfExpOn: false,       // expiration toggle (off by default)
   scdQuality: 100,
   docxQuality: 100,
   txtFmt: 'txt',         // 'txt' | 'md'
@@ -21183,17 +21195,21 @@ async function _pdfApplyPassword() {
 
 async function doExportWithOpts(fmt) {
   refreshSpecialBtns();
+  if (fmt === 'pdf') {
+    /* validate first so the dialog stays open if a toggled option is incomplete */
+    window._pdfPwd = EXP.pdfPwOn ? (EXP.pdfPassword || '') : '';
+    window._pdfExpMs = 0;
+    if (EXP.pdfPwOn && !window._pdfPwd) { window._pdfPwd = ''; showToast('Enter a password or turn Password off', 'error'); return; }
+    if (EXP.pdfExpOn) {
+      const t = EXP.pdfExpiry ? new Date(EXP.pdfExpiry).getTime() : NaN;
+      if (isNaN(t)) { window._pdfPwd = ''; showToast('Choose an expiration date or turn Expiration Date off', 'error'); return; }
+      if (t <= Date.now()) { window._pdfPwd = ''; showToast('Expiration must be in the future', 'error'); return; }
+      window._pdfExpMs = t;
+    }
+  }
   closeMdl('exportMdl');
   await scEnlargePrep();
   if (fmt === 'pdf') {
-    window._pdfPwd = (EXP.pdfPassword || '');
-    window._pdfExpMs = 0;
-    if (EXP.pdfExpiry) {
-      const t = new Date(EXP.pdfExpiry).getTime();
-      if (isNaN(t)) { showToast('Invalid expiration date', 'error'); window._pdfPwd = ''; return; }
-      if (t <= Date.now()) { showToast('Expiration must be in the future', 'error'); window._pdfPwd = ''; return; }
-      window._pdfExpMs = t;
-    }
     try {
       if (EXP.pdfTech === 'native') {
         await exportPDFNative();
