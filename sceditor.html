@@ -7721,6 +7721,34 @@ body #ulBulletChips .olcust-chip.active,body.dark #ulBulletChips .olcust-chip.ac
             <span class="exp-quality-val" id="scdQualityVal">100%</span>
           </div>
         </div>
+        <div class="exp-opt-row exp-opt-toggle-row">
+          <div>
+            <div class="exp-opt-label">Password</div>
+            <div style="font-size:11px;color:hsl(var(--sc-th,0) var(--sc-ts,0%) calc(60% + var(--sc-tld,0%) * 0 + var(--sc-tll,0%) * 0.5));margin-top:2px">Encrypts the file (AES-256, 512-bit key). A key image is generated to unlock it — no recovery if lost. Export and import take longer.</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="scdPwOn" onchange="EXP.scdPwOn=this.checked;document.getElementById('scdPassWrap').style.display=this.checked?'block':'none'"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div id="scdPassWrap" style="display:none">
+          <div class="exp-opt-row exp-opt-toggle-row">
+            <div>
+              <div class="exp-opt-label">Also require a passphrase</div>
+              <div style="font-size:11px;color:hsl(var(--sc-th,0) var(--sc-ts,0%) calc(60% + var(--sc-tld,0%) * 0 + var(--sc-tll,0%) * 0.5));margin-top:2px">Two factors: the key image alone won’t open the file</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="scdPassOn" onchange="EXP.scdPassOn=this.checked;document.getElementById('scdPassBox').style.display=this.checked?'flex':'none'"/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="exp-opt-row" id="scdPassBox" style="display:none">
+            <div style="display:flex;gap:6px;align-items:center;width:100%">
+              <input type="password" class="scf-input" id="scdPass" maxlength="256" autocomplete="new-password" spellcheck="false" placeholder="Choose a passphrase" oninput="EXP.scdPass=this.value" style="padding:8px 12px"/>
+              <button type="button" class="exp-chip" onclick="var i=document.getElementById('scdPass');var h=i.type==='password';i.type=h?'text':'password';this.textContent=h?'Hide':'Show'">Show</button>
+            </div>
+          </div>
+        </div>
         <button class="exp-do-btn" onclick="doExportWithOpts('scd')"><span class="material-symbols-outlined">fmt_scd</span>Export SCD</button>
         <button class="exp-do-btn" style="background:hsl(calc(185.0 * var(--sc-hk,1) + var(--sc-rb,0)) calc(100.0% * var(--sc-rs,1)) calc(28.0% + var(--sc-rl,0%)))" onclick="exportUSCD()" title="Ultra Compressed Sugarcane Document — smallest possible file (context-mixing), slower to export/import"><span class="material-symbols-outlined">fmt_uscd</span>Export uSCD</button>
         <!-- Template Sharing -->
@@ -7779,6 +7807,37 @@ body #ulBulletChips .olcust-chip.active,body.dark #ulBulletChips .olcust-chip.ac
         <button class="exp-do-btn" id="jpgExportBtn" onclick="doExportWithOpts('jpg')"><span class="material-symbols-outlined">fmt_jpg</span>Export JPG Images</button>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- Locked .scd: ask for key image -->
+<div class="modal" id="scKeyMdl">
+  <div class="mbox scf-box" style="width:min(96vw,460px)">
+    <div class="mhdr"><h2 class="mtitle">Locked document</h2><button class="mclose" onclick="scdKeyCancel()"><span class="material-symbols-outlined">close</span></button></div>
+    <p id="scKeyHint" style="font-size:13px;margin:0 0 12px">This file is encrypted. Choose the key image that was saved when it was exported.</p>
+    <div id="scKeyPassRow" style="display:none;margin-bottom:10px"><input type="password" class="scf-input" id="scKeyPass" autocomplete="off" spellcheck="false" placeholder="Passphrase for this file" style="padding:8px 12px;width:100%;box-sizing:border-box"/></div>
+    <button type="button" class="scf-drop" id="scKeyDZ">
+      <span class="material-symbols-outlined">lock</span>
+      <b>Click or drag the key image here</b>
+      <small>The square image saved next to the .scd file</small>
+    </button>
+    <input type="file" id="scKeyFile" accept="image/*" style="display:none"/>
+    <div class="prog-track" id="scKeyProg" style="display:none;margin-top:12px"><div class="prog-fill" id="scKeyFill" style="width:0%"></div></div>
+    <div class="scf-status" id="scKeyStatus" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<!-- Locked export finished -->
+<div class="modal" id="scKeyDoneMdl">
+  <div class="mbox scf-box" style="width:min(96vw,460px)">
+    <div class="mhdr"><h2 class="mtitle">Document locked</h2><button class="mclose" onclick="scdKeyDoneClose()"><span class="material-symbols-outlined">close</span></button></div>
+    <p style="font-size:13px;margin:0 0 8px">Saved <b id="scKeyDoneName"></b>.scd and its key image <b id="scKeyDoneName2"></b>-key.png.</p>
+    <p style="font-size:13px;margin:0 0 8px">The key image is the <b>only</b> way to open the file. Nobody can recover it for you — keep it somewhere safe and apart from the .scd. Anyone holding both can open the document.</p>
+    <p style="font-size:12px;margin:0 0 14px;opacity:.75">Recolouring, rotating or flipping the image is fine. Don’t crop heavily or redraw it.</p>
+    <div style="display:flex;gap:10px">
+      <button class="mbtn" style="flex:1" onclick="scdKeyDoneDownload()">Download key image again</button>
+      <button class="mbtn sec" style="flex:1" onclick="scdKeyDoneClose()">Done</button>
     </div>
   </div>
 </div>
@@ -11054,7 +11113,8 @@ function collabImportBase(file) {
   const r = new FileReader();
   r.onload = async e => {
     try {
-      const data = JSON.parse(e.target.result);
+      let data = JSON.parse(e.target.result);
+      if (data && data.scdEnc) { status.textContent = 'Locked — waiting for key image…'; data = await scdUnlockIfNeeded(data, file.name); }
       if (!data.pages) throw new Error('Not a valid SCD file');
       status.textContent = 'Loading…';
       await DOC.flush();
@@ -21032,6 +21092,9 @@ const EXP = {
   pdfExpiry: '',         // datetime-local string, used only when pdfExpOn
   pdfExpOn: false,       // expiration toggle (off by default)
   scdQuality: 100,
+  scdPwOn: false,        // lock .scd with a generated key image (off by default)
+  scdPassOn: false,      // also require a typed passphrase
+  scdPass: '',
   docxQuality: 100,
   txtFmt: 'txt',         // 'txt' | 'md'
   jpgFmt: 'jpg',         // 'jpg' | 'png' | 'webp'
@@ -21376,6 +21439,7 @@ async function doExportWithOpts(fmt) {
       window._pdfExpMs = t;
     }
   }
+  if (fmt === 'scd' && EXP.scdPwOn && EXP.scdPassOn && !EXP.scdPass) { showToast('Enter a passphrase or turn it off', 'error'); return; }
   closeMdl('exportMdl');
   await scEnlargePrep();
   if (fmt === 'pdf') {
@@ -22693,6 +22757,362 @@ async function exportPDFStructured() {
 }
 
 
+
+/* ═══════════════════════════════════════════════════════
+   SCD LOCK — browser layer (key image I/O, export + unlock UI)
+═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════
+   SCD LOCK — AES-256-GCM, key carried by a 1:1 "key image"
+   The image holds a random 256-bit master key (plus a check tag),
+   spread with heavy redundancy over a scrambled grid of dark cells
+   among decoy noise. Four corner arches carry known reference colours
+   so a recoloured / rotated / flipped / lightly-cropped copy can be
+   calibrated back. Security rests on AES-256-GCM + a random 256-bit
+   key, not on the image format being secret.
+═══════════════════════════════════════════════════════ */
+(function (root) {
+  'use strict';
+  const N = 1024, CELL = 16, G = N / CELL;
+  const LV = [10, 20, 30, 40];                 // dark data levels
+  const GRAY = [0, 1, 3, 2];                   // level index <-> 2-bit gray (self-inverse)
+  const R0 = 16, RW = 24, RB = 8, EXCL = 224;  // arch inner radius, band width, bands, data exclusion radius
+  const PAL = [[220,40,40],[40,220,40],[50,60,230],[230,220,40],[40,220,220],[220,50,220],[60,14,14],[14,60,14],[14,14,60],[60,60,14],[14,60,60],[60,14,60]]; // bright + dim refs (dim ones survive heavy brightening)
+  const SEQ = [[0,1],[3,5],[6,7],[9,11]];       // per-corner palette walk (all distinct => orientation is unambiguous)
+  const CORN = [[0,0,1,1],[N,0,-1,1],[N,N,-1,-1],[0,N,1,-1]];
+  const KEYB = 64, TAGB = 8, PBITS = (KEYB + TAGB) * 8; // 576-bit payload (512-bit key + check tag)
+  const enc = s => new TextEncoder().encode(s);
+  const subtle = () => (root.crypto || globalThis.crypto).subtle;
+  const rnd = n => { const a = new Uint8Array(n); for (let i = 0; i < n; i += 65536) (root.crypto || globalThis.crypto).getRandomValues(a.subarray(i, Math.min(n, i + 65536))); return a; };
+
+  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const gradAt = (x, y, c) => 6 + 3 * Math.sin(x / N * 5.1 + 1.3 + c) + 3 * Math.cos(y / N * 4.3 + 0.4 + c * 0.7);
+
+  /* ── public, deterministic layout (not secret) ── */
+  let _L = null;
+  function layout() {
+    if (_L) return _L;
+    const cells = [];
+    for (let cy = 0; cy < G; cy++) for (let cx = 0; cx < G; cx++) {
+      const mx = cx * CELL + CELL / 2, my = cy * CELL + CELL / 2;
+      let ok = true;
+      for (const [kx, ky] of CORN) if (Math.hypot(mx - kx, my - ky) < EXCL) { ok = false; break; }
+      if (ok) cells.push(cy * G + cx);
+    }
+    const total = cells.length * 6;
+    const pos = new Uint32Array(total); for (let i = 0; i < total; i++) pos[i] = i;
+    const r = mulberry32(0x5CD1A5E);
+    for (let i = total - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); const t = pos[i]; pos[i] = pos[j]; pos[j] = t; }
+    const slots = Math.floor(total / PBITS) * PBITS;
+    const w = mulberry32(0x0DDC0DE), wh = new Uint8Array(slots);
+    for (let i = 0; i < slots; i++) wh[i] = w() < 0.5 ? 0 : 1;
+    return (_L = { cells, total, pos, slots, wh });
+  }
+
+  async function sha(bytes) { return new Uint8Array(await subtle().digest('SHA-256', bytes)); }
+  async function tagOf(key) { const m = new Uint8Array(7 + KEYB); m.set(enc('SCDKEY1')); m.set(key, 7); return (await sha(m)).subarray(0, TAGB); }
+
+  /* ── render the key image (RGBA pixels, N×N) ── */
+  async function renderPixels(master) {
+    const L = layout();
+    const payload = new Uint8Array(KEYB + TAGB); payload.set(master); payload.set(await tagOf(master), KEYB);
+    const fill = rnd(L.total), bits = new Uint8Array(L.total);
+    for (let i = 0; i < L.total; i++) bits[i] = fill[i] & 1;                // decoy bits
+    for (let s = 0; s < L.slots; s++) { const k = s % PBITS; bits[L.pos[s]] = ((payload[k >> 3] >> (7 - (k & 7))) & 1) ^ L.wh[s]; }
+    const lvl = new Uint8Array(G * G * 3), rl = rnd(G * G * 3);
+    for (let i = 0; i < lvl.length; i++) lvl[i] = rl[i] & 3;                // decoy levels (also under arches)
+    for (let ci = 0; ci < L.cells.length; ci++) for (let ch = 0; ch < 3; ch++) {
+      const g = (bits[ci * 6 + ch * 2 + 1] << 1) | bits[ci * 6 + ch * 2];
+      lvl[L.cells[ci] * 3 + ch] = GRAY[g];
+    }
+    const px = new Uint8ClampedArray(N * N * 4), noise = rnd(N * N * 3);
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      const ci = (y >> 4) * G + (x >> 4), o = (y * N + x) * 4, no = (y * N + x) * 3;
+      const hf = 2 * Math.sin(x * 2.1 + y * 1.3);                           // high-pitched pattern
+      for (let c = 0; c < 3; c++) px[o + c] = LV[lvl[ci * 3 + c]] + gradAt(x, y, c) + ((noise[no + c] - 128) / 128) * 6 + hf;
+      px[o + 3] = 255;
+    }
+    for (let k = 0; k < 4; k++) {                                           // corner arches
+      const [kx, ky, sx, sy] = CORN[k], [s0, st] = SEQ[k];
+      for (let dy = 0; dy < R0 + RW * RB; dy++) for (let dx = 0; dx < R0 + RW * RB; dx++) {
+        const d = Math.hypot(dx, dy); if (d < R0 || d >= R0 + RW * RB) continue;
+        const col = PAL[(s0 + st * Math.floor((d - R0) / RW)) % PAL.length];
+        const x = sx > 0 ? kx + dx : kx - 1 - dx, y = sy > 0 ? ky + dy : ky - 1 - dy, o = (y * N + x) * 4;
+        px[o] = col[0]; px[o + 1] = col[1]; px[o + 2] = col[2];
+      }
+    }
+    return px;
+  }
+
+  /* ── decode helpers ── */
+  function orient(src, t) {
+    if (t === 0) return src;
+    const dst = new Uint8ClampedArray(src.length), M = N - 1;
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      let sx, sy;
+      switch (t) { case 1: sx = y; sy = M - x; break; case 2: sx = M - x; sy = M - y; break; case 3: sx = M - y; sy = x; break;
+        case 4: sx = M - x; sy = y; break; case 5: sx = x; sy = M - y; break; case 6: sx = y; sy = x; break; default: sx = M - y; sy = M - x; }
+      const si = (sy * N + sx) * 4, di = (y * N + x) * 4; dst[di] = src[si]; dst[di + 1] = src[si + 1]; dst[di + 2] = src[si + 2]; dst[di + 3] = 255;
+    }
+    return dst;
+  }
+  function srcIdx(t, x, y) {
+    const M = N - 1; let sx, sy;
+    switch (t) { case 0: sx = x; sy = y; break; case 1: sx = y; sy = M - x; break; case 2: sx = M - x; sy = M - y; break; case 3: sx = M - y; sy = x; break;
+      case 4: sx = M - x; sy = y; break; case 5: sx = x; sy = M - y; break; case 6: sx = y; sy = x; break; default: sx = M - y; sy = M - x; }
+    return (sy * N + sx) * 4;
+  }
+  function archObs(data, t) {
+    const obs = [], ref = [], angs = [20, 35, 50, 65, 80];
+    for (let k = 0; k < 4; k++) {
+      const [kx, ky, sx, sy] = CORN[k], [s0, st] = SEQ[k];
+      for (let b = 0; b < RB; b++) {
+        const r = R0 + RW * (b + 0.5); let a0 = 0, a1 = 0, a2 = 0, n = 0;
+        for (const a of angs) {
+          const cx = Math.round(kx + sx * r * Math.cos(a * Math.PI / 180)), cy = Math.round(ky + sy * r * Math.sin(a * Math.PI / 180));
+          for (let j = -2; j <= 2; j++) for (let i = -2; i <= 2; i++) {
+            const x = Math.min(N - 1, Math.max(0, cx + i)), y = Math.min(N - 1, Math.max(0, cy + j)), o = srcIdx(t, x, y);
+            a0 += data[o]; a1 += data[o + 1]; a2 += data[o + 2]; n++;
+          }
+        }
+        obs.push([a0 / n, a1 / n, a2 / n]); ref.push(PAL[(s0 + st * b) % PAL.length]);
+      }
+    }
+    return { obs, ref };
+  }
+  const feat = (o, deg) => { const r = o[0] / 255, g = o[1] / 255, b = o[2] / 255, f = [r, g, b, 1]; if (deg === 2) f.push(r * r, g * g, b * b, r * g, g * b, r * b); return f; };
+  function solve(A, B) {
+    const n = B.length; for (let i = 0; i < n; i++) A[i] = A[i].concat([B[i]]);
+    for (let c = 0; c < n; c++) {
+      let p = c; for (let r = c + 1; r < n; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+      [A[c], A[p]] = [A[p], A[c]];
+      const d = A[c][c] || 1e-12;
+      for (let r = 0; r < n; r++) if (r !== c) { const f = A[r][c] / d; if (f) for (let k = c; k <= n; k++) A[r][k] -= f * A[c][k]; }
+    }
+    return A.map((row, i) => row[n] / (row[i] || 1e-12));
+  }
+  function fit(obs, ref, deg) {
+    const F = obs.map(o => feat(o, deg)), m = F[0].length, W = [];
+    for (let c = 0; c < 3; c++) {
+      const A = Array.from({ length: m }, () => new Array(m).fill(0)), B = new Array(m).fill(0);
+      for (let i = 0; i < F.length; i++) for (let p = 0; p < m; p++) { B[p] += F[i][p] * ref[i][c] / 255; for (let q = 0; q < m; q++) A[p][q] += F[i][p] * F[i][q]; }
+      for (let p = 0; p < m; p++) A[p][p] += 1e-4;
+      W.push(solve(A, B));
+    }
+    const T = { W, deg, res: 0 }; let e = 0;
+    for (let i = 0; i < F.length; i++) { const p = applyT(T, obs[i]); for (let c = 0; c < 3; c++) e += (p[c] - ref[i][c]) ** 2; }
+    T.res = e / (F.length * 3); return T;
+  }
+  function applyT(T, o) { const f = feat(o, T.deg), out = [0, 0, 0]; for (let c = 0; c < 3; c++) { let s = 0; for (let i = 0; i < f.length; i++) s += T.W[c][i] * f[i]; out[c] = s * 255; } return out; }
+
+  function readPayload(a, T) {
+    const L = layout(), bits = new Uint8Array(L.total);
+    for (let ci = 0; ci < L.cells.length; ci++) {
+      const idx = L.cells[ci], cx = idx % G, cy = (idx / G) | 0; let s0 = 0, s1 = 0, s2 = 0;
+      for (let j = 3; j < 13; j++) for (let i = 3; i < 13; i++) { const o = ((cy * CELL + j) * N + cx * CELL + i) * 4; s0 += a[o]; s1 += a[o + 1]; s2 += a[o + 2]; }
+      const m = applyT(T, [s0 / 100, s1 / 100, s2 / 100]), mx = cx * CELL + 8, my = cy * CELL + 8;
+      for (let ch = 0; ch < 3; ch++) {
+        const v = m[ch] - gradAt(mx, my, ch), li = Math.min(3, Math.max(0, Math.round((v - 10) / 10))), g = GRAY[li];
+        bits[ci * 6 + ch * 2 + 1] = g >> 1; bits[ci * 6 + ch * 2] = g & 1;
+      }
+    }
+    const votes = new Int32Array(PBITS);
+    for (let s = 0; s < L.slots; s++) votes[s % PBITS] += (bits[L.pos[s]] ^ L.wh[s]) ? 1 : -1;
+    const out = new Uint8Array(KEYB + TAGB);
+    for (let k = 0; k < PBITS; k++) if (votes[k] > 0) out[k >> 3] |= 1 << (7 - (k & 7));
+    return out;
+  }
+  async function verify(p) {
+    const key = p.slice(0, KEYB), tag = await tagOf(key); let d = 0;
+    for (let i = 0; i < TAGB; i++) d |= tag[i] ^ p[KEYB + i];
+    return d === 0 ? key : null;
+  }
+  /* Robust fit: ignore clipped (saturated) reference samples, then trim the worst quarter and refit. */
+  function fitRobust(obs, ref, deg) {
+    let idx = obs.map((_, i) => i).filter(i => obs[i].every(v => v < 250 && v > 1));
+    if (idx.length < 14) idx = obs.map((_, i) => i);
+    let T = fit(idx.map(i => obs[i]), idx.map(i => ref[i]), deg);
+    const errs = idx.map((i, k) => { const p = applyT(T, obs[i]); let e = 0; for (let c = 0; c < 3; c++) e += (p[c] - ref[i][c]) ** 2; return [e, i]; }).sort((a, b) => a[0] - b[0]);
+    const keep = errs.slice(0, Math.max(12, Math.ceil(errs.length * 0.75))).map(x => x[1]);
+    return fit(keep.map(i => obs[i]), keep.map(i => ref[i]), deg);
+  }
+  /* Try all 8 orientations (best-fitting first) x several colour models on one N×N RGBA buffer. */
+  async function decodePixels(data) {
+    const cand = [];
+    for (let t = 0; t < 8; t++) { const { obs, ref } = archObs(data, t); cand.push({ t, obs, ref, res: fitRobust(obs, ref, 1).res }); }
+    cand.sort((a, b) => a.res - b.res);
+    for (const c of cand) {
+      const a = orient(data, c.t);
+      for (const [deg, rob] of [[1, 0], [2, 0], [1, 1], [2, 1]]) {
+        const T = rob ? fitRobust(c.obs, c.ref, deg) : fit(c.obs, c.ref, deg);
+        const key = await verify(readPayload(a, T)); if (key) return key;
+      }
+    }
+    return null;
+  }
+
+  /* ── envelope: PBKDF2-HMAC-SHA-512 (calibrated, + optional passphrase) -> HKDF-SHA-256 -> AES-256-GCM ── */
+  const b64 = u8 => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
+  const unb64 = s => { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
+  const cat = (...a) => { const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0)); let p = 0; for (const x of a) { o.set(x, p); p += x.length; } return o; };
+  async function pbkdf2(ikm, salt, iters) {
+    const base = await subtle().importKey('raw', ikm, 'PBKDF2', false, ['deriveBits']);
+    return new Uint8Array(await subtle().deriveBits({ name: 'PBKDF2', hash: 'SHA-512', salt, iterations: iters }, base, 512));
+  }
+  async function aesKey(master, pass, salt, iters, use) {
+    const p = enc((pass || '').normalize('NFKC'));
+    const stretched = await pbkdf2(cat(master, enc('|pp|'), p), salt, iters);
+    const base = await subtle().importKey('raw', stretched, 'HKDF', false, ['deriveKey']);
+    return subtle().deriveKey({ name: 'HKDF', hash: 'SHA-256', salt, info: enc('SCD-ENC-v2/aes-256-gcm') }, base, { name: 'AES-GCM', length: 256 }, false, [use]);
+  }
+  const aad = (z, iters, pp, salt) => cat(enc('SCDX2|' + z + '|' + iters + '|' + (pp ? 1 : 0) + '|'), salt);
+  async function pipe(u8, Ctor, fmt) { return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new Ctor(fmt))).arrayBuffer()); }
+  /* iterations that take ~targetMs on THIS device (clamped), so import on a similar device takes about as long */
+  async function calibrate(targetMs) {
+    const t0 = performance.now(), probe = 300000; await pbkdf2(rnd(32), rnd(16), probe);
+    const ms = Math.max(1, performance.now() - t0);
+    return Math.min(40000000, Math.max(1000000, Math.round(probe * targetMs / ms / 1000) * 1000));
+  }
+
+  async function seal(jsonString, master, opts) {
+    opts = opts || {};
+    let data = enc(jsonString), z = '';
+    if (typeof CompressionStream !== 'undefined') { try { data = await pipe(data, CompressionStream, 'deflate-raw'); z = 'deflate-raw'; } catch (e) { data = enc(jsonString); z = ''; } }
+    const total = Math.ceil((4 + data.length) / 4096) * 4096, body = new Uint8Array(total);
+    body.set(rnd(total)); new DataView(body.buffer).setUint32(0, data.length); body.set(data, 4);   // random padding hides exact size
+    const iters = opts.iters || 1000000, pp = !!opts.pass, salt = rnd(32), iv = rnd(12);
+    const key = await aesKey(master, opts.pass, salt, iters, 'encrypt');
+    const ct = new Uint8Array(await subtle().encrypt({ name: 'AES-GCM', iv, additionalData: aad(z, iters, pp, salt), tagLength: 128 }, key, body));
+    return JSON.stringify({ scdEnc: 2, alg: 'AES-256-GCM', kdf: 'PBKDF2-SHA512+HKDF-SHA256', it: iters, pp: pp ? 1 : 0, z, salt: b64(salt), iv: b64(iv), ct: b64(ct) });
+  }
+  async function open(env, master, pass) {
+    if (!env || env.scdEnc !== 2 || env.alg !== 'AES-256-GCM') throw new Error('Unsupported locked-file format (re-export it with this editor version)');
+    if (env.pp && !pass) { const e = new Error('This file also needs its passphrase.'); e.needPass = true; throw e; }
+    const salt = unb64(env.salt), iv = unb64(env.iv), ct = unb64(env.ct), z = env.z || '', iters = env.it | 0;
+    if (iters < 100000 || iters > 100000000) throw new Error('Invalid locked-file header');
+    let body;
+    try { body = new Uint8Array(await subtle().decrypt({ name: 'AES-GCM', iv, additionalData: aad(z, iters, !!env.pp, salt), tagLength: 128 }, await aesKey(master, env.pp ? pass : '', salt, iters, 'decrypt'), ct)); }
+    catch (e) { const err = new Error(env.pp ? 'Wrong key image or passphrase (or the file was altered).' : 'This key image doesn’t match the file (or the file was altered).'); err.wrongKey = true; throw err; }
+    const len = new DataView(body.buffer, body.byteOffset).getUint32(0);
+    let data = body.subarray(4, 4 + len);
+    if (z) data = await pipe(data, DecompressionStream, z);
+    return JSON.parse(new TextDecoder().decode(data));
+  }
+
+  root.SCDX = { N, newMaster: () => rnd(KEYB), renderPixels, decodePixels, seal, open, calibrate, orient, _fit: fit, _layout: layout };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+
+async function scdKeyFromFile(file, onProg, ctl) {
+  let bmp;
+  try { bmp = await createImageBitmap(file, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' }); }
+  catch (e) { try { bmp = await createImageBitmap(file); } catch (e2) { throw new Error('That file isn’t an image this browser can read.'); } }
+  const w = bmp.width, h = bmp.height, N = SCDX.N;
+  if (Math.abs(w - h) / Math.max(w, h) > 0.01) throw new Error('The key image must be square (1:1) and uncropped.');
+  const cv = document.createElement('canvas'); cv.width = cv.height = N;
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, N, N);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(bmp, 0, 0, N, N);                       // any size: re-sampled to the 1024 grid
+  if (onProg) onProg(0.5);
+  await new Promise(r => setTimeout(r, 0));
+  if (ctl && ctl.cancel) throw new Error('Unlock cancelled');
+  const key = await SCDX.decodePixels(ctx.getImageData(0, 0, N, N).data);
+  if (key) return key;
+  throw new Error('Couldn’t reconstruct a key from this image. It may be the wrong image, or edited too heavily (cropped, redrawn or very low quality).');
+}
+
+function scdBusyStart(label, expectMs) {
+  let el = document.getElementById('scdBusy');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'scdBusy';
+    el.style.cssText = 'position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:30000;background:#222;color:#fff;padding:14px 18px;border-radius:12px;font:13px/1.4 system-ui,sans-serif;width:min(92vw,340px);box-shadow:0 6px 24px rgba(0,0,0,.35)';
+    el.innerHTML = '<div id="scdBusyLbl" style="margin-bottom:8px"></div><div style="height:6px;background:#555;border-radius:3px;overflow:hidden"><div id="scdBusyFill" style="height:100%;width:2%;background:#7cc4ff;transition:width .4s"></div></div>';
+    document.body.appendChild(el);
+  }
+  el.style.display = 'block'; document.getElementById('scdBusyLbl').textContent = label;
+  const t0 = Date.now(), fill = document.getElementById('scdBusyFill');
+  const iv = setInterval(() => { fill.style.width = Math.round(4 + 91 * (1 - Math.exp(-(Date.now() - t0) / (expectMs || 12000)))) + '%'; }, 300);
+  return () => { clearInterval(iv); el.style.display = 'none'; };
+}
+
+async function scdExportEncrypted(json) {
+  const pass = EXP.scdPassOn ? EXP.scdPass : '';
+  let stop = scdBusyStart('Generating key image…', 3000);
+  let master, keyBlob, env;
+  try {
+    await new Promise(r => setTimeout(r, 40));
+    master = SCDX.newMaster();
+    const px = await SCDX.renderPixels(master);
+    const cv = document.createElement('canvas'); cv.width = cv.height = SCDX.N;
+    cv.getContext('2d').putImageData(new ImageData(px, SCDX.N, SCDX.N), 0, 0);
+    keyBlob = await new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error('Could not create the key image')), 'image/png'));
+    // Self-test through the exact path an import takes, so a bad key image can never be exported.
+    let back = null; try { back = await scdKeyFromFile(keyBlob, null, null); } catch (e) {}
+    if (!back || back.length !== master.length || back.some((v, i) => v !== master[i]))
+      throw new Error('This browser changes images when reading them back (canvas/privacy protection). Nothing was exported.');
+    stop(); stop = scdBusyStart('Stretching the key (about 12 seconds, longer on slow devices)…', 14000);
+    const iters = await SCDX.calibrate(12000);
+    env = await SCDX.seal(json, master, { iters, pass });
+  } finally { stop(); }
+  const name = safeFile(getTitle());
+  dlBlob(new Blob([env], { type: 'application/x-sugarcane-document' }), name + '.scd');
+  setTimeout(() => dlBlob(keyBlob, name + '-key.png'), 700);
+  window._scKeyBlob = keyBlob; window._scKeyName = name;
+  document.getElementById('scKeyDoneName').textContent = name;
+  document.getElementById('scKeyDoneName2').textContent = name;
+  setTimeout(() => openMdl('scKeyDoneMdl'), 900);
+}
+function scdKeyDoneDownload() { if (window._scKeyBlob) dlBlob(window._scKeyBlob, window._scKeyName + '-key.png'); }
+function scdKeyDoneClose() { window._scKeyBlob = null; closeMdl('scKeyDoneMdl'); }
+
+let _scKeySt = null;
+function scdUnlockIfNeeded(data, fileName) {
+  if (!(data && data.scdEnc)) return Promise.resolve(data);
+  return new Promise((resolve, reject) => {
+    if (_scKeySt) { try { _scKeySt.reject(new Error('Unlock cancelled')); } catch (e) {} }
+    _scKeySt = { data, resolve, reject, busy: false, ctl: { cancel: false } };
+    document.getElementById('scKeyStatus').textContent = '';
+    document.getElementById('scKeyPassRow').style.display = data.pp ? 'block' : 'none';
+    document.getElementById('scKeyPass').value = '';
+    document.getElementById('scKeyProg').style.display = 'none';
+    document.getElementById('scKeyFill').style.width = '0%';
+    const inp = document.getElementById('scKeyFile'); inp.value = '';
+    inp.onchange = () => { const f = inp.files && inp.files[0]; inp.value = ''; if (f) scdKeyPicked(f); };
+    setupDZ('scKeyDZ', 'scKeyFile', scdKeyPicked);
+    openMdl('scKeyMdl');   // closes the Import dialog so only the key prompt is visible
+  });
+}
+async function scdKeyPicked(file) {
+  const st = _scKeySt; if (!st || st.busy || !file) return;
+  const stat = document.getElementById('scKeyStatus'), prog = document.getElementById('scKeyProg'), fill = document.getElementById('scKeyFill');
+  const pass = document.getElementById('scKeyPass').value;
+  if (st.data.pp && !pass) { stat.style.color = '#d93025'; stat.textContent = 'Enter the passphrase first, then choose the key image.'; return; }
+  st.busy = true;
+  stat.style.color = 'var(--ui-link)'; stat.textContent = 'Reconstructing key…'; prog.style.display = 'block'; fill.style.width = '2%';
+  let iv = null;
+  try {
+    const key = await scdKeyFromFile(file, null, st.ctl);
+    stat.textContent = 'Stretching the key — this can take up to a minute…';
+    const t0 = Date.now(); iv = setInterval(() => { fill.style.width = Math.round(4 + 91 * (1 - Math.exp(-(Date.now() - t0) / 14000))) + '%'; }, 300);
+    const plain = await SCDX.open(st.data, key, pass);
+    clearInterval(iv); iv = null;
+    if (!plain || !Array.isArray(plain.pages)) throw new Error('Not a valid SCD file');
+    if (_scKeySt === st) _scKeySt = null;
+    closeMdl('scKeyMdl');
+    st.resolve(plain);
+  } catch (e) {
+    if (iv) clearInterval(iv);
+    if (_scKeySt !== st) return;
+    st.busy = false; prog.style.display = 'none';
+    stat.style.color = '#d93025'; stat.textContent = e.message || 'Could not unlock';
+  }
+}
+function scdKeyCancel() {
+  const st = _scKeySt; _scKeySt = null;
+  if (st) { st.ctl.cancel = true; st.reject(new Error('Unlock cancelled')); }
+  closeMdl('scKeyMdl');
+}
+
 async function exportSCDWithOpts() {
   lazyHydrateAll(false);
   if (!_scGate('exportSCDWithOpts')) return;
@@ -22721,14 +23141,16 @@ async function exportSCDWithOpts() {
     }));
     data.pages = compressedPages;
     const exportJson = JSON.stringify(data, null, 2);
-    dlBlob(new Blob([exportJson], {type:'application/x-sugarcane-document'}), safeFile(getTitle()) + '.scd');
+    const _locked = !!EXP.scdPwOn;
+    if (_locked) await scdExportEncrypted(exportJson);
+    else dlBlob(new Blob([exportJson], {type:'application/x-sugarcane-document'}), safeFile(getTitle()) + '.scd');
     // Keep the periodic-save cache in sync with what was just exported
     // Cache in DOC so periodic saver stays in sync with what was exported
     DOC._lastJson  = JSON.stringify(data);
     DOC._lastTitle = getTitle() || 'Untitled Document';
     // Trigger a save so Recents entry matches the exported file exactly
     DOC.schedule();
-    showToast('Exported as .scd', 'success');
+    showToast(_locked ? 'Exported as locked .scd' : 'Exported as .scd', 'success');
   } catch(err) { showToast('Export failed: ' + err.message, 'error'); }
 }
 
@@ -26024,7 +26446,8 @@ function handleImport(file) {
   r.onload = async e => {
     fill.style.width = '70%';
     try {
-      const data = JSON.parse(e.target.result);
+      let data = JSON.parse(e.target.result);
+      if (data && data.scdEnc) { status.textContent = 'Locked — waiting for key image…'; data = await scdUnlockIfNeeded(data, file.name); }
       if (!data.pages) throw new Error('Not a valid SCD file');
 
       if (isLegacyFile(data)) {
@@ -26616,8 +27039,9 @@ function loadTemplateFromHash() {
       showToast('Loading document from URL\u2026', 'info');
       fetch(payload)
         .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
-        .then(text => {
-          const data = JSON.parse(text);
+        .then(async text => {
+          let data = JSON.parse(text);
+          if (data && data.scdEnc) data = await scdUnlockIfNeeded(data, 'document.scd');
           if (!data.pages) throw new Error('Not a valid SCD file');
           let name;
           try { name = decodeURIComponent(payload.split('/').pop().split('?')[0].replace(/\.scd$/i, '')); } catch(_) { name = ''; }
@@ -26714,8 +27138,9 @@ function loadTemplateFromHash() {
     showToast('Loading document from URL\u2026', 'info');
     fetch(srcUrl)
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
-      .then(text => {
-        const data = JSON.parse(text);
+      .then(async text => {
+        let data = JSON.parse(text);
+        if (data && data.scdEnc) data = await scdUnlockIfNeeded(data, 'document.scd');
         if (!data.pages) throw new Error('Not a valid SCD file');
         let name;
         try { name = decodeURIComponent(srcUrl.split('/').pop().split('?')[0].replace(/\.scd$/i, '')); } catch(_) { name = ''; }
@@ -35811,6 +36236,7 @@ function convHandleFile(file) {
     let data;
     try {
       data = JSON.parse(e.target.result);
+      if (data && data.scdEnc) throw new Error('This file is locked — import it into the editor first');
       if (!data || !Array.isArray(data.pages)) throw new Error('Not a valid SCD file');
     } catch (err) {
       convToast('Invalid .scd file: ' + err.message);
@@ -39914,6 +40340,7 @@ async function impFiles(files) {
     try {
       if (!/\.scd$/i.test(f.name)) throw new Error('Only .scd files can be imported');
       const data = JSON.parse(await f.text());
+      if (data && data.scdEnc) throw new Error('Locked file — import it from the editor’s Import dialog');
       if (!data || !Array.isArray(data.pages)) throw new Error('Not a valid SCD file');
       const legacy = typeof isLegacyFile === 'function' && isLegacyFile(data);
       row.ok(await impSave(data, f.name.replace(/\.scd$/i, '')), legacy);
