@@ -6,7 +6,7 @@
 //    NEVER_CACHE  → Network-only (live data endpoints)
 // ============================================================
 
-const SHELL_CACHE = 'dwp-shell-v5814';
+const SHELL_CACHE = 'dwp-shell-v5815';
 const LIB_CACHE   = 'dwp-libs-v5800';
 // On-device sentence-prediction runtime (vendor/ai/*, ~30 MB). Kept in its own cache that is NOT
 // versioned with the shell, so a shell version bump never forces users to re-download it.

@@ -7,7 +7,7 @@
 <title>Sugarcane Editor</title>
 <meta name="description" content="Sugarcane Editor: a powerful all-in-one online editor from the Oryn suite. Write, design and edit with add-ons and extensions.">
 <meta name="keywords" content="Sugarcane Editor, SCEditor, DocuWrite Pro, sugarcane, sca add-ons, editor add-ons, extensions, online editor, document editor, online document editor, free document editor, Word alternative, Google Docs alternative, WYSIWYG editor, rich text editor, text editor, write documents online, A4 editor, docs, office, word processor, online word processor, create documents, edit documents, format documents, export document, export PDF, export DOCX, export HTML, print document, page layout, headings, fonts, tables, lists, templates, document templates, resume maker, letter writer, report writer, essay writer, Oryn, Oryn app, Oryn online, Mohtadi Azad Mahi, Education By Mohtadi Azad, mahi902, free online tools, online tools, web tools, browser tools, no signup, no login, no ads, no credit card, free forever, works in browser, client-side, privacy friendly, offline friendly, PWA, progressive web app, productivity tools, productivity suite, document suite, all-in-one workspace, online workspace, Android app, mobile friendly, dark mode, open source, GitHub Pages, Toolstructer, instant, fast, easy to use, secure, no installation, no server upload">
-<meta name="sceditor-version" content="253">
+<meta name="sceditor-version" content="254">
 <style id="dwi-css">/* Oryn icons: ink line + off-register tint */
 .dwi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;display:inline-block;font-size:24px;letter-spacing:normal;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
 :is(span,i)[data-dwi]{display:inline-block;flex-shrink:0;width:1em;height:1em;overflow:hidden;text-indent:-99em;white-space:nowrap;vertical-align:middle;line-height:1;background-color:currentColor;-webkit-mask:var(--dwi) center/contain no-repeat;mask:var(--dwi) center/contain no-repeat}
@@ -4300,7 +4300,7 @@ body.pgx-no-select,body.pgx-no-select *{user-select:none!important;-webkit-user-
   <div id="scTip" aria-live="polite"></div>
   <button id="scTipToggle" type="button"></button>
   <div class="loading-text-wrap">
-    <p class="loading-text">Loading Sugarcane v253…</p>
+    <p class="loading-text">Loading Sugarcane v254…</p>
     <div id="loadingAddonText"></div>
   </div>
 </div>
@@ -9511,7 +9511,7 @@ body.dark .ask-bot.ask-err .ask-bub{background:#3a1f1c;color:#ffb4a8;}
 
 <script>
 'use strict';
-const SC_EDITOR_VERSION = 253; // editor release (not the saved-file format build below)
+const SC_EDITOR_VERSION = 254; // editor release (not the saved-file format build below)
 
 /* ═══════════════════════════════════════════════════════
    BUILD / VERSIONING
@@ -21246,6 +21246,30 @@ async function applyPdfExpiry(bytes, expMs) {
       D: { Order: [ocg], Locked: [ocg], ON: [ocg] }
     }));
   }
+  const snapJs = "if(new Date().getTime()>" + Math.floor(expMs) + "){try{if(this.pageNum!==0){this.pageNum=0;}}catch(e){}}";
+  /* Visible notice on every page (works in every viewer) */
+  let stampFont = null;
+  try {
+    stampFont = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+    const stamp = 'Valid until ' + new Date(expMs).toISOString().slice(0, 16).replace('T', ' ') + ' UTC';
+    for (const pg of doc.getPages()) {
+      pg.drawText(stamp, { x: 12, y: 8, size: 8, font: stampFont, color: PDFLib.rgb(0.45, 0.45, 0.45) });
+    }
+  } catch (e) { console.warn('[expiry stamp]', e); }
+  /* "Expired" banner layer: hidden by default, switched ON by the open script
+     only when expired, so it never shows before the expiry date. */
+  const ocgBan = ctx.register(ctx.obj({ Type: 'OCG', Name: PDFString.of('Expired') }));
+  {
+    const ocp = doc.catalog.lookupMaybe(N('OCProperties'), PDFDict);
+    const oa = ocp.lookupMaybe(N('OCGs'), PDFArray); if (oa) oa.push(ocgBan);
+    const dd = ocp.lookupMaybe(N('D'), PDFDict);
+    for (const k of ['Order', 'Locked', 'OFF']) {
+      let ar = dd.lookupMaybe(N(k), PDFArray);
+      if (!ar && k === 'OFF') { ar = ctx.obj([]); dd.set(N('OFF'), ar); }
+      if (ar) ar.push(ocgBan);
+    }
+  }
+  let firstPage = true;
   const open = ctx.register(ctx.stream('/OC /ocExp BDC\n'));
   const close = ctx.register(ctx.stream('\nEMC\n'));
   for (const page of doc.getPages()) {
@@ -21260,7 +21284,22 @@ async function applyPdfExpiry(bytes, expMs) {
     const cv = c && ctx.lookup(c);
     if (cv instanceof PDFArray) items = cv.asArray();
     else if (c) items = [c];
-    node.set(N('Contents'), ctx.obj([open, ...items, close]));
+    const parts = [open, ...items, close];
+    if (firstPage && stampFont) {
+      firstPage = false;
+      const { width: bw, height: bh } = page.getSize();
+      const fs = Math.max(10, Math.min(22, bw / 16));
+      parts.push(ctx.register(ctx.stream(
+        '/OC /ocBan BDC q 1 1 1 rg 0 0 ' + bw + ' ' + bh + ' re f 0.75 0.1 0.1 rg BT /FBan ' + fs +
+        ' Tf ' + (bw * 0.06) + ' ' + (bh / 2) + ' Td (This document has expired) Tj ET Q EMC\n')));
+      let bres = node.Resources();
+      let bprops = bres.lookupMaybe(N('Properties'), PDFDict);
+      bprops.set(N('ocBan'), ocgBan);
+      let bf = bres.lookupMaybe(N('Font'), PDFDict);
+      if (!bf) { bf = ctx.obj({}); bres.set(N('Font'), bf); }
+      bf.set(N('FBan'), stampFont.ref);
+    }
+    node.set(N('Contents'), ctx.obj(parts));
     const annots = node.lookupMaybe(N('Annots'), PDFArray);
     if (annots) {
       for (let i = 0; i < annots.size(); i++) {
@@ -21268,6 +21307,15 @@ async function applyPdfExpiry(bytes, expMs) {
         if (an) an.set(N('OC'), ocg);
       }
     }
+    /* Fallback for viewers that ignore layers/closeDoc (e.g. Firefox pdf.js):
+       page-open action that snaps back to page 1 once expired. Fires on every
+       page visit, so the reader keeps getting teleported to page 1. */
+    const pageAct = ctx.register(ctx.obj({ Type: 'Action', S: 'JavaScript', JS: PDFString.of(snapJs) }));
+    let aa = node.lookupMaybe(N('AA'), PDFDict);
+    if (!aa) { aa = ctx.obj({}); node.set(N('AA'), aa); }
+    const prevO = aa.get(N('O'));
+    if (prevO) ctx.lookup(pageAct).set(N('Next'), prevO);
+    aa.set(N('O'), pageAct);
   }
 
   /* 2) Open script: if expired -> hide layer first, remove pages, alert, close. */
@@ -21275,7 +21323,8 @@ async function applyPdfExpiry(bytes, expMs) {
   const js =
     "var __x=" + Math.floor(expMs) + ";" +
     "if(new Date().getTime()>__x){" +
-      "try{var __o=this.getOCGs();if(__o){for(var __i=0;__i<__o.length;__i++){__o[__i].state=false;}}}catch(e){}" +
+      "try{this.pageNum=0;}catch(e){}" +
+      "try{var __o=this.getOCGs();if(__o){for(var __i=0;__i<__o.length;__i++){__o[__i].state=(__o[__i].name==='Expired');}}}catch(e){}" +
       "try{this.zoomType=zoomtype.fitP;}catch(e){}" +
       "try{app.alert({cType:0,nIcon:0,cTitle:'Document expired',cMsg:'This PDF expired on " + when + " and can no longer be viewed.'});}catch(e){}" +
       "try{var __n=this.numPages;if(__n>1){this.deletePages({nStart:1,nEnd:__n-1});}}catch(e){}" +

@@ -2,7 +2,7 @@
 
 This application incorporates various third-party software libraries, fonts, models and online services. Each item below remains the property of its respective authors and is used under the license or terms shown.
 
-`Notices last updated: Nov 20, 2026 (Editor v253)`
+`Notices last updated: Nov 20, 2026 (Editor v254)`
 
 ---
 
