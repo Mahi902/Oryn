@@ -4886,6 +4886,7 @@ function waitForSugarcaneAddons(){
         <div class="scf-seg" id="vidSrcSeg">
           <button type="button" class="scf-seg-btn on" data-src="upload" onclick="vidSrcTab('upload')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></span>Upload</button>
           <button type="button" class="scf-seg-btn" data-src="url" onclick="vidSrcTab('url')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span>Link</button>
+          <button type="button" class="scf-seg-btn" data-src="drive" id="vidSrcDriveTab" style="display:none" onclick="vidSrcTab('drive')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 1 1 .8-8.9A6 6 0 0 1 19 11a3.5 3.5 0 0 1-.5 7z"/></svg></span>Google Drive</button>
         </div>
 
         <div class="scf-pane on" data-pane="upload">
@@ -4903,7 +4904,15 @@ function waitForSugarcaneAddons(){
           </div>
         </div>
 
-        <div class="scf-picked" id="vidPicked">
+        <div class="scf-pane" data-pane="drive">
+<button type="button" class="scf-drop" onclick="scDrivePickMedia('video','vidDriveStatus',vidPickFile)">
+<span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 1 1 .8-8.9A6 6 0 0 1 19 11a3.5 3.5 0 0 1-.5 7z"/></svg></span>
+<b>Browse Google Drive</b>
+<small id="vidDriveStatus">Pick a video from your Drive</small>
+</button>
+</div>
+
+<div class="scf-picked" id="vidPicked">
           <img id="vidPickedThumb" alt=""/>
           <span class="scf-picked-name" id="vidPickedName"></span>
           <button type="button" class="scf-icon-btn" title="Remove" onclick="vidClearPick()"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button>
@@ -4925,6 +4934,7 @@ function waitForSugarcaneAddons(){
         <div class="scf-seg" id="audSrcSeg">
           <button type="button" class="scf-seg-btn on" data-src="upload" onclick="audSrcTab('upload')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></svg></span>Upload</button>
           <button type="button" class="scf-seg-btn" data-src="url" onclick="audSrcTab('url')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span>Link</button>
+          <button type="button" class="scf-seg-btn" data-src="drive" id="audSrcDriveTab" style="display:none" onclick="audSrcTab('drive')"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 1 1 .8-8.9A6 6 0 0 1 19 11a3.5 3.5 0 0 1-.5 7z"/></svg></span>Google Drive</button>
         </div>
 
         <div class="scf-pane on" data-pane="upload">
@@ -4942,7 +4952,15 @@ function waitForSugarcaneAddons(){
           </div>
         </div>
 
-        <div class="scf-picked" id="audPicked">
+        <div class="scf-pane" data-pane="drive">
+<button type="button" class="scf-drop" onclick="scDrivePickMedia('audio','audDriveStatus',audPickFile)">
+<span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 1 1 .8-8.9A6 6 0 0 1 19 11a3.5 3.5 0 0 1-.5 7z"/></svg></span>
+<b>Browse Google Drive</b>
+<small id="audDriveStatus">Pick an audio file from your Drive</small>
+</button>
+</div>
+
+<div class="scf-picked" id="audPicked">
           <img id="audPickedThumb" alt=""/>
           <span class="scf-picked-name" id="audPickedName"></span>
           <button type="button" class="scf-icon-btn" title="Remove" onclick="audClearPick()"><span class="material-symbols-outlined pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button>
@@ -17789,6 +17807,47 @@ async function imgOpenDrivePicker() {
   } catch (e) {
     console.warn('[Sugarcane] picker', e);
     st.textContent = 'Could not open the Drive picker.';
+    showToast('Could not open the Drive picker', 'error');
+  }
+}
+/* Drive picker for video / audio: downloads the chosen file and hands it to the normal upload handler */
+async function scDrivePickMedia(kind, statusId, onFile) {
+  const st = document.getElementById(statusId);
+  const idle = kind === 'audio' ? 'Pick an audio file from your Drive' : 'Pick a video from your Drive';
+  try {
+    await _loadPicker();
+    const token = await _getToken();
+    const view = kind === 'video'
+      ? new google.picker.DocsView(google.picker.ViewId.DOCS_VIDEOS).setIncludeFolders(true)
+      : new google.picker.DocsView(google.picker.ViewId.DOCS).setIncludeFolders(true)
+          .setMimeTypes('audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/mp4,audio/x-m4a,audio/aac,audio/ogg,audio/flac,audio/x-flac,audio/webm');
+    new google.picker.PickerBuilder()
+      .addView(view)
+      .addView(new google.picker.DocsUploadView())
+      .setOAuthToken(token)
+      .setDeveloperKey(GOOGLE_API_KEY)
+      .setAppId(GOOGLE_CLIENT_ID.split('-')[0])
+      .setOrigin(window.location.protocol + '//' + window.location.host)
+      .setCallback(async d => {
+        if (d.action !== google.picker.Action.PICKED) return;
+        const f = d.docs[0];
+        if (st) st.textContent = 'Downloading \u201c' + f.name + '\u201d\u2026';
+        try {
+          const blob = await (await driveRequest('files/' + encodeURIComponent(f.id) + '?alt=media')).blob();
+          const file = new File([blob], f.name, { type: f.mimeType || blob.type || '' });
+          if (st) st.textContent = idle;
+          onFile({ files: [file], value: '' });
+        } catch (e) {
+          console.warn('[Sugarcane] drive ' + kind, e);
+          if (st) st.textContent = 'Could not load that file.';
+          showToast('Could not load that ' + kind, 'error');
+        }
+      })
+      .build()
+      .setVisible(true);
+  } catch (e) {
+    console.warn('[Sugarcane] picker', e);
+    if (st) st.textContent = 'Could not open the Drive picker.';
     showToast('Could not open the Drive picker', 'error');
   }
 }
@@ -48041,7 +48100,7 @@ var psCur = 'pages';
   window.openVideoModal=function(){
     try{saveRange()}catch(e){}
     V={file:null,url:'',poster:null,kind:null,embed:null,busy:false,_tok:null};
-    $('vidFile').value='';$('vidUrl').value='';setPrev(null);vidSrcTab('upload',true);
+    $('vidFile').value='';$('vidUrl').value='';setPrev(null);var _dt=$('vidSrcDriveTab');if(_dt)_dt.style.display=(typeof _googleUser!=='undefined'&&_googleUser)?'':'none';vidSrcTab('upload',true);
         openMdl('videoMdl');
   };
   window.vidPickFile=function(inp){
@@ -48565,7 +48624,7 @@ var psCur = 'pages';
   window.openAudioModal=function(){
     try{saveRange()}catch(e){}
     A={file:null,url:'',poster:null,cfg:null,busy:false,_tok:A._tok+1};
-    $('audFile').value='';$('audUrl').value='';setPrev(null);audSrcTab('upload',true);
+    $('audFile').value='';$('audUrl').value='';setPrev(null);var _dt=$('audSrcDriveTab');if(_dt)_dt.style.display=(typeof _googleUser!=='undefined'&&_googleUser)?'':'none';audSrcTab('upload',true);
     openMdl('audioMdl');
   };
   window.audPickFile=function(inp){
