@@ -21090,22 +21090,70 @@ async function encryptPdfBytes(bytes, password) {
 async function applyPdfExpiry(bytes, expMs) {
   const PDFLib = window.PDFLib;
   if (!PDFLib) throw new Error('pdf-lib failed to load');
-  const { PDFDocument, PDFName, PDFString } = PDFLib;
+  const { PDFDocument, PDFName, PDFString, PDFArray, PDFDict } = PDFLib;
   const doc = await PDFDocument.load(bytes, { updateMetadata: false });
   const ctx = doc.context;
+  const N = (x) => PDFName.of(x);
+
+  /* 1) Put ALL page content + annotations on one layer (OCG). When expired,
+        the script switches the layer off, so nothing is visible after "OK". */
+  const ocg = ctx.register(ctx.obj({ Type: 'OCG', Name: PDFString.of('Content') }));
+  const ocProps = doc.catalog.lookupMaybe(N('OCProperties'), PDFDict);
+  if (ocProps) {
+    let arr = ocProps.lookupMaybe(N('OCGs'), PDFArray);
+    if (!arr) { arr = ctx.obj([]); ocProps.set(N('OCGs'), arr); }
+    arr.push(ocg);
+    let d = ocProps.lookupMaybe(N('D'), PDFDict);
+    if (!d) { d = ctx.obj({}); ocProps.set(N('D'), d); }
+    let lk = d.lookupMaybe(N('Locked'), PDFArray);
+    if (!lk) { lk = ctx.obj([]); d.set(N('Locked'), lk); }
+    lk.push(ocg);
+  } else {
+    doc.catalog.set(N('OCProperties'), ctx.obj({
+      OCGs: [ocg],
+      D: { Order: [ocg], Locked: [ocg], ON: [ocg] }
+    }));
+  }
+  const open = ctx.register(ctx.stream('/OC /ocExp BDC\n'));
+  const close = ctx.register(ctx.stream('\nEMC\n'));
+  for (const page of doc.getPages()) {
+    const node = page.node;
+    let res = node.Resources();
+    if (!res) { res = ctx.obj({}); node.set(N('Resources'), res); }
+    let props = res.lookupMaybe(N('Properties'), PDFDict);
+    if (!props) { props = ctx.obj({}); res.set(N('Properties'), props); }
+    props.set(N('ocExp'), ocg);
+    const c = node.get(N('Contents'));
+    let items = [];
+    const cv = c && ctx.lookup(c);
+    if (cv instanceof PDFArray) items = cv.asArray();
+    else if (c) items = [c];
+    node.set(N('Contents'), ctx.obj([open, ...items, close]));
+    const annots = node.lookupMaybe(N('Annots'), PDFArray);
+    if (annots) {
+      for (let i = 0; i < annots.size(); i++) {
+        const an = annots.lookupMaybe(i, PDFDict);
+        if (an) an.set(N('OC'), ocg);
+      }
+    }
+  }
+
+  /* 2) Open script: if expired -> hide layer first, remove pages, alert, close. */
   const when = new Date(expMs).toString().replace(/[\\'"\r\n]/g, ' ');
   const js =
     "var __x=" + Math.floor(expMs) + ";" +
-    "var __n=new Date().getTime();" +
-    "if(__n>__x){" +
-      "try{app.alert({cType:0,nIcon:0,cTitle:'Document expired',cMsg:'This PDF expired on " + when + " and can no longer be opened.'});}catch(e){}" +
+    "if(new Date().getTime()>__x){" +
+      "try{var __o=this.getOCGs();if(__o){for(var __i=0;__i<__o.length;__i++){__o[__i].state=false;}}}catch(e){}" +
+      "try{this.zoomType=zoomtype.fitP;}catch(e){}" +
+      "try{app.alert({cType:0,nIcon:0,cTitle:'Document expired',cMsg:'This PDF expired on " + when + " and can no longer be viewed.'});}catch(e){}" +
+      "try{var __n=this.numPages;if(__n>1){this.deletePages({nStart:1,nEnd:__n-1});}}catch(e){}" +
       "try{this.closeDoc(true);}catch(e){}" +
     "}";
   const action = { Type: 'Action', S: 'JavaScript', JS: PDFString.of(js) };
   const cat = doc.catalog;
-  const prev = cat.get(PDFName.of('OpenAction'));
+  const prev = cat.get(N('OpenAction'));
   if (prev) action.Next = prev;
-  cat.set(PDFName.of('OpenAction'), ctx.register(ctx.obj(action)));
+  cat.set(N('OpenAction'), ctx.register(ctx.obj(action)));
   return await doc.save({ useObjectStreams: false });
 }
 async function _pdfApplyPassword() {
