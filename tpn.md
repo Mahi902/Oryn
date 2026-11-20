@@ -1,56 +1,124 @@
 # Open Source Notices and Attributions
 
-This application incorporates various third-party software libraries and services.
+This application incorporates various third-party software libraries, fonts, models and online services. Each item below remains the property of its respective authors and is used under the license or terms shown.
+
+`Notices last updated: Nov 20, 2026 (Editor v253)`
 
 ---
 
 ##  Libraries and Frameworks
 
+Bundled with the application (served from our own `vendor/` folder, not loaded from a third-party CDN).
+
 | Library | License | Copyright/License Link |
 | :--- | :--- | :--- |
-| **Tesseract.js** | Apache 2.0 | [View License](https://github.com/naptha/tesseract.js/blob/master/LICENSE) |
-| **PDF.js** | Apache 2.0 | [View License](https://github.com/mozilla/pdf.js/blob/master/LICENSE) |
 | **jsPDF** | MIT | [View License](https://github.com/parallax/jsPDF/blob/master/LICENSE) |
+| **pdf-lib** | MIT | [View License](https://github.com/Hopding/pdf-lib/blob/master/LICENSE.md) |
+| **PDF.js** | Apache 2.0 | [View License](https://github.com/mozilla/pdf.js/blob/master/LICENSE) |
 | **html2canvas** | MIT | [View License](https://github.com/niklasvh/html2canvas/blob/master/LICENSE) |
-| **Chart.js** | MIT | [View License](https://github.com/chartjs/Chart.js/blob/master/LICENSE) |
-| **Tailwind CSS** | MIT | [View License](https://github.com/tailwindlabs/tailwindcss/blob/master/LICENSE) |
-| **Axios** | MIT | [View License](https://github.com/axios/axios/blob/master/LICENSE) |
-| **Lodash** | MIT | [View License](https://github.com/lodash/lodash/blob/master/LICENSE) |
-| **DOMPurify** | Apache 2.0/MPL 2.0 | [View License](https://github.com/cure53/dompurify/blob/main/LICENSE) |
-| **CodeMirror** | MIT | [View License](https://github.com/codemirror/dev/blob/main/LICENSE) |
-| **Quill.js** | BSD 3-Clause | [View License](https://github.com/quilljs/quill/blob/develop/LICENSE) |
-| **Papa Parse** | MIT | [View License](https://github.com/mholt/PapaParse/blob/master/LICENSE) |
-| **Fuse.js** | Apache 2.0 | [View License](https://github.com/krisk/Fuse/blob/master/LICENSE) |
-| **Day.js** | MIT | [View License](https://github.com/iamkun/dayjs/blob/dev/LICENSE) |
-| **Peer.js** | MIT | [View License](https://github.com/peers/peerjs/blob/master/LICENSE) |
-| **OpenCV** | Apache 2.0 | [View License](https://opencv.org/license/) |
-| **MyMemory** | MIT | [View License](https://github.com/0xdolan/mymemory/blob/main/LICENSE) |
-| **IndexedDB** | W3C | [View License](https://github.com/w3c/IndexedDB/blob/main/LICENSE.md) |
-| **Material Icons** | Apache 2.0 | [View License](https://github.com/google/material-design-icons/blob/master/LICENSE) |
 | **Fabric.js** | MIT | [View License](https://github.com/fabricjs/fabric.js/blob/master/LICENSE) |
-| **Dwyl English Word Dictionary** | The Unlicense | [View License](https://github.com/dwyl/english-words/blob/master/LICENSE.md) |
 | **KaTeX** | MIT | [View License](https://github.com/KaTeX/KaTeX/blob/main/LICENSE) |
+| **Yjs** | MIT | [View License](https://github.com/yjs/yjs/blob/main/LICENSE) |
+| **PeerJS** | MIT | [View License](https://github.com/peers/peerjs/blob/master/LICENSE) |
+| **Harper** (grammar checking) | Apache 2.0 | [View License](https://github.com/Automattic/harper/blob/master/LICENSE) |
+| **franc** (language detection) | MIT | [View License](https://github.com/wooorm/franc/blob/main/license) |
+| **marked** | MIT | [View License](https://github.com/markedjs/marked/blob/master/LICENSE.md) |
+| **QR Code Generator** (Kazuhiko Arase) | MIT | [View License](https://github.com/kazuhikoarase/qrcode-generator/blob/master/LICENSE) |
+| **Chart.js** | MIT | [View License](https://github.com/chartjs/Chart.js/blob/master/LICENSE.md) |
+| **Tesseract.js** | Apache 2.0 | [View License](https://github.com/naptha/tesseract.js/blob/master/LICENSE) |
+| **OpenCV** | Apache 2.0 | [View License](https://opencv.org/license/) |
+| **Papa Parse** | MIT | [View License](https://github.com/mholt/PapaParse/blob/master/LICENSE) |
+| **JSZip** | MIT or GPL v3 (used under MIT) | [View License](https://github.com/Stuk/jszip/blob/main/LICENSE.markdown) |
+| **CryptoJS** | MIT | [View License](https://github.com/brix/crypto-js/blob/develop/LICENSE) |
+| **CodeMirror** | MIT | [View License](https://github.com/codemirror/dev/blob/main/LICENSE) |
+| **Tailwind CSS** | MIT | [View License](https://github.com/tailwindlabs/tailwindcss/blob/master/LICENSE) |
+| **Dwyl English Word Dictionary** | The Unlicense | [View License](https://github.com/dwyl/english-words/blob/master/LICENSE.md) |
 | **LaTeX** | LPPL | [View License](https://github.com/latex3/latex3/blob/develop/LICENSE) |
-| **Unsplash** | Unsplash | [View License](https://unsplash.com/license) |
 
+### On-device AI
 
+Runs entirely in your browser; models are downloaded once and cached.
+
+| Component | License | Copyright/License Link |
+| :--- | :--- | :--- |
+| **Transformers.js** | Apache 2.0 | [View License](https://github.com/huggingface/transformers.js/blob/main/LICENSE) |
+| **ONNX Runtime Web** | MIT | [View License](https://github.com/microsoft/onnxruntime/blob/main/LICENSE) |
+| **SmolLM2** (HuggingFaceTB) | Apache 2.0 | [Model card](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct) |
+| **SDXS-512** text-to-image model | See model card | [Model card](https://huggingface.co/Fcouprie/sdxs-512-texte-image) |
+
+### Fonts and Icons
+
+| Asset | License | Copyright/License Link |
+| :--- | :--- | :--- |
+| **Fontsource font packages** (Inter, Roboto, Open Sans, Lato, Montserrat, Poppins, Lora, Merriweather, Playfair Display, Noto, Fira Code, JetBrains Mono and others) | SIL Open Font License 1.1 (some families Apache 2.0 or the Ubuntu Font Licence) | [Fontsource](https://fontsource.org/) / [OFL 1.1](https://openfontlicense.org/) |
+| **Material Symbols & Material Icons** | Apache 2.0 | [View License](https://github.com/google/material-design-icons/blob/master/LICENSE) |
+| **Bootstrap Icons** | MIT | [View License](https://github.com/twbs/icons/blob/main/LICENSE) |
+
+### Images
+
+| Source | License | Copyright/License Link |
+| :--- | :--- | :--- |
+| **Unsplash** | Unsplash License | [View License](https://unsplash.com/license) |
+
+### Browser Standards
+
+| Standard | License | Copyright/License Link |
+| :--- | :--- | :--- |
+| **IndexedDB** | W3C | [View License](https://github.com/w3c/IndexedDB/blob/main/LICENSE.md) |
 
 ---
 
 ##  Service Providers & APIs
 
-The following services are used to power specific features within the application. Usage is governed by their respective Terms of Service and Privacy Policies.
+The following services are used to power specific features within the application, and are contacted only when you use those features. Usage is governed by their respective Terms of Service and Privacy Policies.
 
 ### AI & Machine Learning
-* **OpenAI**: Powered by OpenAI models. 
+* **OpenAI**: Powered by OpenAI models.
     * [Terms of Service](https://openai.com/policies/service-terms)
 * **Pollinations.ai**: Used for image generation services.
     * [Terms & Conditions](https://pollinations.ai/)
 
 ### Translation Services
-* **MyMemory API**: Provided by Translated.net. 
+* **MyMemory API**: Provided by Translated.net.
     * [Terms of Service](https://mymemory.translated.net/doc/tos.php)
     * [Google Translate](https://docs.cloud.google.com/translate/attribution)
+
+### Google Services
+* **Google Identity Services, Google Drive API and Google Picker**: Sign-in, saving and opening documents, and picking images, video and audio from your Google Drive.
+    * [Google APIs Terms of Service](https://developers.google.com/terms)
+    * [Google Privacy Policy](https://policies.google.com/privacy)
+* **Google Fonts**: Font catalogue and on-demand font loading.
+    * [Google Fonts Terms](https://developers.google.com/fonts/terms)
+* **Google Input Tools**: Handwriting recognition.
+    * [Google Terms of Service](https://policies.google.com/terms)
+
+### Images and Media
+* **Openverse**: Web image search in Insert Image. Results are openly licensed (Creative Commons and public-domain works); the creator and license are shown when you pick an image.
+    * [Openverse Terms](https://openverse.org/terms)
+    * [About Creative Commons licenses](https://creativecommons.org/share-your-work/cclicenses/)
+* **YouTube and Vimeo**: Playback of videos you insert by link.
+    * [YouTube Terms of Service](https://www.youtube.com/t/terms)
+    * [Vimeo Terms of Service](https://vimeo.com/terms)
+
+### Maps and Location
+* **OpenStreetMap**: Map tiles and place search (Nominatim). Map data © OpenStreetMap contributors, available under the Open Database License.
+    * [Copyright and License](https://www.openstreetmap.org/copyright)
+    * [Tile Usage Policy](https://operations.osmfoundation.org/policies/tiles/)
+    * [Nominatim Usage Policy](https://operations.osmfoundation.org/policies/nominatim/)
+* **Photon (Komoot)**: Place search.
+    * [Photon](https://photon.komoot.io/)
+* **Open-Meteo Geocoding API**: Place search. Licensed CC BY 4.0.
+    * [License & Terms](https://open-meteo.com/en/license)
+* **Esri (ArcGIS Online)**: Satellite and reference map imagery.
+    * [Esri Legal](https://www.esri.com/en-us/legal/overview)
+
+### Utilities
+* **AllOrigins**: Fetches images and web pages that block direct browser requests.
+    * [AllOrigins](https://allorigins.win/)
+* **QR Server (goqr.me)**: Fallback QR code image service.
+    * [Terms](https://goqr.me/api/)
+* **GitHub**: Lists the Material Symbols icon set from the public google/material-design-icons repository.
+    * [GitHub Terms of Service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service)
 
 ---
 
