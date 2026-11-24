@@ -1,12 +1,15 @@
 <img width="889" height="268" alt="1000032278" src="https://mahi902.github.io/Oryn/img/banner.png" />
 
+> [!IMPORTANT]
+> **This project was recently rebranded!**
+> DocuWrite Pro was recently rebranded as Oryn. All references, including logos, titles, holdings, etc., related to DocuWrite Pro are now referred to as Oryn.
 
 ## Premium Document Editing Suite
 
 
 
 ### 🔹mahi902.GitHub.io/Oryn
-_Last updated: Nov 6, 2026_
+_Last updated: Nov 24, 2026_
 
 > [!WARNING]
 > **This README is out of date!**
